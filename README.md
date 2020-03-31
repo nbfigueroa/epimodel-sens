@@ -9,7 +9,7 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   
 * Cambridge model (Age-structured SIR model): Includes age and social contact structure of the Indian population when assessing the impact of social distancing, predicts 21-day lockdown is not enough to prevent resurgence in virus spread.  
   * Model structure defined in paper [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf), seems easy to implement (SIR + age-structured transition dynamics)
-  * The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), we currently only have the Johns Hopkins Pull.
+  * The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), we currently only have CCSE.
   * Population data and contact surveys to construct Contact matrices (references in paper).
   
 * UMichigan model (SIR/SEIR model with + ?)
