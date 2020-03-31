@@ -8,11 +8,13 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * Presumably uses CCSE Johns Hopkins data which we have.
   
 * Cambridge model (Age-structured SIR model): Includes age and social contact structure of the Indian population when assessing the impact of social distancing [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf), predicts 21-day lockdown is not enough to prevent resurgence in virus spread.  
-  * Model structure defined in paper, seems easy to implement
+  * Model structure defined in paper, seems easy to implement (SIR + age-structured transition dynamics)
   * The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), we currently only have the Johns Hopkins Pull.
-  * 
+  * Population data and contact surveys to construct Contact matrices (references in paper).
+  
 * UMichigan model (SEIR model with + ?)
-
+ * Don't know model structure yet
+ * Don't know model structure yet
 Other well-known models being used by governments/media:
 * Imperial College model (Stochastic agent/Individual-based model) ??
 * Oxford study (SEIR with Bayesian estimates) ??
