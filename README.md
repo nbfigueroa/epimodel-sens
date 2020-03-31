@@ -1,6 +1,6 @@
 # MIT-COVID19-Model-Evaluation
 
-Repository for code to evaluate the COVID-19 Models being used by different institutes and proposed to the Indian government. 
+Repository for code to evaluate the COVID-19 Models being used by different institutes and proposed to the Indian government. The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. In this repo we will reverse-engineer the models and apply sensitivity analysis techniques to understand what drives such drastic differences across models.
 
 ### Modelling Techniques
 Models provided to Indian Government and info on what is needed to reproduce each model: 
@@ -17,7 +17,6 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * Don't know model structure yet
   * Don't know which data they use
 
-These models provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. In this repo we will reverse-engineer the models and apply sensitivity analysis techniques to understand what drives such drastic differences across models.
 
 Other known models being used by other governments/media:
  * Imperial College model (Stochastic agent/Individual-based model) ??
