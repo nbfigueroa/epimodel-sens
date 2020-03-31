@@ -13,12 +13,16 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * Population data and contact surveys to construct Contact matrices (references in paper).
   
 * UMichigan model (SEIR model with + ?)
- * Don't know model structure yet
- * Don't know model structure yet
-Other well-known models being used by governments/media:
-* Imperial College model (Stochastic agent/Individual-based model) ??
-* Oxford study (SEIR with Bayesian estimates) ??
+  * Don't know model structure yet
+  * Don't know which data they use
 
 These models provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. In this repo we will reverse-engineer the models and apply sensitivity analysis techniques to understand what drives such drastic differences across models.
+
+
+Other known models being used by governments/media:
+ * Imperial College model (Stochastic agent/Individual-based model) ??
+ * Oxford study (SEIR with Bayesian estimates) ??
+
+
 
 
