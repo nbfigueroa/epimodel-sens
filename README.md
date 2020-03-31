@@ -2,6 +2,7 @@
 
 Repository for code to evaluate the COVID-19 Models being used by different institutes and proposed to the Indian government. 
 
+### Modelling Techniques
 Models provided to Indian Government and info on what is needed to reproduce each model: 
 * CDDEP (aka Johns Hopkins) model (SIR/SEIR model with  ?)
   * Don't know model structure yet
@@ -22,8 +23,8 @@ Other known models being used by other governments/media:
  * Imperial College model (Stochastic agent/Individual-based model) ??
  * Oxford study (SEIR with Bayesian estimates) ??
 
-## Estimation and Extrapolation Techniques
+### Estimation and Extrapolation Techniques
 * Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
 
-
+### Data Sources
 
