@@ -4,7 +4,7 @@ Repository for code to evaluate the COVID-19 Models being used by different inst
 
 Models provided to Indian Government: 
 * CDDEP (aka Johns Hopkins) model (SEIR model with +)
-* Cambrdige model (SEIR model with +): Includes age and social contact structure of  the Indian population when assessing the impact of social distancing [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf)  
+* Cambridge model (Age-structured SIR model): Includes age and social contact structure of the Indian population when assessing the impact of social distancing [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf), predicts 21-day lockdown is not enough to prevent resurgence in virus spread.  
 * UMichigan model (SEIR model with +)
 
 Other well-known models being used by governments/media:
