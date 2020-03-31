@@ -3,7 +3,7 @@
 Repository for code to evaluate the COVID-19 Models being used by different institutes and proposed to the Indian government. 
 
 Models provided to Indian Government and info on what is needed to reproduce each model: 
-* CDDEP (aka Johns Hopkins) model (SEIR model with  ?)
+* CDDEP (aka Johns Hopkins) model (SIR/SEIR model with  ?)
   * Don't know model structure yet
   * Presumably uses CCSE Johns Hopkins data which we have.
   
@@ -12,7 +12,7 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), we currently only have the Johns Hopkins Pull.
   * Population data and contact surveys to construct Contact matrices (references in paper).
   
-* UMichigan model (SEIR model with + ?)
+* UMichigan model (SIR/SEIR model with + ?)
   * Don't know model structure yet
   * Don't know which data they use
 
