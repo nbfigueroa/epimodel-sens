@@ -18,7 +18,7 @@ S0 = N - I0 - R0
 # Contact rate (beta), and mean recovery rate (gamma) (in 1/days).
 # Estimtated values
 infperiod  = 4.5  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912
-r0         = 2.65 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5
+r0         = 2.85 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5
 beta       = r0 / infperiod
 gamma      = 1.0 / infperiod
 
@@ -72,5 +72,11 @@ legend.get_frame().set_alpha(0.5)
 for spine in ('top', 'right', 'bottom', 'left'):
     ax2.spines[spine].set_visible(True)
 
+
+fig, ax = plt.subplots()
+ax.plot(S, I, 'k', lw=2, label='Susceptible')
+ax.set_xlabel('S (Susceptible)')
+ax.set_ylabel('I (Infected)')
+plt.title('COVID-19 SIR Model Phase-Plane',fontsize=15)
 
 plt.show()
