@@ -37,7 +37,7 @@ def linreg(X, Y):
     Var_a, Var_b = ss * N / det, ss * Sxx / det
     return a, b, RR, Var_a, Var_b
 
-nation='united states'
+nation='italy'
 # here you can use nation= 'united states', nation='canada' or any  other nation
 #       or you can use a state such as nation="new york" or nation="illinois"
 
@@ -66,23 +66,24 @@ for row in reader:
     i+=1
     str=row[ii].split("-")
     nn=len(str)
+    print(str)
     if (str[0] and str[0]!=nation):
         print(i,row[0],str[0])
         day.append(float(i))
         confirmed.append(float(row[ii].split("-")[0]))
+        print('confirmed',float(row[ii].split("-")[0]))
+        if (nn>2 and row[ii].split("-")[2]):
+            recovered.append(float(row[ii].split("-")[2]))
+            print('recovered',float(row[ii].split("-")[2]))
+        else:
+            recovered.append(0.)
         
-    if (nn>2 and row[ii].split("-")[2]):
-        recovered.append(float(row[ii].split("-")[2]))
-#print('recovered',float(row[ii].split("-")[2]))
-    else:
-        recovered.append(0.)
         
-        
-    if(nn>3 and row[ii].split("-")[3]):
-        dead.append(float(row[ii].split("-")[3]))
-#print('dead',float(row[ii].split("-")[3]))
-    else:
-        dead.append(0.)
+        if(nn>3 and row[ii].split("-")[3]):
+            dead.append(float(row[ii].split("-")[3]))
+            print('dead',float(row[ii].split("-")[3]))
+        else:
+            dead.append(0.)
 g.close()
 
 xx=[]
