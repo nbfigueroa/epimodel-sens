@@ -37,13 +37,12 @@ def linreg(X, Y):
     Var_a, Var_b = ss * N / det, ss * Sxx / det
     return a, b, RR, Var_a, Var_b
 
-nation='italy'
+nation='india'
 # here you can use nation= 'united states', nation='canada' or any  other nation
 #       or you can use a state such as nation="new york" or nation="illinois"
 
 
-infperiod=4.5 # infectious period in days
-
+infperiod = 4.5 # infectious period in days
 g=open('virus.csv', 'r')
 reader=csv.reader(g)
 
@@ -86,6 +85,8 @@ for row in reader:
             dead.append(0.)
 g.close()
 
+
+# plt.subplot(131)
 xx=[]
 yy=[]
 for i in range (len(confirmed)):
@@ -94,9 +95,12 @@ for i in range (len(confirmed)):
         yy.append(np.log(confirmed[i]-recovered[i]-dead[i]))
 
 plt.plot(xx,yy,'r-o',alpha=0.5,markersize=8)
+# plt.show()
 
 
 print('days with cases=',len(yy))
+
+
 R2=[]
 growthrate=[]
 egrowthrateM=[]
@@ -125,7 +129,7 @@ for ii in range(width,len(yy)):
     RM.append( (gradient+2.*np.sqrt(var_gr))*infperiod +1.)
     Rm.append( (gradient-2.*np.sqrt(var_gr))*infperiod +1.)
     
-# show models and best fit
+    # show models and best fit
     tt=xxx
     tt.sort()
     fitx=np.arange(float(tt[0])-0.1,float(tt[-1])+0.1,0.1,dtype=float)
@@ -138,10 +142,14 @@ plt.title(nation,fontsize=20)
 plt.ylabel('infectious', fontsize=20)
 plt.xlabel('time',fontsize=20)
 plt.tight_layout()
-savefig('Infectious.pdf')
-plt.show()
-plt.clf()
+# savefig('Infectious.pdf')
+savefig('Infectious.png')
+# plt.show()
+# plt.clf()
 
+
+# plt.subplot(132)
+fig, ax = plt.subplots()
 #extrapolate growth rate into the future
 xx=daysmeasured[0:5]
 yy=growthrate[0:5]
@@ -156,13 +164,11 @@ days2criticalM=int(-intercept/(gradient+2.*np.sqrt(var_gr)))
 
 print(days2critical,days2criticalM,days2criticalm)
 
-
-
 tt=xx
 tt.sort()
 fitx=np.arange(float(tt[0]),float(tt[-1])+days2critical+1,0.1,dtype=float)
 fity=intercept + fitx*gradient
-    
+
 plt.plot(fitx,fity,'g-', linewidth=2, alpha=0.9)
 plt.plot(-intercept/gradient,0,'go',ms=10,alpha=1)
 
@@ -199,9 +205,10 @@ plt.ylabel('growthrate', fontsize=20)
 plt.xlabel('days from present',fontsize=20)
 plt.tight_layout()
 plt.ylim(-0.02,)
-savefig('Growth_Rate_Extrapolation.pdf')
-plt.show()
-plt.clf()
+# savefig('Growth_Rate_Extrapolation.pdf')
+savefig('Growth_Rate_Extrapolation.png')
+# plt.show()
+# plt.clf()
 
 
 plt.title(nation,fontsize=20)
@@ -209,10 +216,11 @@ plt.plot(daysmeasured,R2,'ko-')
 plt.ylabel('R-squared', fontsize=20)
 plt.xlabel('days from present',fontsize=20)
 plt.tight_layout()
-plt.show()
+# plt.show()
+# plt.clf()
 
-
-plt.clf()
+# plt.subplot(133)
+fig1, ax1 = plt.subplots()
 plt.title(nation,fontsize=20)
 plt.plot(daysmeasured,R,'ro-',alpha=0.6)
 plt.fill_between(daysmeasured, Rm, RM,color='gray', alpha=0.3)
@@ -221,7 +229,9 @@ plt.text(daysmeasured[-1], 1.03, 'critical', fontsize=14,color='red',alpha=1.0)
 plt.ylabel('Reproductive Rate', fontsize=20)
 plt.xlabel('days from present',fontsize=20)
 plt.tight_layout()
-savefig('Reproducive_Rate_vs_Critical.pdf')
+# savefig('Reproducive_Rate_vs_Critical.pdf')
+savefig('Reproducive_Rate_vs_Critical.png')
+
 plt.show()
 
 
