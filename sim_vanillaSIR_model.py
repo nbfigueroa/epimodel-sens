@@ -18,7 +18,7 @@ days = 90
 # Contact rate (beta), and mean recovery rate (gamma) (in 1/days).
 # Estimtated values
 gamma_inv  = 4.5  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912
-r0         = 4 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5
+r0         = 2.2 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5
 beta       = r0 / gamma_inv
 gamma      = 1.0 / gamma_inv
 
@@ -83,7 +83,7 @@ plt.plot(np.linspace(1,[r0],10), [covid_SinfS0]*10, color='black')
 # Sample R0 values from Gaussian distribution for Covid estimate
 mu_r0, sigma_r0 = r0, 0.15  # mean and standard deviation
 r0_gauss   = stats.norm.pdf(r0_vals,mu_r0,sigma_r0)
-r0_samples = np.random.normal(mu_r0, sigma_r0, 25)
+r0_samples = np.random.normal(mu_r0, sigma_r0, 10)
 covid_SinfS0_samples  =   []
 for ii in range(len(r0_samples)):
     r0_test = r0_samples[ii]
@@ -165,7 +165,7 @@ fig.suptitle(txt_title.format(N=N, R0=r0, gamma_inv = gamma_inv, beta= beta),fon
 # Variable evolution
 ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
 ax1.plot(t, I/N, 'r', lw=2, label='Infected')
-ax1.plot(t, R/N, 'g', lw=2, label='Recovered')
+ax1.plot(t, R/N, 'g', lw=2, label='Removed')
 
 # Inflection point
 ax1.plot(max_inf_idx, max_inf/N, 'md', markersize=12, lw=2)
@@ -190,7 +190,7 @@ for spine in ('top', 'right', 'bottom', 'left'):
 # Plot curves in log-scale
 ax2.plot(t, S, 'k', lw=2, label='Susceptible')
 ax2.plot(t, I, 'r', lw=2, label='Infected')
-ax2.plot(t, R, 'g', lw=2, label='Recovered')
+ax2.plot(t, R, 'g', lw=2, label='Removed')
 plt.yscale('symlog', linthreshy=0.015)
 ax2.set_xlabel('Time /days')
 ax2.set_ylabel('Number (1 person)')
@@ -203,24 +203,27 @@ for spine in ('top', 'right', 'bottom', 'left'):
     ax2.spines[spine].set_visible(True)
 
 
-plt.show()
 
+# Plot Growth Rate
+fig, (ax1, ax2) = plt.subplots(1,2)
+txt_title = "COVID-19 SIR Model Dynamics (N={N:2.0f},R0={R0:1.3f},1/gamma={gamma_inv:1.3f}, beta={beta:1.3f})"
+fig.suptitle(txt_title.format(N=N, R0=r0, gamma_inv = gamma_inv, beta= beta),fontsize=15)
+ax1.plot(t, growth_rates, 'k', lw=2, label='rI (temporal grow rate)')
+ax1.set_ylabel('rI (temporal grow rate)')
+ax1.set_xlabel('t')
 
-
-# Plot Grow Rate
-# fig, (ax1, ax2) = plt.subplots(1,2)
-# txt_title = "COVID-19 SIR Model Dynamics (N={N:2.0f},R0={R0:1.3f},1/gamma={gamma_inv:1.3f}, beta={beta:1.3f})"
-# fig.suptitle(txt_title.format(N=N, R0=r0, gamma_inv = gamma_inv, beta= beta),fontsize=15)
-# ax1.plot(t, growth_rates, 'k', lw=2, label='rI (temporal grow rate)')
-# ax1.set_ylabel('rI (temporal grow rate)')
-# ax1.set_xlabel('t')
-
-# ax2.plot(t, effective_Rt, 'k', lw=2, label='Rt (Effective Reproductive Rate)')
-# ax2.set_ylabel('Rt (Effective Reproductive Rate)')
-# ax2.set_xlabel('t')
+ax2.plot(t, effective_Rt, 'k', lw=2, label='Rt (Effective Reproductive Rate)')
+ax2.set_ylabel('Rt (Effective Reproductive Rate)')
+ax2.set_xlabel('t')
 
 # fig, ax = plt.subplots()
 # ax.plot(S, I, 'k', lw=2, label='Susceptible')
 # ax.set_xlabel('S (Susceptible)')
 # ax.set_ylabel('I (Infected)')
 # plt.title('COVID-19 SIR Model Phase-Plane',fontsize=15)
+
+
+plt.show()
+
+
+
