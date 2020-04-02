@@ -7,6 +7,7 @@ from pylab import *
 from scipy import *
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
 
 def linreg(X, Y):
@@ -37,7 +38,7 @@ def linreg(X, Y):
     Var_a, Var_b = ss * N / det, ss * Sxx / det
     return a, b, RR, Var_a, Var_b
 
-nation='united states'
+nation='india'
 # here you can use nation= 'united states', nation='canada' or any  other nation
 #       or you can use a state such as nation="new york" or nation="illinois"
 
@@ -101,7 +102,8 @@ print('days with cases=',len(yy))
 
 
 R2=[]
-growthrate=[]
+growthrate =[]
+incercepts =[]
 egrowthrateM=[]
 egrowthratem=[]
 daysmeasured=[]
@@ -109,22 +111,27 @@ R=[]
 RM=[]
 Rm=[]
 
-width=4
+
+print('estimating growth rates at each time step!')
+window = 5
+width  = window
 for ii in range(width,len(yy)):
     width=ii # a window with 4 days...
     iii=len(yy)-ii+width  #moving window? width = #, otherwise width =ii
     xxx=xx[-ii:iii]
     yyy=yy[-ii:iii]
-    print(len(xxx))
+
     gradient, intercept, r_value, var_gr, var_it = linreg(xxx,yyy)
     #print( "R-squared", ii, r_value**2,gradient,2.*np.sqrt(var_gr),gradient*infperiod +1,xx[-ii])
     R2.append(r_value**2)
     growthrate.append(gradient)
+    incercepts.append(intercept)
     egrowthrateM.append(gradient+2.*np.sqrt(var_gr))
     egrowthratem.append(gradient-2.*np.sqrt(var_gr))
     
     daysmeasured.append(-(ii-3))
-    R.append(gradient*4.5 +1.)
+    # R.append(gradient*4.5 +1.)
+    R.append(gradient*infperiod +1.)
     RM.append( (gradient+2.*np.sqrt(var_gr))*infperiod +1.)
     Rm.append( (gradient-2.*np.sqrt(var_gr))*infperiod +1.)
     
@@ -133,11 +140,10 @@ for ii in range(width,len(yy)):
     tt.sort()
     fitx=np.arange(float(tt[0])-0.1,float(tt[-1])+0.1,0.1,dtype=float)
     fity=intercept + fitx*gradient
-    
+    # print(intercept,gradient)
     # plt.plot(fitx,fity,'k-', linewidth=2, alpha=0.2)
     plt.plot(fitx,fity, linewidth=2, alpha=0.2)
 
-print(len(growthrate))
 # print(daysmeasured)
 plt.title(nation,fontsize=20)
 plt.ylabel('infectious', fontsize=20)
@@ -153,18 +159,29 @@ plt.clf()
 # plt.subplot(132)
 # fig, ax = plt.subplots()
 #extrapolate growth rate into the future
-xx=daysmeasured[0:5]
-yy=growthrate[0:5]
+print('extrapolation part hereeee.. follows the trend of the last K growth-rates!')
+print('estimation depends ALOT on the window used for estimation')
+# xx=daysmeasured[0:5]
+# yy=growthrate[0:5]
+# this window could be adaptive "based on the best fit of the line"
+# alternative is to use GP
+window = window+1
+xx = daysmeasured[0:window]
+yy = growthrate[0:window]
+
+print(xx)
+print(yy)
 
 gradient, intercept, r_value, var_gr, var_it = linreg(xx,yy)
 print(gradient,intercept,-intercept/gradient)
 days2critical=int(-intercept/gradient)
-print('days to critical',days2critical)
+print('days to critical 1',days2critical)
 
 days2criticalm=int(-intercept/(gradient-2.*np.sqrt(var_gr)))
 days2criticalM=int(-intercept/(gradient+2.*np.sqrt(var_gr)))
 
 print(days2critical,days2criticalM,days2criticalm)
+
 
 tt=xx
 tt.sort()
