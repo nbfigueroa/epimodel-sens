@@ -15,7 +15,7 @@ class SIR():
 
         #Set keyword values
         for key in kwargs.keys():
-            self.argss[key] = kwargs[key]
+            self.args[key] = kwargs[key]
 
         self.N = N
         self.days = days
