@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
 class SIR():
 
-    def __init__(self, N, days, **kwargs):
+    def __init__(self, N, **kwargs):
 
         #Default kwargs
         self.args = {}
@@ -18,7 +19,7 @@ class SIR():
             self.args[key] = kwargs[key]
 
         self.N = N
-        self.days = days
+        #self.days = days
 
     @property
     def beta(self):
@@ -38,17 +39,25 @@ class SIR():
             return dSdt, dIdt, dRdt
         return ddt
 
-    def project(self):
+    def project(self, days):
         #Set initial conditions
         y0 = (self.N - self.args['I0'] - self.args['R0'], self.args['I0'],self.args['R0'])
 
-        t = np.arange(self.days)
-        t = np.append(t,self.days)
+        t = np.arange(days)
+        t = np.append(t,days)
 
         #Integrate the ODE
         ode_sol = odeint(self.deriv(), y0, t)
         S,I,R = ode_sol.T
         return S,I,R
+    
+    def final_infection(self):
+        
+        def f(x):
+            return np.log(x) + self.args['r0']*(1-x)
+        
+        answer = fsolve(f, 0.0001)
+        return 1-answer
 
 
 if __name__ == '__main__':
