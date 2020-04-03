@@ -19,26 +19,27 @@ days = 180
 
 # Contact rate (beta), and mean recovery rate (gamma) (in 1/days).
 gamma_inv  = 4.5  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912 (Dave=10)
+gamma      = 1/gamma_inv
 
 # Estimtated values
 if sim_num == 1:
     beta_matrix = np.matrix([[0.35, 0.18, 0.11],[0.18, 0.27, 0.11],[0.11, 0.11, 0.30]])
-    S_vector    = np.array([0.38, 0.31, 0.28])
-    I_vector    = np.array([1e-5, 5e-5, 1e-5])
+    S0_vector    = np.array([0.38, 0.31, 0.28])
+    I0_vector    = np.array([1e-5, 5e-5, 1e-5])
     r0_matrix   = gamma_inv * beta_matrix
     
 if sim_num == 2:
     Beta        = np.matrix([[0.35, 0.18, 0.0],[0.18, 0.27, 0.0],[0.0, 0.0, 0.30]])
-    S_vector    = np.array([0.38, 0.31, 0.28])
-    I_vector    = np.array([1e-5, 5e-5, 1e-5])
+    S0_vector    = np.array([0.38, 0.31, 0.28])
+    I0_vector    = np.array([1e-5, 5e-5, 1e-5])
     r0_matrix   = gamma_inv * beta_matrix
 
-R_vector    = np.array([0, 0, 0])
+R0_vector    = np.array([0, 0, 0])
 print('*****   Model-parameters    *****')
 print ('Beta=',beta_matrix)
-print ('S_0=',S_vector)
-print ('I_0=',I_vector)
-print ('R_0=',R_vector)
+print ('S_0=',S0_vector)
+print ('I_0=',I0_vector)
+print ('R_0=',R0_vector)
 print ('R0=', r0_matrix)
 
 
@@ -50,30 +51,50 @@ def epi_size(x):
     return np.log(x) + r0_test*(1-x)
 
 # The SIR model differential equations.
-def deriv(y_vector, t, N, beta_matrix, gamma):
-    S, I, R = y
-    dSdt = -beta/N * S * I 
-    dIdt = beta/N * S * I  - gamma * I
-    dRdt = gamma * I
-    return dSdt, dIdt, dRdt
+def deriv(y, t, i, N, beta_matrix, gamma):
+    S_i, I_i, R_i = y
+    S_vector = np.array([S0[0], S0[1], S0[2]])
+    I_vector = np.array([I0[0], I0[1], I0[2]])
+    print(S_vector)
+    print(I_vector)
+    dS_idt, dI_idt = 0, 0
+    for j in range(3):
+        dS_idt = dS_idt - (beta_matrix[i,j]/N * S_i * I_vector[j]) 
+        dI_idt = dI_idt + (beta_matrix[i,j]/N * S_vector[j] * I_vector[i]  - gamma * I_vector[i])
+
+    dR_idt = gamma * I_vector[i] 
+
+    return dS_idt, dI_idt, dR_idt
 
 ###################################################
 ######## Initial Parameters for Simulation ########
 ###################################################
 # Initial number of infected and recovered and susceptible individuals
-S0 = N*S_0
-I0 = N*I_0
+S0 = N*S0_vector
+I0 = N*I0_vector
 
 # A grid of time points (in days)
 t = np.linspace(0, days, days)
 
-# Initial conditions matrix
-y0 = S0, I0, R0
-
 # Integrate the SIR equations over the time grid, with beta_matrix
-ode_sol = odeint(deriv, y0, t, args=(N, beta_matrix, gamma))
-S, I, R = ode_sol.T
-T = I + R
+sim_size = (3,len(t))
+S = np.zeros(sim_size)
+I = np.zeros(sim_size)
+R = np.zeros(sim_size)
+T = np.zeros(sim_size)
+
+# Initial condition
+for ii in range(3):
+    y0 = S0[ii], I0[ii], R0[ii]
+    print('y0=',y0)    
+    # Solve the ODE equations
+    ode_sol = odeint(deriv, y0, t, args=(ii, N, beta_matrix, gamma))
+    S[ii,:], I[ii,:], R[ii,:] = ode_sol.T
+    T[ii,:] = I[ii,:] + R[ii,:]
+
+print(S)
+print(I)
+print(R)
 
 print('*****   Results    *****')
 max_inf_idx = np.argmax(I)
