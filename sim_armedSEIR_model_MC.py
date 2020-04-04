@@ -126,8 +126,9 @@ ode_sol = odeint(deriv, y0, t, args=(N, beta, gamma, kappa, q, qt, m))
 S, E, I, Q, R, D = ode_sol.T
 
 print('*****   Results    *****')
-max_inf_idx = np.argmax(I)
-max_inf     = I[max_inf_idx]
+T = I + Q + D
+max_inf_idx = np.argmax(T)
+max_inf     = T[max_inf_idx]
 print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
 
 #####################################################################
@@ -142,8 +143,9 @@ fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, kap
 # Variable evolution
 # ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
 ax1.plot(t, E/N, 'm',  lw=2, label='Exposed')
-ax1.plot(t, I/N, 'r', lw=2,   label='Infected')
-ax1.plot(t, Q/N, 'm',  lw=2, label='Quarantined')
+ax1.plot(t, I/N, 'r', lw=2,  label='Infected')
+ax1.plot(t, Q/N, 'g',  lw=2, label='Quarantined')
+ax1.plot(t, T/N, 'b',  lw=2, label='Total Active Cases')
 # ax1.plot(t, R/N, 'g',  lw=2,  label='Recovered')
 # ax1.plot(t, D/N, 'm',  lw=2, label='Dead')
 

@@ -33,7 +33,8 @@ if sim_num == 1:
     R0           = 23
     D0           = 5 
     Q0           = 249 #Q0 is 1% of infectious I0
-    I0           = Q0*100
+    I0           = (1.01/0.01) * Q0
+    # E0           = I0*kappa_inv
     E0           = 0
     
     # Estimated rates from data
@@ -64,7 +65,7 @@ def epi_size(x):
 
 # The SIR model differential equations.
 def deriv(y, t, N, beta, gamma, kappa, q, qt, m):
-    S, E, I, Q, R, D = y
+    S, E, I, Q, R, D, T = y
     
     # Main state variables with exponential rates
     dSdt = -beta/N * S * I 
@@ -72,11 +73,12 @@ def deriv(y, t, N, beta, gamma, kappa, q, qt, m):
     dIdt = kappa * E  - gamma * I
 
     # Decomposed Infected->Removed based on model
-    dQdt = q*I - qt*Q - m*Q
+    dQdt = q*I - qt*Q 
     dRdt = gamma * I + qt*Q
     dDdt = m * I + m*Q
 
-    return dSdt, dEdt, dIdt, dQdt, dRdt, dDdt
+    dTdt = -dSdt
+    return dSdt, dEdt, dIdt, dQdt, dRdt, dDdt, dTdt
 
 
 # Final epidemic size (analytic)
@@ -110,21 +112,30 @@ print("I0=",I0)
 print("Q0=",Q0)
 print("R0=",R0)
 print("D0=",D0)
+T0 = I0 + R0 + D0
 
 # A grid of time points (in days)
 t = np.linspace(0, days, days)
 
 # Initial conditions vector
-y0 = S0, E0, I0, Q0, R0, D0
+y0 = S0, E0, I0, Q0, R0, D0, T0
 
 # Integrate the SIR equations over the time grid, with beta
 ode_sol = odeint(deriv, y0, t, args=(N, beta, gamma, kappa, q, qt, m))
-S, E, I, Q, R, D = ode_sol.T
+S, E, I, Q, R, D, T = ode_sol.T
+TA = T - R + Q 
+TA = I + Q 
+
+
+# 25 May -- 3 Million Cases
+# 30 May -- 6 Million Cases
+print('Total Cases:', T[65],T[70])
+print('Deaths:', D[65],D[70])
 
 print('*****   Results    *****')
-max_inf_idx = np.argmax(I)
-max_inf     = I[max_inf_idx]
-print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
+max_inf_idx = np.argmax(TA)
+max_inf     = TA[max_inf_idx]
+print('Peak Active = ', max_inf,'by day=',max_inf_idx)
 
 #####################################################################
 ######## Plots Simulation with point estimates of parameters ########
@@ -136,17 +147,21 @@ txt_title = r"COVID-19 ARMED FORCES SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1
 fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, kappa_inv = kappa_inv),fontsize=15)
 
 # Variable evolution
+scale = 1
 # ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
-ax1.plot(t, E/N, 'm',  lw=2, label='Exposed')
-ax1.plot(t, I/N, 'r', lw=2,   label='Infected')
-ax1.plot(t, Q/N, 'm',  lw=2, label='Quarantined')
-# ax1.plot(t, R/N, 'g',  lw=2,  label='Recovered')
-# ax1.plot(t, D/N, 'm',  lw=2, label='Dead')
+ax1.plot(t, E/N * scale, 'm',  lw=2, label='Exposed')
+ax1.plot(t, I/N * scale, 'r', lw=2,  label='Infected')
+ax1.plot(t, TA/N * scale, 'r',  lw=1,  label='Active Cases')
+# ax1.plot(t, T/N, 'b',  lw=2, label='Total Cases')
+
+ax1.plot(t, Q/N * scale, 'g',  lw=2, label='Quarantined')
+# ax1.plot(t, R/N, 'k--',  lw=2,  label='Recovered')
+ax1.plot(t, D/N * scale, 'y-',  lw=2, label='Dead')
 
 
 ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=12)
 txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21)" 
-ax1.text(max_inf_idx, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
+ax1.text(max_inf_idx+20, max_inf/N-0.025, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
 
 # ax1.plot(t, covid_SinfS0*np.ones(len(t)), 'm--')
 # txt1 = "{per:2.2f} infected"
