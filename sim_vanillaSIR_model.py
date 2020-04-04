@@ -9,33 +9,48 @@ rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
 # Select simulation number
-sim_num = 1
+sim_num = 5
 
 ############################################
 ######## Parameters for Simulation ########
 ############################################
 N    = 1000000 
-days = 180
 
 # Contact rate (beta), and mean recovery rate (gamma) (in 1/days).
 # Estimtated values
 if sim_num == 1:
     gamma_inv  = 4.5  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912 (Dave=10)
     r0         = 2.2 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5 (Dave=10)
+    I0, R0 = 1, 0
 
 if sim_num == 2:
     gamma_inv  = 4.5  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912 (Dave=10)
     r0         = 2.65 # Basic Reproductive Rate 2.65, estimates between 2.2-6.5 (Dave=10)
+    I0, R0 = 1, 0
 
 if sim_num == 3:
     gamma_inv  = 3  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912 (Dave=10)
     beta       = 0.589
     r0         = beta * gamma_inv # Basic Reproductive Rate 2.65, estimates between 2.2-6.5 (Dave=10)
+    I0, R0 = 1, 0
 
 if sim_num == 4:
     gamma_inv  = 6  # SEIRS dudes: 6.8, Luis B.: 4.5, 1/0.3253912 (Dave=10)
     beta       = 0.589
     r0         = beta * gamma_inv # Basic Reproductive Rate 2.65, estimates between 2.2-6.5 (Dave=10)
+    I0, R0 = 1, 0
+
+# Indian armed forces numbers (Initial parameters from March 21)
+if sim_num == 5:
+    N            = 1486947036
+    days         = 356
+    gamma_inv    = 7  
+    r0           = 2.28  
+    R0           = 23
+    D0           = 5 
+    Q0           = 249 #Q0 is 1% of infectious I0
+    I0           = Q0*100
+    T0           = I0 + R0 + D0
 
 
 beta       = r0 / gamma_inv
@@ -56,16 +71,16 @@ def epi_size(x):
 
 # The SIR model differential equations.
 def deriv(y, t, N, beta, gamma):
-    S, I, R = y
+    S, I, R, T = y
     dSdt = -beta/N * S * I 
     dIdt = beta/N * S * I  - gamma * I
     dRdt = gamma * I
-    return dSdt, dIdt, dRdt
+    dTdt = -dSdt
+    return dSdt, dIdt, dRdt, dTdt
 
 #############################################################
 ######## Dependence of R0 on Final Epidemic Behavior ########
 #############################################################
-
 # Final epidemic size (analytic)
 r0_vals     = np.linspace(1,5,100) 
 init_guess  = 0.0001
@@ -100,7 +115,6 @@ ax0.text(1.1, covid_SinfS0 - 0.025,txt.format(Sinf=covid_SinfS0[0]), fontsize=8)
 plt.plot(np.linspace(1,[r0],10), [covid_SinfS0]*10, color='black')
 
 ax0.text(4, 0.75, r"${\cal R}_0 \equiv \frac{ \beta } {\gamma}$", fontsize=15, bbox=dict(facecolor='red', alpha=0.15))
-ax0.text(4, 0.65, r"$\beta \sim {\cal N}(\mu_{\beta},(\sigma_{\beta}^2)$", fontsize=15, bbox=dict(facecolor='red', alpha=0.15))
 fig0.set_size_inches(18.5/2, 12.5/2, forward=True)
 plt.savefig('./snaps/vanillaSIR_finalSize_%i.png'%sim_num, bbox_inches='tight')
 plt.savefig('./snaps/vanillaSIR_finalSize_%i.pdf'%sim_num, bbox_inches='tight')
@@ -115,6 +129,8 @@ r0_mean    = gamma_inv*beta
 I0, R0 = N*1e-6, 0
 I0, R0 = 1, 0
 
+T0 = I0 + R0
+
 # Everyone else, S0, is susceptible to infection initially.
 S0 = N - I0 - R0
 
@@ -122,12 +138,11 @@ S0 = N - I0 - R0
 t = np.linspace(0, days, days)
 
 # Initial conditions vector
-y0 = S0, I0, R0
+y0 = S0, I0, R0, T0
 
 # Integrate the SIR equations over the time grid, with beta
 ode_sol = odeint(deriv, y0, t, args=(N, beta, gamma))
-S, I, R = ode_sol.T
-T = I + R
+S, I, R, T = ode_sol.T
 
 print('*****   Results    *****')
 max_inf_idx = np.argmax(I)
