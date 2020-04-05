@@ -9,8 +9,8 @@ from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
-sim_num = 1
-
+sim_num = 2
+eps = 1e-20
 ############################################
 ######## Parameters for Simulation ########
 ############################################
@@ -44,11 +44,16 @@ if sim_num == 1:
 
     # Extra variables for quarentine compartment
     Q0         = 0                 # number of quarantined indivuals
-    tau_q_inv  = 14                # quarantined period
+    tau_q_inv  = 7                # quarantined period
     tau_q      = 1.0 /tau_q_inv    # translated to rate
 
     # Control variable:  percentage quarantined
     q      = 0.01
+    # Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
+    # In the report table 1, they write number of Quarantined as SO rather than Q0
+    # Q0, is this a typo? 
+    # Number of Infectuos as described in report    
+    I0          = ((1-q)/q) * Q0  
 
     # Plotting
     x_axis_offset = 50
@@ -57,7 +62,6 @@ if sim_num == 1:
 if sim_num == 2:
     # Values used for the indian armed forces model
     # Initial values from March 21st for India test-case
-    N            = 1486947036 # Real number from website
     N            = 1375987036 # Number from report
     days         = 356
     gamma_inv    = 7  
@@ -69,15 +73,8 @@ if sim_num == 2:
     # Initial values from March 21st "indian armed forces predictions"
     R0           = 23
     D0           = 5         
-    Q0           = 249             # Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
-                                   # In the report table 1, they write number of Quarantined as SO rather than Q0
-                                   # Q0, is this a typo? 
-    T0           = 334             # This is the total number of comfirmed cases for March 21st, not used it seems?                                   
-    I0           = (1.01/0.01) * Q0  # Number of Infectuos as described in report
-
-    # The initial number of exposed E(0) is not defined in report, how are they computed?
-    contact_rate = 10                     # number of contacts an individual has per day
-    E0           = (contact_rate - 1)*I0  # Estimated exposed based on contact rate and inital infected
+    Q0           = 249               
+    T0           = 334               # This is the total number of comfirmed cases for March 21st, not used it seems?                                   
 
     # Derived Model parameters and 
     beta       = r0 / gamma_inv
@@ -86,7 +83,16 @@ if sim_num == 2:
     tau_q      = 1.0 /tau_q_inv
 
     # Control variable:  percentage quarantined
-    q           = 0.01
+    q           = 0.0001
+    # Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
+    # In the report table 1, they write number of Quarantined as SO rather than Q0
+    # Q0, is this a typo? 
+    # Number of Infectuos as described in report    
+    I0          = ((1-q)/(q)) * Q0  
+
+    # The initial number of exposed E(0) is not defined in report, how are they computed?
+    contact_rate = 10                     # number of contacts an individual has per day
+    E0           = (contact_rate - 1)*I0  # Estimated exposed based on contact rate and inital infected
 
     # Plotting
     x_axis_offset = 100
@@ -167,33 +173,25 @@ print("DT=", D[-1])
 print("ReT=",Re[-1])
 print("TT=", T[-1])
 
-
-print('*****   Results    *****')
-max_inf_idx = np.argmax(I)
-max_inf     = I[max_inf_idx]
-print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
-
-max_act_idx = np.argmax(Inf)
-max_act     = Inf[max_act_idx]
-print('Peak Infected+Quarantined = ', max_act, 'by day=',max_act_idx)
-
-if sim_num==2:
-    est_act     = Inf[65]
-    print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
-
-# Final epidemic size (analytic)
+# Estimated Final epidemic size (analytic) not-dependent on simulation
 init_guess   = 0.0001
 r0_test      = r0
-covid_SinfN  = fsolve(epi_size, init_guess)
-covid_1SinfN = 1 - covid_SinfN
+SinfN  = fsolve(epi_size, init_guess)
+One_SinfN = 1 - SinfN
 print('*****   Final Epidemic Size    *****')
-print('Covid r0 = ', r0_test, 'Covid Sinf/S0 = ', covid_SinfN[0], 'Covid Sinf/S0 = ', covid_1SinfN[0])
+print('r0 = ', r0_test, '1 - Sinf/S0 = ', One_SinfN[0])    
+
+print('*****   Results    *****')
+peak_inf_idx = np.argmax(I)
+peak_inf     = I[peak_inf_idx]
+print('Peak Instant. Infected = ', peak_inf,'by day=', peak_inf_idx)
+peak_total_inf     = T[peak_inf_idx]
+print('Total Cases when Peak = ', peak_total_inf,'by day=', peak_inf_idx)
+
 
 #####################################################################
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
-
-plot_all = 0
 
 # Plot the data on three separate curves for S(t), I(t) and R(t)
 fig, ax1 = plt.subplots()
@@ -202,38 +200,32 @@ txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, 
 fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
 
 # Variable evolution
-if plot_all:
-    ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
-    ax1.plot(t, T/N, 'y', lw=2,   label='Total Cases')
-    ax1.plot(t, Re/N, 'g--',  lw=1,  label='Recovered')
-    ax1.plot(t, R/N, 'g',  lw=2,  label='Recovered+Dead+Quarantined')
-    # Plot Final Epidemic Size
-    ax1.plot(t, covid_1SinfN*np.ones(len(t)), 'm--')
-    txt1 = "{per:2.2f} infected"
-    ax1.text(t[0], covid_1SinfN - 0.05, txt1.format(per=covid_1SinfN[0]), fontsize=12, color='m')
-
-
-ax1.plot(t, D/N, 'b--', lw=1,   label='Dead')
+ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
+ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
 ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
+ax1.plot(t, T/N, 'y', lw=2,   label='Total Cases')
+ax1.plot(t, Re/N, 'g--',  lw=1,  label='Recovered')
+ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
+ax1.plot(t, R/N, 'g',  lw=2,  label='Recovered+Dead+Quarantined')
 ax1.plot(t, Q/N, 'm',   lw=2,   label='Quarantined')
-ax1.plot(t, Inf/N, 'k', lw=2,   label='Infectuos (I+Q)')
+ax1.plot(t, Inf/N, 'r--', lw=2,   label='Infectuos (I+Q)')
 
+# Plot Final Epidemic Size
+ax1.plot(t, One_SinfN*np.ones(len(t)), 'm--')
+txt1 = "{per:2.2f} infected (no quar)"
+ax1.text(t[0], One_SinfN - 0.05, txt1.format(per=One_SinfN[0]), fontsize=12, color='m')
 
 # Plot peak points
-if sim_num==2:
-    txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
-    txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
-    ax1.plot(65, est_act/N,'ro', markersize=8)
-    txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
-    ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
-else:
+ax1.plot(peak_inf_idx, peak_inf/N,'ro', markersize=8)
+ax1.plot(peak_inf_idx, peak_total_inf/N,'ro', markersize=8)
+if sim_num < 2:
     txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f}" 
-    txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f}" 
-ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
-ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
-
-ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
-ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
+    txt_title2 = r"Total Cases: {peak_total:5.0f} by day {peak_days:2.0f}" 
+else: 
+    txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:10.0f} from March 21" 
+    txt_title2 = r"Total Cases: {peak_total:5.0f} by day {peak_days:10.0f} from March 21" 
+ax1.text(peak_inf_idx+10, peak_inf/N, txt_title.format(peak_inf=peak_inf, peak_days= peak_inf_idx), fontsize=12, color="r")
+ax1.text(peak_inf_idx+10, peak_total_inf/N, txt_title2.format(peak_total=peak_total_inf, peak_days= peak_inf_idx), fontsize=12, color="r")
 
 
 # Making things beautiful
@@ -248,9 +240,8 @@ for spine in ('top', 'right', 'bottom', 'left'):
     ax1.spines[spine].set_visible(True)
 
 fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-fig.set_size_inches(20.5/2, 14.5/2, forward=True)
+fig.set_size_inches(27.5/2, 14.5/2, forward=True)
 
-sim_num = 1
 plt.savefig('./snaps/mumbaiSEIR_timeEvolution_%i.png'%sim_num, bbox_inches='tight')
 plt.savefig('./snaps/mumbaiSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tight')
 
