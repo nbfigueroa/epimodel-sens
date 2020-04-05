@@ -40,7 +40,7 @@ gamma      = 1.0 / gamma_inv
 tau_q      = 1.0 /tau_q_inv
 
 # Control variable:  percentage quarantined
-q           = 0.01
+q           = 0.90
 
 print('*****   Hyper-parameters    *****')
 print('N=',N,'days=',days, 'r0=',r0, 'gamma_inv (days) = ',gamma_inv, 'tauq_inv (days) = ',tau_q_inv)
@@ -127,9 +127,9 @@ max_inf_idx = np.argmax(I)
 max_inf     = I[max_inf_idx]
 print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
 
-max_act_idx = np.argmax(TA)
-max_act     = TA[max_act_idx]
-print('Peak Exp+Inf = ', max_inf,'by day=',max_act_idx)
+max_act_idx = np.argmax(Inf)
+max_act     = Inf[max_act_idx]
+print('Peak Infected+Quarantined = ', max_act, 'by day=',max_act_idx)
 
 est_act     = Inf[65]
 print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
@@ -164,20 +164,24 @@ if plot_all:
     txt1 = "{per:2.2f} infected"
     ax1.text(t[0], covid_1SinfN - 0.05, txt1.format(per=covid_1SinfN[0]), fontsize=12, color='m')
 
-ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
-ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
-ax1.plot(t, Inf/N, 'r--',   lw=2,   label='Infectious (I+Q)')
-ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
+# ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
+# ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
+# ax1.plot(t, Inf/N, 'r--',   lw=2,   label='Infectious (I+Q)')
+# ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
 ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
-ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
+# ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
+
+ax1.plot(t, I/N, 'r',   lw=2,       label='Infected')
+ax1.plot(t, Q/N, 'm',   lw=2,       label='Quarantined')
+ax1.plot(t, (Q+I)/N, 'k',   lw=2,   label='Infectuos (I+Q)')
 
 
 # Plot peak points
 ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
 ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
 ax1.plot(65, est_act/N,'ro', markersize=8)
-txt_title = r"Peak infectious: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
-txt_title2 = r"Peak exp+inf: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
+txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
+txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
 txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
 ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
 ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
@@ -205,7 +209,7 @@ plt.savefig('./snaps/mumbaiSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tigh
 #################################################################
 ######## Plots Simulation with reproductive/growth rates ########
 #################################################################
-do_growth = 1
+do_growth = 0
 if do_growth:
     # Analytic growth rate
     effective_Rt = r0 * (S/N)
@@ -224,11 +228,13 @@ if do_growth:
 
 
     # Estimations of End of Epidemic
-    effRT_diff     = effective_Rt - 1
-    ids_less_1     = np.nonzero(effRT_diff < 0)
-    effRT_crossing = ids_less_1[0][0]
-    ax1.plot(effRT_crossing, 1,'ro', markersize=12)
-    ax1.text(effRT_crossing-10, 1-0.2,str(effRT_crossing), fontsize=10, color="r")
+    # effRT_diff     = effective_Rt - 1
+    # ids_less_1     = np.nonzero(effRT_diff < 0)
+    # effRT_crossing = ids_less_1[0][0]
+    # ax1.plot(effRT_crossing, 1,'ro', markersize=12)
+    # ax1.text(effRT_crossing-10, 1-0.2,str(effRT_crossing), fontsize=10, color="r")
+
+
     ax1.set_ylabel('Rt (Effective Reproductive Rate)', fontsize=12)
     ax1.set_xlabel('Time[days]', fontsize=12)
     ax1.set_ylim(0,4)
@@ -238,24 +244,26 @@ if do_growth:
 
     # Plot of temporal growth rate
     ax2.plot(t, growth_rates, 'k', lw=2, label='rI (temporal growth rate)')
-    ax2.text(t[0] + 0.02, growth_rates[0] - 0.02,r'${r}_I(t)$', fontsize=10)
-
+    ax2.text(t[0] + 0.02, growth_rates[0] - 0.02,r'${r}_I(t)$', fontsize=10)    
     ax2.plot(t, 0*np.ones(len(t)), 'r-')
     txt1 = r"Critical ($r_I$={per:2.2f})"
     ax2.text(t[-1]-100, 0 + 0.01, txt1.format(per=0), fontsize=12, color='r')
     ax2.text(t[-1]-100, 0.2, r"$r_I  \equiv \gamma \left[ {\cal R}_t - 1 \right]$", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
     ax2.text(t[-1]-100, 0.1, r"$\frac{ dI}{dt} = r_I \, I $", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
+    
     ax2.set_ylabel('rI (temporal growth rate)', fontsize=12)
     ax2.set_xlabel('Time[days]',fontsize=12)
     ax2.set_ylim(-0.2,0.5)
 
 
     # Estimations of End of Epidemic
-    rI_diff     = growth_rates 
-    ids_less_0  = np.nonzero(rI_diff < 0)
-    rI_crossing = ids_less_1[0][0]
-    ax2.plot(rI_crossing, 0,'ro', markersize=12)
-    ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
+    # rI_diff     = growth_rates 
+    # ids_less_0  = np.nonzero(rI_diff < 0)
+    # rI_crossing = ids_less_1[0][0]
+    # ax2.plot(rI_crossing, 0,'ro', markersize=12)
+    # ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
+
+
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)
 
     plt.savefig('./snaps/mumbaiSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')

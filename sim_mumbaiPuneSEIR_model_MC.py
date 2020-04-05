@@ -36,7 +36,7 @@ D0           = 5
 T0           = 334  # 249  
 Q0           = 249           #Q0 is 1% of infectious I0
 I0           = (1.01/0.01) * Q0
-contact_rate = 10            # number of contacts per day
+contact_rate = 1           # number of contacts per day
 E0           = (contact_rate - 1)*I0
 
 
@@ -70,7 +70,7 @@ def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
 ###################################################
 
 # Control variable:  percentage quarantined
-q           = 0.01
+q           = 0.90
 
 # Model Parameters to sample from Gamma Distributions
 gamma_inv, gamma_inv_shape = 7 , 0.1 
@@ -78,19 +78,58 @@ sigma_inv, sigma_inv_shape = 5.1, 0.1
 r0, r0_shape               = 2.28 , 0.1     
 
 # Sample 1000 points from gamma distribution of gamma_inv
-gamma_inv_samples = 10*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
-sigma_inv_samples = 10*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
-r0_samples = 10*np.random.gamma(r0, r0_shape, 1000)
-# gamma_inv_samples = np.random.normal(gamma_inv, gamma_inv_shape, 1000)
-# sigma_inv_samples = np.random.normal(sigma_inv, sigma_inv_shape, 1000)
-# r0_samples = np.random.normal(r0, r0_shape, 1000)
 
-count, bins, ignored = plt.hist(r0_samples, 50, density=True)
-plt.show()
-count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
-plt.show()
+gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
+sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
+r0_samples = r0*np.random.gamma(r0, r0_shape, 1000)
+
+
+
+# For gamma pdf plots
+x           = np.linspace(1E-6, 10, 1000)
+num_samples = 1000
+
+#### Gamma distributed samples for gamma_inv ####
+k = 1
+loc = gamma_inv
+theta = gamma_inv_shape
+gamma_inv_dist    = gamma(k, loc, theta)
+gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
+
+# Plot gamma samples and pdf
 count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
+plt.plot(x, gamma_inv_dist.pdf(x), 'r',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+
+#### Gamma distributed samples for sigma_inv ####
+k = 1
+loc = sigma_inv
+theta = sigma_inv_shape
+sigma_inv_dist = gamma(k, loc, theta)
+sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
+
+# Plot sigma samples and pdf
+plt.plot(x, sigma_inv_dist.pdf(x), 'g',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+
+count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
+
+
+#### Gamma distributed samples for r0 ####
+k = 1
+loc = r0
+theta = r0_shape
+r0_dist = gamma(k, loc, theta)
+r0_samples = r0_dist.rvs(num_samples)
+
+# Plot r0 samples and pdf
+plt.plot(x, r0_dist.pdf(x), 'b',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+count, bins, ignored = plt.hist(r0_samples, 50, density=True)
+
 plt.show()
+
+
 
 # A grid of time points (in days) for each simulation
 t_eval = np.arange(0, days, 1)
@@ -195,10 +234,10 @@ max_inf     = I[max_inf_idx]
 print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
 
 max_act_idx = np.argmax(Inf)
-max_act     = TA[max_act_idx]
-print('Peak Exp+Inf = ', max_inf,'by day=',max_act_idx)
+max_act     = Inf[max_act_idx]
+print('Peak Infected+Quarantined = ', max_act, 'by day=',max_act_idx)
 
-est_act     = I[65]
+est_act     = Inf[65]
 print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
 
 # Final epidemic size (analytic)
@@ -234,9 +273,10 @@ if plot_inf:
     ax1.plot(t, Q/N, 'm',   lw=2,       label='Quarantined')
     ax1.plot(t, Q_up/N, 'm--',   lw=2,   label='95 CI')
     ax1.plot(t, Q_low/N, 'm--',   lw=2,   label='95 CI')
-    ax1.plot(t, (Q+I)/N, 'k',   lw=2,       label='Active')
+    ax1.plot(t, (Q+I)/N, 'k',   lw=2,       label='Infectuos (I+Q)')
     ax1.plot(t, (Q_up+I_up)/N, 'k--',   lw=2,   label='95 CI')
     ax1.plot(t, (Q_low+I_low)/N, 'k--',   lw=2,   label='95 CI')
+    ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
 
 
 # Variable evolution
@@ -256,16 +296,16 @@ if plot_all:
     ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
     ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
 
-    # Plot peak points
-    ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
-    ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
-    ax1.plot(65, est_act/N,'ro', markersize=8)
-    txt_title = r"Peak infectious: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
-    txt_title2 = r"Peak exp+inf: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
-    txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
-    ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
-    ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
-    ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
+# Plot peak points
+ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
+ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
+ax1.plot(65, est_act/N,'ro', markersize=8)
+txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
+txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
+txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
+ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
+ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
+ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
 
 # Making things beautiful
 ax1.set_xlabel('Time /days', fontsize=12)
