@@ -36,7 +36,7 @@ D0           = 5
 T0           = 334  # 249  
 Q0           = 249           #Q0 is 1% of infectious I0
 I0           = (1.01/0.01) * Q0
-contact_rate = 1           # number of contacts per day
+contact_rate = 10           # number of contacts per day
 E0           = (contact_rate - 1)*I0
 
 
@@ -70,7 +70,7 @@ def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
 ###################################################
 
 # Control variable:  percentage quarantined
-q           = 0.90
+q           = 0.40
 
 # Model Parameters to sample from Gamma Distributions
 gamma_inv, gamma_inv_shape = 7 , 0.1 
@@ -78,19 +78,17 @@ sigma_inv, sigma_inv_shape = 5.1, 0.1
 r0, r0_shape               = 2.28 , 0.1     
 
 # Sample 1000 points from gamma distribution of gamma_inv
-
 gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
 sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
 r0_samples = r0*np.random.gamma(r0, r0_shape, 1000)
-
-
 
 # For gamma pdf plots
 x           = np.linspace(1E-6, 10, 1000)
 num_samples = 1000
 
 #### Gamma distributed samples for gamma_inv ####
-k = 1
+#### --> This might be wrong?
+k = 2
 loc = gamma_inv
 theta = gamma_inv_shape
 gamma_inv_dist    = gamma(k, loc, theta)
@@ -102,7 +100,7 @@ plt.plot(x, gamma_inv_dist.pdf(x), 'r',
          label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
 
 #### Gamma distributed samples for sigma_inv ####
-k = 1
+k = 2
 loc = sigma_inv
 theta = sigma_inv_shape
 sigma_inv_dist = gamma(k, loc, theta)
@@ -116,7 +114,7 @@ count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
 
 
 #### Gamma distributed samples for r0 ####
-k = 1
+k = 2
 loc = r0
 theta = r0_shape
 r0_dist = gamma(k, loc, theta)
@@ -169,7 +167,6 @@ for ii in range(simulations):
     print("R0=",R0)
     print("D0=",D0)
     
-
     # Initial conditions vector
     y0 = S0, E0, I0, Q0, R0, D0
 

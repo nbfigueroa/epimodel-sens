@@ -40,7 +40,7 @@ gamma      = 1.0 / gamma_inv
 tau_q      = 1.0 /tau_q_inv
 
 # Control variable:  percentage quarantined
-q           = 0.90
+q           = 0.40
 
 print('*****   Hyper-parameters    *****')
 print('N=',N,'days=',days, 'r0=',r0, 'gamma_inv (days) = ',gamma_inv, 'tauq_inv (days) = ',tau_q_inv)
