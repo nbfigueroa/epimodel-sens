@@ -1,14 +1,21 @@
+import random
 import numpy as np
 from   scipy.integrate import odeint
 from   scipy.integrate import solve_ivp
 from   scipy.optimize import fsolve
 from   scipy import stats
 from   scipy.stats import gamma
+import scipy.special as sps
+from scipy.stats import sem
+from scipy.stats import t as tdist
+from scipy import mean
+confidence = 0.95
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
+
 
 ############################################
 ######## Parameters for Simulation ########
@@ -21,6 +28,7 @@ N            = 1375987036
 days         = 356
 tau_q_inv    = 14
 tau_q        = 1.0 /tau_q_inv
+m            = 0.0043 
 
 # Initial values from March 21st "armed forces predictions"
 R0           = 23
@@ -28,7 +36,7 @@ D0           = 5
 T0           = 334  # 249  
 Q0           = 249           #Q0 is 1% of infectious I0
 I0           = (1.01/0.01) * Q0
-contact_rate = 10             # number of contacts per day
+contact_rate = 10            # number of contacts per day
 E0           = (contact_rate - 1)*I0
 
 
@@ -65,70 +73,104 @@ def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
 q           = 0.01
 
 # Model Parameters to sample from Gamma Distributions
-gamma_inv    = 7  
-sigma_inv    = 5.1
-m            = 0.0043
-r0           = 2.28      
+gamma_inv, gamma_inv_shape = 7 , 0.1 
+sigma_inv, sigma_inv_shape = 5.1, 0.1
+r0, r0_shape               = 2.28 , 0.1     
 
-# Sample 1000 points from 
-shape,scale = 4.2503, 7037
-Gamma = gamma(a = shape, scale = scale)
-x = np.arange(1,100000)
+# Sample 1000 points from gamma distribution of gamma_inv
+gamma_inv_samples = 10*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
+sigma_inv_samples = 10*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
+r0_samples = 10*np.random.gamma(r0, r0_shape, 1000)
+# gamma_inv_samples = np.random.normal(gamma_inv, gamma_inv_shape, 1000)
+# sigma_inv_samples = np.random.normal(sigma_inv, sigma_inv_shape, 1000)
+# r0_samples = np.random.normal(r0, r0_shape, 1000)
 
-fig, ax = plt.subplots(ncols = 3, nrows = 1, figsize = (20,5), sharex = True)
-ax[0].plot(x, Gamma.pdf(x));
+count, bins, ignored = plt.hist(r0_samples, 50, density=True)
+plt.show()
+count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
+plt.show()
+count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
+plt.show()
 
-ax[1].hist(Gamma.rvs(460), edgecolor = 'white', bins = 50);
-
-
-samps = np.concatenate([Gamma.rvs(j) for j in [200, 200, 50 , 10]])
-ax[2].hist(samps, edgecolor = 'white', bins = 50);
-
-
-
-
-# Derived Model parameters and 
-beta       = r0 / gamma_inv
-sigma      = 1.0 / sigma_inv
-gamma      = 1.0 / gamma_inv
-
-
-print('*****   Hyper-parameters    *****')
-print('N=',N,'days=',days, 'r0=',r0, 'gamma_inv (days) = ',gamma_inv, 'tauq_inv (days) = ',tau_q_inv)
-
-print('*****   Model-parameters    *****')
-print('beta=',beta,'gamma=', gamma, 'sigma', sigma, 'tau_q', tau_q, 'm', m)
-
-
-''' Compartment structure of armed forces SEIR model
-    N = S + E + I + Q + R + D
-'''
-S0 = N - E0 - I0 - Q0 - R0 - D0
-print("S0=",S0)
-print("E0=",E0)
-print("I0=",I0)
-print("Q0=",D0)
-print("R0=",R0)
-print("D0=",D0)
-
-# A grid of time points (in days)
+# A grid of time points (in days) for each simulation
 t_eval = np.arange(0, days, 1)
 
-# Initial conditions vector
-y0 = S0, E0, I0, Q0, R0, D0
+simulations = 1000
+S_sims  = np.empty(shape=(simulations,days))
+E_sims  = np.empty(shape=(simulations,days))
+I_sims  = np.empty(shape=(simulations,days))
+Q_sims  = np.empty(shape=(simulations,days))
+Re_sims = np.empty(shape=(simulations,days))
+D_sims  = np.empty(shape=(simulations,days))
+for ii in range(simulations):
+    gamma_inv_sample = gamma_inv_samples[ii]
+    sigma_inv_sample = sigma_inv_samples[ii]
+    r0_sample = r0_samples[ii]
 
-# Integrate the SEIR equations over the time grid, with bet
-ode_sol = solve_ivp(lambda t, X: seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q), y0=y0, t_span=[0, days], t_eval=t_eval, method='LSODA')
+    ### TODO:  Put all of this in a class later
+    # Derived Model parameters and 
+    beta       = r0_sample / gamma_inv_sample
+    sigma      = 1.0 / sigma_inv_sample
+    gamma      = 1.0 / gamma_inv_sample
 
-t   = ode_sol['t']
-S   = ode_sol['y'][0]
-E   = ode_sol['y'][1]
-I   = ode_sol['y'][2]
-Q   = ode_sol['y'][3]
-Re  = ode_sol['y'][4]
-D   = ode_sol['y'][5]
+    print('*****   Hyper-parameters    *****')
+    print('N=',N,'days=',days, 'r0=',r0_sample, 'gamma_inv (days) = ',gamma_inv_sample, 'tauq_inv (days) = ',tau_q_inv, 'sigma_inv (days) = ',sigma_inv_sample)
+
+    print('*****   Model-parameters    *****')
+    print('beta=',beta,'gamma=', gamma, 'sigma', sigma, 'tau_q', tau_q, 'm', m)
+
+    ''' Compartment structure of armed forces SEIR model
+        N = S + E + I + Q + R + D
+    '''
+    S0 = N - E0 - I0 - Q0 - R0 - D0
+    print("S0=",S0)
+    print("E0=",E0)
+    print("I0=",I0)
+    print("Q0=",D0)
+    print("R0=",R0)
+    print("D0=",D0)
+    
+
+    # Initial conditions vector
+    y0 = S0, E0, I0, Q0, R0, D0
+
+    # Integrate the SEIR equations over the time grid, with bet
+    ode_sol = solve_ivp(lambda t, X: seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q), y0=y0, t_span=[0, days], t_eval=t_eval, method='LSODA')
+
+    t              = ode_sol['t']
+    S_sims[ii,:]   = ode_sol['y'][0]
+    E_sims[ii,:]   = ode_sol['y'][1]
+    I_sims[ii,:]   = ode_sol['y'][2]
+    Q_sims[ii,:]   = ode_sol['y'][3]
+    Re_sims[ii,:]  = ode_sol['y'][4]
+    D_sims[ii,:]   = ode_sol['y'][5]
+
+
+t = t_eval
+# Compute mean and confidence interval of simulations
+S = np.mean(S_sims,0)
+E = np.mean(E_sims,0)
+
+# Infected Cases
+I = np.mean(I_sims,0)
+I_std_err = sem(I_sims,0)
+I_h = I_std_err * tdist.ppf((1 + confidence) / 2, days - 1)
+I_up = I+I_h
+I_low = I-I_h
+
+# Quarantined Cases
+Q = np.mean(Q_sims,0)
+Q_std_err = sem(Q_sims,0)
+Q_h = Q_std_err * tdist.ppf((1 + confidence) / 2, days - 1)
+Q_up = Q+Q_h
+Q_low = Q-Q_h
+
+
+Re = np.mean(Re_sims,0)
+D = np.mean(D_sims,0)
+
+# Compute auxilliary variables
 R   = Re + D + Q
-
 T  = I + R 
 TA = E + I + Q
 Inf = I + Q
@@ -152,11 +194,11 @@ max_inf_idx = np.argmax(I)
 max_inf     = I[max_inf_idx]
 print('Peak Infected = ', max_inf,'by day=',max_inf_idx)
 
-max_act_idx = np.argmax(TA)
+max_act_idx = np.argmax(Inf)
 max_act     = TA[max_act_idx]
 print('Peak Exp+Inf = ', max_inf,'by day=',max_act_idx)
 
-est_act     = Inf[65]
+est_act     = I[65]
 print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
 
 # Final epidemic size (analytic)
@@ -173,10 +215,29 @@ print('Covid r0 = ', r0_test, 'Covid Sinf/S0 = ', covid_SinfN[0], 'Covid Sinf/S0
 # Plot the data on three separate curves for S(t), I(t) and R(t)
 fig, ax1 = plt.subplots()
 
+gamma_inv = np.mean(gamma_inv_samples)
+sigma_inv = np.mean(sigma_inv_samples)
+r0        = np.mean(r0_samples)
+
 txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f})"
 fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv),fontsize=15)
 
 plot_all = 0
+plot_inf = 1
+
+# Evolution of infected cases with confidence intervals
+if plot_inf:
+    ax1.plot(t, I/N, 'r',   lw=2,       label='Infected')
+    ax1.plot(t, I_up/N, 'r--',   lw=2,   label='95 CI')
+    ax1.plot(t, I_low/N, 'r--',   lw=2,   label='95 CI')
+    ax1.plot(65, est_act/N,'ro', markersize=8)
+    ax1.plot(t, Q/N, 'm',   lw=2,       label='Quarantined')
+    ax1.plot(t, Q_up/N, 'm--',   lw=2,   label='95 CI')
+    ax1.plot(t, Q_low/N, 'm--',   lw=2,   label='95 CI')
+    ax1.plot(t, (Q+I)/N, 'k',   lw=2,       label='Active')
+    ax1.plot(t, (Q_up+I_up)/N, 'k--',   lw=2,   label='95 CI')
+    ax1.plot(t, (Q_low+I_low)/N, 'k--',   lw=2,   label='95 CI')
+
 
 # Variable evolution
 if plot_all:
@@ -188,25 +249,23 @@ if plot_all:
     ax1.plot(t, covid_1SinfN*np.ones(len(t)), 'm--')
     txt1 = "{per:2.2f} infected"
     ax1.text(t[0], covid_1SinfN - 0.05, txt1.format(per=covid_1SinfN[0]), fontsize=12, color='m')
+    ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
+    ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
+    ax1.plot(t, Inf/N, 'r--',   lw=2,   label='Infectious (I+Q)')
+    ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
+    ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
+    ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
 
-ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
-ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
-ax1.plot(t, Inf/N, 'r--',   lw=2,   label='Infectious (I+Q)')
-ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
-ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
-ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
-
-
-# Plot peak points
-ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
-ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
-ax1.plot(65, est_act/N,'ro', markersize=8)
-txt_title = r"Peak infectious: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
-txt_title2 = r"Peak exp+inf: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
-txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
-ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
-ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
-ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
+    # Plot peak points
+    ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
+    ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
+    ax1.plot(65, est_act/N,'ro', markersize=8)
+    txt_title = r"Peak infectious: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
+    txt_title2 = r"Peak exp+inf: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
+    txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
+    ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
+    ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
+    ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
 
 # Making things beautiful
 ax1.set_xlabel('Time /days', fontsize=12)
@@ -325,5 +384,6 @@ if do_growth:
 
 
 plt.show()
+
 
 
