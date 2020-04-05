@@ -9,38 +9,87 @@ from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
+sim_num = 1
+
 ############################################
 ######## Parameters for Simulation ########
 ############################################
 
-# Values used for the indian armed forces model
+# Simulation for a toy problem for implementation comparison and sanity checks
+if sim_num == 1:
+    
+    # Simulation parameters
+    S0   = 9990
+    I0   = 1
+    R0   = 0
+    E0   = 9
+    D0   = 0
+    N    = S0 + I0 + R0 + E0 + D0
+    days = 100
+    
+    # Usual SEIR Model parameters
+    gamma_inv = 5                   # infectious period
+    sigma_inv = 2                   # latent period 
+    m         = 0.0043              # mortality rate
+
+    # Typical equation for beta computation if estimates are known
+    contact_rate = 10               # number of contacts per day
+    transmission_probability = 0.07 # transmission probability
+    beta         = contact_rate * transmission_probability
+
+    # Derived Model parameters and Control variable     
+    gamma  = 1 / gamma_inv
+    sigma  = 1 / sigma_inv
+    r0     = beta / gamma
+
+    # Extra variables for quarentine compartment
+    Q0         = 0                 # number of quarantined indivuals
+    tau_q_inv  = 14                # quarantined period
+    tau_q      = 1.0 /tau_q_inv    # translated to rate
+
+    # Control variable:  percentage quarantined
+    q      = 0.01
+
+    # Plotting
+    x_axis_offset = 50
+
 # Initial values from March 21st for India test-case
-N            = 1486947036
-N            = 1375987036
-days         = 356
-gamma_inv    = 7  
-sigma_inv    = 5.1
-m            = 0.0043
-r0           = 2.28      
-tau_q_inv    = 14
+if sim_num == 2:
+    # Values used for the indian armed forces model
+    # Initial values from March 21st for India test-case
+    N            = 1486947036 # Real number from website
+    N            = 1375987036 # Number from report
+    days         = 356
+    gamma_inv    = 7  
+    sigma_inv    = 5.1
+    m            = 0.0043
+    r0           = 2.28      
+    tau_q_inv    = 14
 
-# Initial values from March 21st "armed forces predictions"
-R0           = 23
-D0           = 5 
-T0           = 334  # 249  
-Q0           = 249           #Q0 is 1% of infectious I0
-I0           = (1.01/0.01) * Q0
-contact_rate = 10             # number of contacts per day
-E0           = (contact_rate - 1)*I0
+    # Initial values from March 21st "indian armed forces predictions"
+    R0           = 23
+    D0           = 5         
+    Q0           = 249             # Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
+                                   # In the report table 1, they write number of Quarantined as SO rather than Q0
+                                   # Q0, is this a typo? 
+    T0           = 334             # This is the total number of comfirmed cases for March 21st, not used it seems?                                   
+    I0           = (1.01/0.01) * Q0  # Number of Infectuos as described in report
 
-# Derived Model parameters and 
-beta       = r0 / gamma_inv
-sigma      = 1.0 / sigma_inv
-gamma      = 1.0 / gamma_inv
-tau_q      = 1.0 /tau_q_inv
+    # The initial number of exposed E(0) is not defined in report, how are they computed?
+    contact_rate = 10                     # number of contacts an individual has per day
+    E0           = (contact_rate - 1)*I0  # Estimated exposed based on contact rate and inital infected
 
-# Control variable:  percentage quarantined
-q           = 0.01
+    # Derived Model parameters and 
+    beta       = r0 / gamma_inv
+    sigma      = 1.0 / sigma_inv
+    gamma      = 1.0 / gamma_inv
+    tau_q      = 1.0 /tau_q_inv
+
+    # Control variable:  percentage quarantined
+    q           = 0.01
+
+    # Plotting
+    x_axis_offset = 100
 
 print('*****   Hyper-parameters    *****')
 print('N=',N,'days=',days, 'r0=',r0, 'gamma_inv (days) = ',gamma_inv, 'tauq_inv (days) = ',tau_q_inv)
@@ -55,7 +104,7 @@ print('beta=',beta,'gamma=', gamma, 'sigma', sigma, 'tau_q', tau_q, 'm', m)
 def epi_size(x):
     return np.log(x) + r0_test*(1-x)
 
-# The SEIR model differential equations with mortality rates
+# The SEIR model differential equations with mortality rates and quarentine
 def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
     S, E, I, Q, R, D = X
 
@@ -104,8 +153,7 @@ Re  = ode_sol['y'][4]
 D   = ode_sol['y'][5]
 R   = Re + D + Q
 
-T  = I + R 
-TA = E + I + Q
+T   = I + R 
 Inf = I + Q
 print("t=",  t[-1])
 print("ST=", S[-1])
@@ -117,9 +165,7 @@ print("InfT=", Inf[-1])
 print("RT=", R[-1])
 print("DT=", D[-1])
 print("ReT=",Re[-1])
-
 print("TT=", T[-1])
-print("TAT=", TA[-1])
 
 
 print('*****   Results    *****')
@@ -131,8 +177,9 @@ max_act_idx = np.argmax(Inf)
 max_act     = Inf[max_act_idx]
 print('Peak Infected+Quarantined = ', max_act, 'by day=',max_act_idx)
 
-est_act     = Inf[65]
-print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
+if sim_num==2:
+    est_act     = Inf[65]
+    print('3Million Estimate Exp+Inf = ', est_act,'by day 65')
 
 # Final epidemic size (analytic)
 init_guess   = 0.0001
@@ -145,13 +192,14 @@ print('Covid r0 = ', r0_test, 'Covid Sinf/S0 = ', covid_SinfN[0], 'Covid Sinf/S0
 #####################################################################
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
+
+plot_all = 0
+
 # Plot the data on three separate curves for S(t), I(t) and R(t)
 fig, ax1 = plt.subplots()
 
-txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f})"
-fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv),fontsize=15)
-
-plot_all = 0
+txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
+fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
 
 # Variable evolution
 if plot_all:
@@ -164,28 +212,28 @@ if plot_all:
     txt1 = "{per:2.2f} infected"
     ax1.text(t[0], covid_1SinfN - 0.05, txt1.format(per=covid_1SinfN[0]), fontsize=12, color='m')
 
-# ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
-# ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
-# ax1.plot(t, Inf/N, 'r--',   lw=2,   label='Infectious (I+Q)')
-# ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
-ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
-# ax1.plot(t, Q/N, 'm--',  lw=1,  label='Quarantined')
 
-ax1.plot(t, I/N, 'r',   lw=2,       label='Infected')
-ax1.plot(t, Q/N, 'm',   lw=2,       label='Quarantined')
-ax1.plot(t, (Q+I)/N, 'k',   lw=2,   label='Infectuos (I+Q)')
+ax1.plot(t, D/N, 'b--', lw=1,   label='Dead')
+ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
+ax1.plot(t, Q/N, 'm',   lw=2,   label='Quarantined')
+ax1.plot(t, Inf/N, 'k', lw=2,   label='Infectuos (I+Q)')
 
 
 # Plot peak points
+if sim_num==2:
+    txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
+    txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
+    ax1.plot(65, est_act/N,'ro', markersize=8)
+    txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
+    ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
+else:
+    txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f}" 
+    txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f}" 
 ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
 ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
-ax1.plot(65, est_act/N,'ro', markersize=8)
-txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
-txt_title2 = r"Peak infected+quarantined: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
-txt_title3 = r"Est. inf: {est_act:5.0f} by day May 25" 
+
 ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
 ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
-ax1.text(0, est_act/N, txt_title3.format(est_act=est_act), fontsize=10, color="r")
 
 
 # Making things beautiful
@@ -223,33 +271,33 @@ if do_growth:
     ax1.text(t[0] + 0.02, effective_Rt[0] - 0.15,r'${\cal R}_t$', fontsize=10)
     ax1.plot(t, 1*np.ones(len(t)), 'r-')
     txt1 = "Critical (Rt={per:2.2f})"
-    ax1.text(t[-1]-100, 1 + 0.01, txt1.format(per=1), fontsize=12, color='r')
-    ax1.text(t[-1]-100,2.5, r"${\cal R}_t \equiv \left( \frac{S (t) }{N (t) } \right) {\cal R}_0$", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
+    ax1.text(t[-1]-x_axis_offset, 1 + 0.01, txt1.format(per=1), fontsize=12, color='r')
+    ax1.text(t[-1]-x_axis_offset,2.5, r"${\cal R}_t \equiv \left( \frac{S (t) }{N (t) } \right) {\cal R}_0$", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
 
 
     # Estimations of End of Epidemic
-    # effRT_diff     = effective_Rt - 1
-    # ids_less_1     = np.nonzero(effRT_diff < 0)
-    # effRT_crossing = ids_less_1[0][0]
-    # ax1.plot(effRT_crossing, 1,'ro', markersize=12)
-    # ax1.text(effRT_crossing-10, 1-0.2,str(effRT_crossing), fontsize=10, color="r")
+    effRT_diff     = effective_Rt - 1
+    ids_less_1     = np.nonzero(effRT_diff < 0)
+    effRT_crossing = ids_less_1[0][0]
+    ax1.plot(effRT_crossing, 1,'ro', markersize=12)
+    ax1.text(effRT_crossing-10, 1-0.2,str(effRT_crossing), fontsize=10, color="r")
 
 
     ax1.set_ylabel('Rt (Effective Reproductive Rate)', fontsize=12)
     ax1.set_xlabel('Time[days]', fontsize=12)
     ax1.set_ylim(0,4)
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f})"
-    fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv),fontsize=15)
+    txt_title = r"COVID-19 Mumbai SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
+    fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
 
     # Plot of temporal growth rate
     ax2.plot(t, growth_rates, 'k', lw=2, label='rI (temporal growth rate)')
     ax2.text(t[0] + 0.02, growth_rates[0] - 0.02,r'${r}_I(t)$', fontsize=10)    
     ax2.plot(t, 0*np.ones(len(t)), 'r-')
     txt1 = r"Critical ($r_I$={per:2.2f})"
-    ax2.text(t[-1]-100, 0 + 0.01, txt1.format(per=0), fontsize=12, color='r')
-    ax2.text(t[-1]-100, 0.2, r"$r_I  \equiv \gamma \left[ {\cal R}_t - 1 \right]$", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
-    ax2.text(t[-1]-100, 0.1, r"$\frac{ dI}{dt} = r_I \, I $", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
+    ax2.text(t[-1]-x_axis_offset, 0 + 0.01, txt1.format(per=0), fontsize=12, color='r')
+    ax2.text(t[-1]-x_axis_offset, 0.2, r"$r_I  \equiv \gamma \left[ {\cal R}_t - 1 \right]$", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
+    ax2.text(t[-1]-x_axis_offset, 0.1, r"$\frac{ dI}{dt} = r_I \, I $", fontsize=15, bbox=dict(facecolor='red', alpha=0.2))
     
     ax2.set_ylabel('rI (temporal growth rate)', fontsize=12)
     ax2.set_xlabel('Time[days]',fontsize=12)
@@ -257,11 +305,11 @@ if do_growth:
 
 
     # Estimations of End of Epidemic
-    # rI_diff     = growth_rates 
-    # ids_less_0  = np.nonzero(rI_diff < 0)
-    # rI_crossing = ids_less_1[0][0]
-    # ax2.plot(rI_crossing, 0,'ro', markersize=12)
-    # ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
+    rI_diff     = growth_rates 
+    ids_less_0  = np.nonzero(rI_diff < 0)
+    rI_crossing = ids_less_1[0][0]
+    ax2.plot(rI_crossing, 0,'ro', markersize=12)
+    ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
 
 
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)

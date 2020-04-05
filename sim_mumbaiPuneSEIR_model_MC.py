@@ -73,61 +73,65 @@ def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
 q           = 0.40
 
 # Model Parameters to sample from Gamma Distributions
-gamma_inv, gamma_inv_shape = 7 , 0.1 
-sigma_inv, sigma_inv_shape = 5.1, 0.1
-r0, r0_shape               = 2.28 , 0.1     
+gamma_inv, gamma_inv_shape = 7 , 0.1    # From report (mean, shape)
+sigma_inv, sigma_inv_shape = 5.1, 0.1   # From report (mean, shape)
+r0, r0_shape               = 2.28 , 0.1 # From report (mean, shape)    
 
-# Sample 1000 points from gamma distribution of gamma_inv
-gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
-sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
-r0_samples = r0*np.random.gamma(r0, r0_shape, 1000)
+gamma_calc_option = 1
 
-# For gamma pdf plots
-x           = np.linspace(1E-6, 10, 1000)
-num_samples = 1000
+if gamma_calc_option == 1:
+    # Sample 1000 points from gamma distribution of gamma_inv
+    # Trief this but its a hack to get some good numbers.. 
+    # How to convert from (mean, shape) params --> (shape, scale) params ???
+    # https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.gamma.html
+    gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
+    sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
+    r0_samples        = r0*np.random.gamma(r0, r0_shape, 1000)
+else; 
+    # For gamma pdf plots
+    x           = np.linspace(1E-6, 10, 1000)
+    num_samples = 1000
 
-#### Gamma distributed samples for gamma_inv ####
-#### --> This might be wrong?
-k = 2
-loc = gamma_inv
-theta = gamma_inv_shape
-gamma_inv_dist    = gamma(k, loc, theta)
-gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
+    #### Gamma distributed samples for gamma_inv ####
+    #### --> This might be wrong?!?!?
+    k = 1
+    loc = gamma_inv
+    theta = gamma_inv_shape
+    gamma_inv_dist    = gamma(k, loc, theta)
+    gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
 
-# Plot gamma samples and pdf
-count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
-plt.plot(x, gamma_inv_dist.pdf(x), 'r',
-         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+    # Plot gamma samples and pdf
+    count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
+    plt.plot(x, gamma_inv_dist.pdf(x), 'r',
+             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
 
-#### Gamma distributed samples for sigma_inv ####
-k = 2
-loc = sigma_inv
-theta = sigma_inv_shape
-sigma_inv_dist = gamma(k, loc, theta)
-sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
+    #### Gamma distributed samples for sigma_inv ####
+    k = 1
+    loc = sigma_inv
+    theta = sigma_inv_shape
+    sigma_inv_dist = gamma(k, loc, theta)
+    sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
 
-# Plot sigma samples and pdf
-plt.plot(x, sigma_inv_dist.pdf(x), 'g',
-         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+    # Plot sigma samples and pdf
+    plt.plot(x, sigma_inv_dist.pdf(x), 'g',
+             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
 
-count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
-
-
-#### Gamma distributed samples for r0 ####
-k = 2
-loc = r0
-theta = r0_shape
-r0_dist = gamma(k, loc, theta)
-r0_samples = r0_dist.rvs(num_samples)
-
-# Plot r0 samples and pdf
-plt.plot(x, r0_dist.pdf(x), 'b',
-         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
-count, bins, ignored = plt.hist(r0_samples, 50, density=True)
-
-plt.show()
+    count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
 
 
+    #### Gamma distributed samples for r0 ####
+    k = 1
+    loc = r0
+    theta = r0_shape
+    r0_dist = gamma(k, loc, theta)
+    r0_samples = r0_dist.rvs(num_samples)
+
+    # Plot r0 samples and pdf
+    plt.plot(x, r0_dist.pdf(x), 'b',
+             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+    count, bins, ignored = plt.hist(r0_samples, 50, density=True)
+
+    plt.show()
 
 # A grid of time points (in days) for each simulation
 t_eval = np.arange(0, days, 1)
@@ -184,6 +188,7 @@ for ii in range(simulations):
 
 t = t_eval
 # Compute mean and confidence interval of simulations
+# Confidence intervals might be wrong, ankit said he saw negative numbers...
 S = np.mean(S_sims,0)
 E = np.mean(E_sims,0)
 
@@ -197,10 +202,9 @@ I_low = I-I_h
 # Quarantined Cases
 Q = np.mean(Q_sims,0)
 Q_std_err = sem(Q_sims,0)
-Q_h = Q_std_err * tdist.ppf((1 + confidence) / 2, days - 1)
-Q_up = Q+Q_h
+Q_h   = Q_std_err * tdist.ppf((1 + confidence) / 2, days - 1)
+Q_up  = Q+Q_h
 Q_low = Q-Q_h
-
 
 Re = np.mean(Re_sims,0)
 D = np.mean(D_sims,0)
