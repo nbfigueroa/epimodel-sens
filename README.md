@@ -12,6 +12,9 @@ Models provided to Indian Government and info on what is needed to reproduce eac
 * UMichigan model (extended SIR model; i.e. state-space)
   * Don't know model structure yet
   * CCSE Johns Hopkins data which we have access to
+  * Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. 
+  * Does not justify why particular growth rate scaling is used for particular intervention strategies
+  * Code implemented in R, 
 
 * CDDEP (aka Johns Hopkins) model (will not evaluate now due to lack of transperency)
   * Don't know model structure yet
