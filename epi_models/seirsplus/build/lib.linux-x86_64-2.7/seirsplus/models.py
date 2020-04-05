@@ -113,6 +113,14 @@ class SEIRSModel():
 
         dF  = mu_I*I + mu_D*D_I
 
+            # beta    Rate of transmission (exposure) 
+            # sigma   Rate of infection (upon exposure) 
+            # gamma   Rate of recovery (upon infection) 
+            # xi      Rate of re-susceptibility (upon recovery)  
+            # mu_I    Rate of infection-related death  
+            # mu_0    Rate of baseline death   
+            # nu      Rate of baseline birth
+
         return [dS, dE, dI, dDE, dDI, dR, dF]
 
 
@@ -135,6 +143,8 @@ class SEIRSModel():
 
         init_cond       = [self.numS[-1], self.numE[-1], self.numI[-1], self.numD_E[-1], self.numD_I[-1], self.numR[-1], self.numF[-1]]
 
+        print(init_cond)
+        print('here')
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Solve the system of differential eqns:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -151,8 +161,8 @@ class SEIRSModel():
         self.numS       = numpy.append(self.numS, solution['y'][0])
         self.numE       = numpy.append(self.numE, solution['y'][1])
         self.numI       = numpy.append(self.numI, solution['y'][2])
-        self.numD_E       = numpy.append(self.numD_E, solution['y'][3])
-        self.numD_I       = numpy.append(self.numD_I, solution['y'][4])
+        self.numD_E     = numpy.append(self.numD_E, solution['y'][3])
+        self.numD_I     = numpy.append(self.numD_I, solution['y'][4])
         self.numR       = numpy.append(self.numR, solution['y'][5])
         self.numF       = numpy.append(self.numF, solution['y'][6])
 
@@ -189,6 +199,17 @@ class SEIRSModel():
         # Run the simulation loop:
         #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if(not checkpoints):
+
+            print("t = %.2f" % self.t)
+            if(verbose):
+                print("\t S   = " + str(self.numS[-1]))
+                print("\t E   = " + str(self.numE[-1]))
+                print("\t I   = " + str(self.numI[-1]))
+                print("\t D_E = " + str(self.numD_E[-1]))
+                print("\t D_I = " + str(self.numD_I[-1]))
+                print("\t R   = " + str(self.numR[-1]))
+                print("\t F   = " + str(self.numF[-1]))
+
             self.run_epoch(runtime=self.tmax, dt=dt)
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
