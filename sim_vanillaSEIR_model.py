@@ -33,7 +33,7 @@ if sim_num == 1:
     T0           = 334  
     Q0           = 249           #Q0 is 1% of infectious I0
     I0           = 2*(1.01/0.01) * Q0
-    contact_rate = 10             # number of contacts per day
+    contact_rate = 1             # number of contacts per day
     E0           = (contact_rate - 1)*I0
     
     # Derived Model parameters and Control variable 
@@ -236,16 +236,16 @@ if plot_all:
     ax1.plot(t, covid_1SinfN*np.ones(len(t)), 'm--')
     txt1 = "{per:2.2f} infected"
     ax1.text(t[0], covid_1SinfN - 0.05, txt1.format(per=covid_1SinfN[0]), fontsize=12, color='m')
+    ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
 
 ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
 ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
-ax1.plot(t, TA/N, 'c--', lw=1.5,   label='Exposed+Infected')
 ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
 
 
 # Plot peak points
 ax1.plot(max_inf_idx, max_inf/N,'ro', markersize=8)
-ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
+# ax1.plot(max_act_idx, max_act/N,'ro', markersize=8)
 if sim_num == 2:
     txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f}" 
     txt_title2 = r"Peak inf+exp: {peak_act:5.0f} by day {peak_days:2.0f}" 
@@ -253,7 +253,7 @@ else:
     txt_title = r"Peak infected: {peak_inf:5.0f} by day {peak_days:2.0f} from March 21" 
     txt_title2 = r"Peak inf+exp: {peak_act:5.0f} by day {peak_days:2.0f} from March 21" 
 ax1.text(max_inf_idx+10, max_inf/N, txt_title.format(peak_inf=max_inf, peak_days= max_inf_idx), fontsize=10, color="r")
-ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
+# ax1.text(max_act_idx+10, max_act/N, txt_title2.format(peak_act=max_act, peak_days= max_act_idx), fontsize=10, color="r")
 
 
 # Making things beautiful
@@ -277,7 +277,7 @@ plt.savefig('./snaps/vanillaSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tig
 #################################################################
 ######## Plots Simulation with reproductive/growth rates ########
 #################################################################
-do_growth = 0
+do_growth = 1
 if do_growth:
     # Analytic growth rate
     effective_Rt = r0 * (S/N)

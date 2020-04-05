@@ -40,7 +40,7 @@ gamma      = 1.0 / gamma_inv
 tau_q      = 1.0 /tau_q_inv
 
 # Control variable:  percentage quarantined
-q           = 0.40
+q           = 0.01
 
 print('*****   Hyper-parameters    *****')
 print('N=',N,'days=',days, 'r0=',r0, 'gamma_inv (days) = ',gamma_inv, 'tauq_inv (days) = ',tau_q_inv)
@@ -209,7 +209,7 @@ plt.savefig('./snaps/mumbaiSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tigh
 #################################################################
 ######## Plots Simulation with reproductive/growth rates ########
 #################################################################
-do_growth = 0
+do_growth = 1
 if do_growth:
     # Analytic growth rate
     effective_Rt = r0 * (S/N)
