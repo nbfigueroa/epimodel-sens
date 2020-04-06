@@ -12,7 +12,7 @@ Folowing are the values used to run our simulations:
     r0           = 2.28      
     tau_q_inv    = 14
 
-    # Initial values from March 21st "indian armed forces predictions"
+    # Values from March 21st
     R0           = 23
     D0           = 5         
     Q0           = 249               
@@ -27,11 +27,7 @@ Folowing are the values used to run our simulations:
     tau_q      = 1.0 /tau_q_inv
 
     # Control variable:  percentage quarantined
-    q           = 0.001
-    # Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
-    # In the report table 1, they write number of Quarantined as SO rather than Q0
-    # Q0, is this a typo? 
-    # Number of Infectuos as described in report    
+    q           = 0.001  
     I0          = ((1-q)/(q)) * Q0  
 
     # The initial number of exposed E(0) is not defined in report, how are they computed?
