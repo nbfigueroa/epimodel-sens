@@ -1,6 +1,4 @@
-from bayes_probe_sir.sir import *
-from tqdm import tqdm
-
+from sir import *
 class eSIR(SIR):
     
     def __init__(self, N, time_points, values, **kwargs):
@@ -131,74 +129,3 @@ def MC_Mich(n_rollouts):
     I = np.array(I)
     R = np.array(R)
     return r0s, gammas, models, S, I, R
-
-
-
-if __name__ == '__main__':
-    
-    
-    #Using the params for the Mumbai model
-
-    proportional = False
-    
-    N = 1375987036  #population of India
-    days = 365  # projection horizon starting from March 21st
-    
-   
-    #Control params
-    # No Intervention pi = 1
-    # Travel ban pi = 0.8 March 13
-    # Social Distancing guidelines = 0.6 March 17
-    # Total lockodown pi = 0.2 March 24
-    
-    
-    #Disease propogation
-    kwargs = {}
-    kwargs['r0'] = 2.28 # the mean parameter
-    kwargs['inf_period'] = 7 #mean infection period, 1/gamma, 7 days
-    
-    #Initial population params
-    kwargs['R0'] = 23 #Recovered patients as of March 21st
-    Q0 = 249 # Detected cases and quarantined as of March 21st. Assumed to be 1% of total infections
-    q = 0.01 #1% of true cases quarantined
-    kwargs['I0'] = (1.01/0.01)*Q0 # Assumption that only 1% of cases have been detected and quarantined
-    
-    time_points = [3] #Nationwide lockdown imposed here
-    values = [0.2]
-    
-    #Initialize the model
-    model1 = eSIR(N,time_points, values, **kwargs)
-    S1, I1, R1 = model1.project(days)
-    
-    create_plots(model1, S1, I1, R1, proportional = False)
-    
-    
-
-    #Recreating the UMich report numbers, need to get the posterior mean 
-    #estimate of R0 from data per the report
-    
-    kwargs['r0'] = 1.78  #Using the stochastic estimator to estimate params
-    kwargs['inf_period'] = 1/0.119 #from estimated posterior
-    
-    #Start date is March 16
-    time_points = []
-    values = []
-    
-    #Population params
-    kwargs['I0'] = 3.12e-5*N #Assuming that all cases are detected
-    kwargs['R0'] = 2.75e-5*N #
-    
-    model2 = eSIR(N, time_points, values, **kwargs)
-    S2,I2,R2 = model2.project(60)
-    
-    create_plots(model2, S2, I2, R2, proportional = False, startdate = 'March 16')
-    60
-    
-    r0s, gammas, models, S, I, R = MC_Mich(10000)
-    S_mean = np.mean(S, axis=0)
-    I_mean = np.mean(I, axis = 0)
-    R_mean = np.mean(R, axis = 0)
-    
-    
-
-    plt.show()
