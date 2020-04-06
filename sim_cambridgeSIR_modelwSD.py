@@ -42,7 +42,6 @@ CA = np.array(my_data)
 # matrix of total contacts
 C=CH+CW+CS+CO
 
-
 ###############################################
 ####  SIR Model Simulation with One Closure  ##
 ###############################################

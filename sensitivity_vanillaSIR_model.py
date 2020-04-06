@@ -109,7 +109,12 @@ r0_sigma   = np.sqrt(pow(gamma_inv,2)*pow(beta_sigma,2))
 r0_gauss   = stats.norm.pdf(r0_vals,r0_mean,r0_sigma)
 # r0_gauss   = gamma_inv*stats.norm.pdf(r0_vals/gamma_inv,beta_mean,beta_sigma)
 
-r0_samples = gamma_inv*np.random.normal(beta_mean, beta_sigma, 20)
+r0_samples = gamma_inv*np.random.normal(beta_mean, beta_sigma, 100)
+
+beta_mean  = np.mean(r0_samples/gamma_inv)
+beta_std   = np.std(r0_samples/gamma_inv)
+beta_plus  = beta_mean + 2*beta_std
+beta_minus = beta_mean - 2*beta_std
 
 # These give tail parameters often
 r0_plus    = r0_samples[np.argmax(r0_samples)]
