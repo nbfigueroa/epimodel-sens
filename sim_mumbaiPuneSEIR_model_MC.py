@@ -4,7 +4,7 @@ from   scipy.integrate import odeint
 from   scipy.integrate import solve_ivp
 from   scipy.optimize import fsolve
 from   scipy import stats
-from   scipy.stats import gamma
+from   scipy.stats import gamma as gamma_dist
 import scipy.special as sps
 from scipy.stats import sem
 from scipy.stats import t as tdist
@@ -21,26 +21,39 @@ rc('text', usetex=True)
 ######## Parameters for Simulation ########
 ############################################
 
-# Values used for the indian armed forces model
-# Initial values from March 21st for India test-case
-N            = 1486947036
-N            = 1375987036
+N            = 1375987036 # Number from report
 days         = 356
+gamma_inv    = 7  
+sigma_inv    = 5.1
+m            = 0.0043
+r0           = 2.28      
 tau_q_inv    = 14
-tau_q        = 1.0 /tau_q_inv
-m            = 0.0043 
 
-# Initial values from March 21st "armed forces predictions"
+# Initial values from March 21st "indian armed forces predictions"
 R0           = 23
-D0           = 5 
-T0           = 334  # 249  
-Q0           = 249           #Q0 is 1% of infectious I0
-I0           = (1.01/0.01) * Q0
-contact_rate = 10           # number of contacts per day
-E0           = (contact_rate - 1)*I0
+D0           = 5         
+Q0           = 249               
+T0           = 334               # This is the total number of comfirmed cases for March 21st, not used it seems?                                   
 
+# Derived Model parameters and 
+beta       = r0 / gamma_inv
+sigma      = 1.0 / sigma_inv
+gamma      = 1.0 / gamma_inv
+tau_q      = 1.0 /tau_q_inv
+# tau_q      = tau_q_inv
 
-######################################
+# Control variable:  percentage quarantined
+q           = 0.01
+# Q0 is 1% of total infectious; i.e. I0 + Q0 (as described in report)
+# In the report table 1, they write number of Quarantined as SO rather than Q0
+# Q0, is this a typo? 
+# Number of Infectuos as described in report    
+I0          = ((1-q)/(q)) * Q0  
+
+# The initial number of exposed E(0) is not defined in report, how are they computed?
+contact_rate = 10                     # number of contacts an individual has per day
+E0           = (contact_rate - 1)*I0  # Estimated exposed based on contact rate and inital infected
+
 ######## Simulation Functions ########
 ######################################
 # Equation to estimate final epidemic size (infected)
@@ -79,7 +92,7 @@ r0, r0_shape               = 2.28 , 0.1 # From report (mean, shape)
 
 gamma_calc_option = 1
 
-if gamma_calc_option == 1:
+if gamma_calc_option == 0:
     # Sample 1000 points from gamma distribution of gamma_inv
     # Trief this but its a hack to get some good numbers.. 
     # How to convert from (mean, shape) params --> (shape, scale) params ???
@@ -87,7 +100,7 @@ if gamma_calc_option == 1:
     gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
     sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
     r0_samples        = r0*np.random.gamma(r0, r0_shape, 1000)
-else; 
+else:
     # For gamma pdf plots
     x           = np.linspace(1E-6, 10, 1000)
     num_samples = 1000
@@ -97,7 +110,7 @@ else;
     k = 1
     loc = gamma_inv
     theta = gamma_inv_shape
-    gamma_inv_dist    = gamma(k, loc, theta)
+    gamma_inv_dist    = gamma_dist(k, loc, theta)
     gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
 
     # Plot gamma samples and pdf
@@ -109,7 +122,7 @@ else;
     k = 1
     loc = sigma_inv
     theta = sigma_inv_shape
-    sigma_inv_dist = gamma(k, loc, theta)
+    sigma_inv_dist = gamma_dist(k, loc, theta)
     sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
 
     # Plot sigma samples and pdf
@@ -123,7 +136,7 @@ else;
     k = 1
     loc = r0
     theta = r0_shape
-    r0_dist = gamma(k, loc, theta)
+    r0_dist = gamma_dist(k, loc, theta)
     r0_samples = r0_dist.rvs(num_samples)
 
     # Plot r0 samples and pdf
