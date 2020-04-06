@@ -2,7 +2,7 @@
 
 Repository for code to evaluate the COVID-19 Models being used by different institutes and proposed to the Indian government. The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. In this repo we will reverse-engineer the models and apply sensitivity analysis techniques to understand what drives such drastic differences across models.
 
-### Modelling Techniques
+### Modeling Techniques
 Models provided to Indian Government and info on what is needed to reproduce each model:   
 * Cambridge model: 
   * **Model type:** The "Cambridge Model" is an extended SIR model that includes and age and social contact structure of the Indian population when assessing the impact of social distancing, predicts 21-day lockdown is not enough to prevent resurgence in virus spread. The model has been extended to SEIR form, original paper 
