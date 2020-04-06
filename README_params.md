@@ -39,3 +39,22 @@ Folowing are the values used to run our simulations:
     E0           = (contact_rate - 1)*I0  # Estimated exposed based on contact rate and inital infected
 
 ```
+
+```python
+# The SEIR model differential equations with mortality rates and quarentine
+def seir_mumbai(t, X, N, beta, gamma, sigma, m, q, tau_q):
+    S, E, I, Q, R, D = X
+
+    # Original State equations for SEIR
+    dSdt  = - (beta*S*I)/N 
+    dEdt  = (beta*S*I)/N - sigma*E    
+
+    # Incorporating Quarantine components
+    dIdt  = sigma*E - gamma*I - q*I - m*I
+    dQdt  = q*I - tau_q*Q - m*Q
+    dRdt  = gamma*I + tau_q*Q
+    dDdt  = m*I + m*Q 
+
+    return dSdt, dEdt, dIdt, dQdt, dRdt, dDdt
+```
+
