@@ -10,7 +10,7 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * Code, Population data and contact surveys to construct Contact matrices available [online]().
   
 * Mumbai/Pune model (SEIR + Quarantine compartment): 
-  * Model stucture defined in paper [paper](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub)
+  * Model stucture defined in [paper](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub)
   
 * UMichigan model (extended SIR model; i.e. state-space)
   * Don't know model structure yet
