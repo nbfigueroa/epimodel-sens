@@ -80,28 +80,31 @@ def create_plots(model, S,I,R, proportional=False, startdate = 'March 21'):
         
         print(f'Maximum case load is expected after {day} days')
 
-def rollout_Mich():
+def rollout_Mich(N = 1375987036, days = 365, log_r0_mean = 0.44, log_r0_sd = 0.57,
+                 log_gamma_mean = -2.4, log_gamma_sd = 0.73,
+                 theta = [0.9999413, 3.12e-5, 2.75e-5], k = 1.5e6, time_points= [],
+                 values = []):
         
-        N = 1375987036  #population of India
-        days = 365  # projection horizon starting from March 21st
+        #N = 1375987036  #population of India
+        #days = 365  # projection horizon starting from March 21st
         
         #sample r0
-        r0 = np.random.lognormal(0.44,0.57)
-        gamma = np.random.lognormal(-2.4, 0.73)
+        r0 = np.random.lognormal(log_r0_mean, log_r0_sd)
+        gamma = np.random.lognormal(log_gamma_mean, log_gamma_sd)
         
         kwargs['r0'] = r0
         kwargs['inf_period'] = 1/gamma
     
-        theta = np.array([1-(3.12e-5 + 2.75e-5), 3.12e-5, 2.75e-5])
-        k = 1.5e6
+        #theta = np.array([1-(3.12e-5 + 2.75e-5), 3.12e-5, 2.75e-5])
+        #k = 1.5e6
         
         y = np.random.dirichlet(k*theta)
         kwargs['I0'] = y[1]
         kwargs['R0'] = y[2]
         
         #assume no interventions
-        time_points = [-1,3]
-        values = [0.8, 0.6]
+        #time_points = [-1,3]
+        #values = [0.8, 0.6]
         
         model = eSIR(N, time_points, values, **kwargs)
         
