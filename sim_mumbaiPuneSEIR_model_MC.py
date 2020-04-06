@@ -87,7 +87,7 @@ if gamma_calc_option == 1:
     gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
     sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
     r0_samples        = r0*np.random.gamma(r0, r0_shape, 1000)
-else; 
+else:
     # For gamma pdf plots
     x           = np.linspace(1E-6, 10, 1000)
     num_samples = 1000
