@@ -88,7 +88,7 @@ def rollout_Mich():
         days = 365  # projection horizon starting from March 21st
         
         #sample r0
-        r0 = np.random.lognormal(0.44,0.57)
+        r0 = np.random.lognormal(0.31,0.73)
         gamma = np.random.lognormal(-2.4, 0.73)
         
         kwargs['r0'] = r0
@@ -98,12 +98,12 @@ def rollout_Mich():
         k = 1.5e6
         
         y = np.random.dirichlet(k*theta)
-        kwargs['I0'] = y[1]
-        kwargs['R0'] = y[2]
+        kwargs['I0'] = y[1]*N
+        kwargs['R0'] = y[2]*N
         
         #assume no interventions
-        time_points = [-1,3]
-        values = [0.8, 0.6]
+        time_points = []
+        values = []
         
         model = eSIR(N, time_points, values, **kwargs)
         
@@ -203,4 +203,27 @@ if __name__ == '__main__':
     I_mean = np.mean(I, axis = 0)
     R_mean = np.mean(R, axis = 0)
     
+    S_up = np.quantile(S, 0.975, axis = 0)
+    S_down = np.quantile(S, 0.025, axis = 0)
+    
+    I_up = np.quantile(I, 0.975, axis = 0)
+    I_down = np.quantile(I, 0.025, axis = 0)
+    
+    R_up = np.quantile(R, 0.975, axis=0)
+    R_down = np.quantile(R, 0.025, axis = 0)
+    
+    plt.figure(figsize = [10,8])
+    plt.title('Michigan: Cumulative Cases', fontsize = 20)
+    plt.xlabel('Days after March 16', fontsize = 18)
+    plt.ylabel('Proportion of population', fontsize = 18)
+    plt.plot(N - S_mean, label = 'Infected')
+    plt.fill_between(np.arange(len(S_mean)), N - S_up, N - S_down, alpha = 0.5)
+    
+    
+    plt.figure(figsize = [10,8])
+    plt.title('Michigan: Active Infections')
+    plt.xlabel('Days after March 16', fontsize = 18)
+    plt.ylabel('Proportion of population', fontsize = 18)
+    plt.plot(I_mean/N, label = 'Infected')
+    plt.fill_between(np.arange(len(I_mean)), I_up/N, I_down/N, alpha = 0.5)
     
