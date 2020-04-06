@@ -47,8 +47,6 @@ C=CH+CW+CS+CO
 ##############################
 # epidemic parameters
 beta  = 0.0298          # infection rate 
-# beta  = 0.0155          # infection rate 
-# beta  = 1.1*0.0298    # infection rate 
 gIa   = 1./7            # recovery rate of asymptomatic infectives 
 gIs   = 1./7            # recovery rate of symptomatic infectives 
 gE    = 1/4

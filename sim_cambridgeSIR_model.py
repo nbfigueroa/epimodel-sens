@@ -115,7 +115,7 @@ plt.plot(cases, 'o-', lw=4, color='#348ABD', ms=16, label='data', alpha=0.5)
 plt.legend(fontsize=26, loc='upper left'); plt.grid() 
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.ylabel('Infected individuals'); plt.xlim(0, 40); plt.ylim(0, 9999);
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModel_timeEvolution.png', format='png', dpi=212)
+plt.savefig('./snaps/cambridgeSIRModel_timeEvolution.png', format='png', dpi=212)
 plt.show()
 
 ###################################
@@ -191,7 +191,7 @@ plt.ylabel('Individuals (millions)')
 plt.plot(t*0+t[np.argsort(IC)[-1]], -170+.4*SC*10**(-6), lw=4, color='g', alpha=0.8)
 plt.xticks(np.arange(0, 200, 30), ('4 Mar', '3 Apr', '3 May', '2 Jun', '2 Jul', '1 Aug', '31 Aug'));
 #plt.savefig('/Users/rsingh/Desktop/2b.png', format='png', dpi=212)
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModel_timeEvolution.png', format='png', dpi=212)
+plt.savefig('./snaps/cambridgeSIRModel_timeEvolution.png', format='png', dpi=212)
 
 
 # Plot reproductive rates
@@ -227,7 +227,7 @@ plt.plot(t[::10], rr, 'o', lw=4, color='#A60628', label='suscetible', alpha=0.8,
 plt.fill_between(t, 0, t*0+1, color="dimgrey", alpha=0.2); plt.ylabel('Basic reproductive ratio')
 plt.ylim(np.min(rr)-.1, np.max(rr)+.1)
 plt.xticks(np.arange(0, 200, 30), ('4 Mar', '3 Apr', '3 May', '2 Jun', '2 Jul', '1 Aug', '31 Aug'));
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModel_reproductiveRate.png', format='png', dpi=212)
+plt.savefig('./snaps/cambridgeSIRModel_reproductiveRate.png', format='png', dpi=212)
 
 
 

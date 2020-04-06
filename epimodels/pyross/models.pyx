@@ -81,6 +81,7 @@ cdef class SIR:
         #    solver.set_initial_condition(self.rp0)
         #    u, time_points = solver.solve(time_points)
         savemat(filename, {'X':u, 't':time_points, 'N':self.N, 'M':self.M,'alpha':self.alpha, 'beta':self.beta,'gIa':self.gIa, 'gIs':self.gIs })
+        savemat(filename, {'X':u, 't':time_points, 'N':self.N, 'M':self.M,'alpha':self.alpha, 'beta':self.beta,'gIa':self.gIa, 'gIs':self.gIs })
         return
         
 

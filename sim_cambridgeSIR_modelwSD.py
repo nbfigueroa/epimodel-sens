@@ -98,7 +98,7 @@ plt.plot(cases, 'o-', lw=4, color='#348ABD', ms=16, label='data', alpha=0.5)
 plt.legend(fontsize=26, loc='upper left'); plt.grid() 
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.ylabel('Infected individuals'); plt.ylim(0, 6000); plt.xlim(0, 98);
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModelwSD_oneClusure.png', format='png', dpi=200)
+plt.savefig('./snaps/cambridgeSIRModelwSD_oneClusure.png', format='png', dpi=200)
 m1 = .01*MM*(data['X'][0,0:M]-data['X'][-1,0:M])
 np.sum(m1)
 
@@ -153,7 +153,7 @@ plt.plot(cases, 'o-', lw=4, color='#348ABD', ms=16, label='data', alpha=0.5)
 plt.legend(fontsize=26); plt.grid() 
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.ylabel('Infected individuals'); plt.xlim(0, 98); plt.ylim(0, 600);
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModelwSD_twoClusures.png', format='png', dpi=200)
+plt.savefig('.snaps/cambridgeSIRModelwSD_twoClusures.png', format='png', dpi=200)
 m1 = .01*MM*(data['X'][0,0:M]-data['X'][-1,0:M])
 np.sum(m1)
 SC[-1]-SC[0]
@@ -213,7 +213,7 @@ plt.plot(cases, 'o-', lw=4, color='#348ABD', ms=16, label='data', alpha=0.5)
 plt.legend(fontsize=26); plt.grid() 
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.ylabel('Infected individuals'); plt.xlim(0, 98); plt.ylim(0, 600);
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModelwSD_threeClusures.png', format='png', dpi=200)
+plt.savefig('.snaps/cambridgeSIRModelwSD_threeClusures.png', format='png', dpi=200)
 plt.show()
 
 ###########################
@@ -257,7 +257,7 @@ plt.plot(cases, 'o-', lw=4, color='#348ABD', ms=16, label='data', alpha=0.5)
 plt.legend(fontsize=26); plt.grid() 
 plt.autoscale(enable=True, axis='x', tight=True)
 plt.ylabel('Infected individuals'); plt.xlim(0, 98); plt.ylim(0, 600);
-plt.savefig('../../MIT-COVID19-Model-Evaluation/snaps/cambridgeSIRModelwSD_longClusures.png', format='png', dpi=200)
+plt.savefig('.snaps/cambridgeSIRModelwSD_longClusures.png', format='png', dpi=200)
 
 
 
