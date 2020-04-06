@@ -10,7 +10,7 @@ rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
 # Select simulation number
-sim_num = 1
+sim_num = 0
 
 ############################################
 ######## Parameters for Simulation ########
@@ -49,7 +49,6 @@ if sim_num < 2:
 if sim_num == 2:
     # Values used for the indian armed forces model
     # Initial values from March 21st for India test-case
-    N            = 1486947036 # Real number from website
     N            = 1375987036 # Number from report
     days         = 356
     gamma_inv    = 7  
@@ -130,7 +129,7 @@ def seir_deaths_ivp(t, X, N, beta, gamma, sigma, m):
     # dRdt  = (1-m)*gamma*I 
     # dDdt  = m*gamma*I 
 
-    # Change of variable way
+    # Change of variable way --> Yields same results
     dIdt  = sigma*E - gamma*I - m*I
     dRdt  = gamma*I 
     dDdt  = m*I 
@@ -166,7 +165,8 @@ def simulate_seirModel(seir_type, solver_type, y0, simulation_time, dt):
             t = t_eval
             S, E, I, R = ode_sol.T
 
-            sol_ode_timeseries = np.vstack((t, S, E, I, R))
+        # Pack timeseries
+        sol_ode_timeseries = np.vstack((t, S, E, I, R))
 
     else:
         ''' Compartment structure of armed forces SEIR model
@@ -193,8 +193,10 @@ def simulate_seirModel(seir_type, solver_type, y0, simulation_time, dt):
             ode_sol = odeint(seir_deaths_ode, y0, t_eval, args=(N, beta, gamma, sigma. m))
             t = t_eval
             S, E, I, Re, D = ode_sol.T
-                    
+        
+        # Pack timeseries            
         sol_ode_timeseries = np.vstack((t, S, E, I, Re, D))    
+
     return  sol_ode_timeseries  
 
 ###################################################
@@ -280,26 +282,31 @@ print('Total Cases when Peak = ', peak_total_inf,'by day=', peak_inf_idx)
 #####################################################################
 # Plot the data on three separate curves for S(t), I(t) and R(t)
 fig, ax1 = plt.subplots()
+if sim_num > 0:
+    txt_title_sim = r"COVID-19 Vanilla SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, m={m:1.3f})"
+    fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, m=m),fontsize=15)
+else:
+    txt_title_sim = r"COVID-19 Vanilla SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f})"
+    fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv),fontsize=15)    
 
-txt_title_sim = r"COVID-19 Vanilla SEIR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f})"
-fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv),fontsize=15)
 
-plot_all = 1
 
 # Variable evolution
-if plot_all:
-    ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
-    ax1.plot(t, T/N, 'y', lw=2,   label='Total Cases')
-    ax1.plot(t, Re/N, 'g--',  lw=1,  label='Recovered')
-    # Plot Final Epidemic Size
-    ax1.plot(t, One_SinfN*np.ones(len(t)), 'm--')
-    txt1 = "{per:2.2f} infected"
-    ax1.text(t[0], One_SinfN - 0.05, txt1.format(per=One_SinfN[0]), fontsize=12, color='m')
-
+ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
 ax1.plot(t, E/N, 'm',   lw=2, label='Exposed')
 ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
-ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
+ax1.plot(t, T/N, 'y', lw=2,   label='Total Cases')
 
+if sim_num == 0:
+    ax1.plot(t, R/N, 'g--',  lw=1,  label='Recovered')    
+else:
+    ax1.plot(t, Re/N, 'g--',  lw=1,  label='Recovered')
+    ax1.plot(t, D/N, 'b--',  lw=1,  label='Dead')
+
+# Plot Final Epidemic Size
+ax1.plot(t, One_SinfN*np.ones(len(t)), 'm--')
+txt1 = "{per:2.2f} infected"
+ax1.text(t[0], One_SinfN - 0.05, txt1.format(per=One_SinfN[0]), fontsize=12, color='m')
 
 # Plot peak points
 ax1.plot(peak_inf_idx, peak_inf/N,'ro', markersize=8)
@@ -343,8 +350,11 @@ if do_growth:
 
     ####### Plots for Growth Rates #######
     fig, (ax1, ax2) = plt.subplots(1,2)
-    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv),fontsize=15)
+    if sim_num > 0:
+        fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, m=m),fontsize=15)
+    else:
+        fig.suptitle(txt_title_sim.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv),fontsize=15)    
+
 
     # Plot of Reproductive rate (number)
     ax1.plot(t, effective_Rt, 'k', lw=2, label='Rt (Effective Reproductive Rate)')
@@ -358,7 +368,7 @@ if do_growth:
     # Estimations of End of Epidemic
     effRT_diff     = effective_Rt - 1
     ids_less_1     = np.nonzero(effRT_diff < 0)
-    effRT_crossing = ids_less_1[0][0]
+    effRT_crossing = ids_less_1[0][1]
     ax1.plot(effRT_crossing, 1,'ro', markersize=12)
     ax1.text(effRT_crossing-10, 1-0.2,str(effRT_crossing), fontsize=10, color="r")
     ax1.set_ylabel('Rt (Effective Reproductive Rate)', fontsize=12)
@@ -382,7 +392,7 @@ if do_growth:
     # Estimations of End of Epidemic
     rI_diff     = growth_rates 
     ids_less_0  = np.nonzero(rI_diff < 0)
-    rI_crossing = ids_less_1[0][0]
+    rI_crossing = ids_less_1[0][1]
     ax2.plot(rI_crossing, 0,'ro', markersize=12)
     ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)
