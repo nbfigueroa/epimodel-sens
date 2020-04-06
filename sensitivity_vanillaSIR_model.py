@@ -111,12 +111,12 @@ r0_gauss   = stats.norm.pdf(r0_vals,r0_mean,r0_sigma)
 
 r0_samples = gamma_inv*np.random.normal(beta_mean, beta_sigma, 100)
 
+# Just for sanity check, actually the mean is the same only beta_std will be different
 beta_mean  = np.mean(r0_samples/gamma_inv)
 beta_std   = np.std(r0_samples/gamma_inv)
 beta_plus  = beta_mean + 2*beta_std
 beta_minus = beta_mean - 2*beta_std
 
-# These give tail parameters often
 r0_plus    = r0_samples[np.argmax(r0_samples)]
 r0_minus   = r0_samples[np.argmin(r0_samples)]
 print(r0_plus, r0_minus)

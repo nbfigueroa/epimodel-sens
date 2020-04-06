@@ -216,7 +216,7 @@ txt_title = r"COVID-19 Cambridge SIR Model Dynamics (N={N:10.0f},$R_0^e$={R0:1.3
 fig.suptitle(txt_title.format(N=N, R0=float(r0), beta_= beta, gamma_inv = gamma_inv),fontsize=15)
 
 # Variable evolution
-plot_all = 0
+plot_all = 1
 if plot_all == 1:
     ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
     ax1.plot(t, T/N, 'y', lw=2,   label='Total Cases')
