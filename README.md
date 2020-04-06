@@ -4,10 +4,13 @@ Repository for code to evaluate the COVID-19 Models being used by different inst
 
 ### Modelling Techniques
 Models provided to Indian Government and info on what is needed to reproduce each model:   
-* Cambridge model (Age-structured SIR model): Includes age and social contact structure of the Indian population when assessing the impact of social distancing, predicts 21-day lockdown is not enough to prevent resurgence in virus spread.  
+* Cambridge model (Age and Contact structured SIR model): Includes age and social contact structure of the Indian population when assessing the impact of social distancing, predicts 21-day lockdown is not enough to prevent resurgence in virus spread.  
   * Model structure defined in paper [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf), seems easy to implement (SIR + age-structured transition dynamics)
   * The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), we currently only have CCSE.
-  * Population data and contact surveys to construct Contact matrices (references in paper).
+  * Code, Population data and contact surveys to construct Contact matrices available [online]().
+  
+* Mumbai/Pune model (SEIR + Quarantine compartment): 
+  * Model stucture defined in paper [paper](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub)
   
 * UMichigan model (extended SIR model; i.e. state-space)
   * Don't know model structure yet
