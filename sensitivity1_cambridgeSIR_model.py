@@ -151,8 +151,30 @@ print("I0=",I0)
 print("R0=",R0)
 
 
-def contactMatrix(t):
-    return C
+scenario = 2
+if scenario == 0:
+    def contactMatrix(t):
+        return C
+if scenario == 1:
+    # the contact matrix is time-dependent
+    def contactMatrix(t):
+        if t<21:
+            xx = C
+        elif 21<=t<42:
+            xx = CH
+        else:
+            xx = C
+        return xx
+if scenario == 2:
+    def contactMatrix(t):
+        if t<21:
+            xx = C
+        elif 21<=t<70:
+            xx = CH
+        else:
+            xx = CH
+        return xx
+
 
 ############ start simulation ############
 Nf=Tf; filename='this.mat'
