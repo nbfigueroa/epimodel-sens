@@ -22,11 +22,10 @@ Models provided to Indian Government and info on what is needed to reproduce eac
   * Does not justify why particular growth rate scaling is used for particular intervention strategies
   * Code implemented in R, 
 
-* CDDEP (aka Johns Hopkins) model (will not evaluate due to lack of transparency)
-  * Don't know model structure yet
-  * Presumably uses CCSE Johns Hopkins data which we have access to.
-
 Other known models being used by other governments/media:
+ * CDDEP (aka Johns Hopkins) model (will not evaluate due to lack of transparency)
+   * Don't know model structure yet
+   * Presumably uses CCSE Johns Hopkins data which we have access to.
  * Imperial College model (Stochastic agent/Individual-based model)
  * Oxford study (SEIR with Bayesian estimates)
 
