@@ -94,7 +94,6 @@ if sim_num == 2:
     sigma      = 1.0 / sigma_inv
     gamma      = 1.0 / gamma_inv
     tau_q      = 1.0 /tau_q_inv
-    # tau_q      = tau_q_inv
 
     # Control variable:  percentage quarantined
     q           = 0.001

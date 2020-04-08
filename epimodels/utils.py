@@ -188,11 +188,11 @@ def plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, sto
 
     if store_plots:
         plt.savefig(filename + '.png', bbox_inches='tight')
-        plt.savefig(filename + '.pdf', bbox_inches='tight')
+        # plt.savefig(filename + '.pdf', bbox_inches='tight')
 
 
 
-def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_variables, Plotoptions, store_plots, filename):
+def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_variables, Plotoptions,  store_plots, filename):
     scale = 1000000    
     
     # Unpack
@@ -223,7 +223,7 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
     fig, ax1 = plt.subplots()
 
     fig.suptitle(txt_title.format(scenario=scenario, R0=float(r0), beta= beta, gamma = 1/gamma_inv),fontsize=20)
-    ax1.text(Tf/2, 0.9, r"$\beta \pm %1.2f \beta $"%beta_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+    ax1.text(Tf/2, 0.95, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
 
     # Variable evolution
     ax1.plot(t, S_plus/N, 'k--', lw=2, alpha=0.25)
@@ -242,19 +242,19 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
     print('Total Cases when growth linear = ', total_cases)
     ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
     txt1 = "{per:2.2f} million total cases as $t(end)$"
-    ax1.text(t[-1]-x_axis_offset, (total_cases/N) - 0.05, txt1.format(per=total_cases/scale), fontsize=20, color='r')
+    ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
 
     total_cases     = T_minus[-1]
     print('Total Cases when growth linear = ', total_cases)
     ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
     txt1 = "{per:2.2f} million total cases as $t(end)$"
-    ax1.text(t[-1]-x_axis_offset, (total_cases/N) - 0.05, txt1.format(per=total_cases/scale), fontsize=20, color='r')
+    ax1.text(t[-1]-x_axis_offset, 0.8*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
 
     total_cases     = T_plus[-1]
     print('Total Cases when growth linear = ', total_cases)
     ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
     txt1 = "{per:2.2f} million total cases as $t(end)$"
-    ax1.text(t[-1]-x_axis_offset, (total_cases/N) - 0.05, txt1.format(per=total_cases/scale), fontsize=20, color='r')
+    ax1.text(t[-1]-x_axis_offset, 1.1*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
 
     # Estimated Final epidemic size (analytic) not-dependent on simulation
@@ -299,7 +299,7 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
     txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
     ax1.text(peak_inf_idx+10, (1.1)*peak_inf/N , txt_title.format(peak_inf=peak_inf/scale, peak_days= peak_inf_idx), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
     txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
-    ax1.text(peak_inf_plus_idx+5, (1.4)*peak_inf_plus/N, txt_title.format(peak_inf=peak_inf_plus/scale, peak_days= peak_inf_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+    ax1.text(peak_inf_plus_idx+5, (1.5)*peak_inf_plus/N, txt_title.format(peak_inf=peak_inf_plus/scale, peak_days= peak_inf_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
     txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
     ax1.text(peak_inf_minus_idx+5, (0.6)*peak_inf_minus/N, txt_title.format(peak_inf=peak_inf_minus/scale, peak_days= peak_inf_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
@@ -332,4 +332,173 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
         plt.savefig(filename + "_all.png", bbox_inches='tight')
         # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
 
+
+def plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_variables, E_variables, I_variables,  Q_variables, 
+    Re_variables, D_variables, Plotoptions, text_error, store_plots, filename):
+    scale = 1000000    
+    
+    # Unpack
+    scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N = SEIQRparams
+    plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error = Plotoptions 
+
+    S       = S_variables[0,:]
+    S_plus  = S_variables[1,:]
+    S_minus = S_variables[2,:]
+
+    E       = E_variables[0,:]
+    E_plus  = E_variables[1,:]
+    E_minus = E_variables[2,:]
+
+    I       = I_variables[0,:]
+    I_plus  = I_variables[1,:]
+    I_minus = I_variables[2,:]
+
+    Q       = Q_variables[0,:]
+    Q_plus  = Q_variables[1,:]
+    Q_minus = Q_variables[2,:]
+
+    Re       = Re_variables[0,:]
+    Re_plus  = Re_variables[1,:]
+    Re_minus = Re_variables[2,:]
+
+    D        = D_variables[0,:]
+    D_plus   = D_variables[1,:]
+    D_minus  = D_variables[2,:]
+
+
+    R     = Re + D + Q
+    T     = I + R 
+    Inf   = I + Q
+    All_I = I + Q + E 
+
+    T = I + R
+
+    R_plus     = Re_plus + D_plus + Q_plus
+    T_plus     = I_plus + R_plus 
+    Inf_plus   = I_plus + Q_plus
+    All_I_plus = I_plus + Q_plus + E_plus 
+    T_plus     = I_plus+ R_plus
+
+    R_minus     = Re_minus + D_minus + Q_minus
+    T_minus     = I_minus + R_minus 
+    Inf_minus   = I_minus + Q_minus
+    All_I_minus = I_minus + Q_minus + E_minus
+    T_minus     = I_minus+ R_minus
+    
+
+    Tf = len(T_plus)
+    t = np.arange(0, Tf, 1)
+
+    # Plot the data of three separate curves for S(t), I(t) and R(t)
+    fig, ax1 = plt.subplots()
+    fig.suptitle(txt_title.format(R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
+    ax1.text(Tf/2, 0.95, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+    
+    # Variable evolution
+    ax1.plot(t, S_plus/N, 'k--', lw=2, alpha=0.25)
+    ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
+    ax1.plot(t, S_minus/N, 'k--', lw=2, alpha=0.25)
+
+    ax1.plot(t, Inf_plus/N, 'r--',  lw=2, alpha=0.25)
+    ax1.plot(t, Inf/N, 'r', lw=2,   label='Infectuous (I+Q)')
+    ax1.plot(t, Inf_minus/N, 'r--', lw=2, alpha=0.25)
+
+    ax1.plot(t, T_plus/N, 'm--',  lw=2, alpha=0.25)
+    ax1.plot(t, T/N, 'm',  lw=2, label='Total Cases')
+    ax1.plot(t, T_minus/N, 'm--',  lw=2, alpha=0.25)
+
+    total_cases     = T[-1]
+    print('Total Cases when growth linear = ', total_cases)
+    ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
+    txt1 = "{per:2.2f} million total cases as $t(end)$"
+    ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
+
+    total_cases     = T_minus[-1]
+    print('Total Cases when growth linear = ', total_cases)
+    ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
+    txt1 = "{per:2.2f} million total cases as $t(end)$"
+    ax1.text(t[-1]-x_axis_offset, 0.95*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
+
+    total_cases     = T_plus[-1]
+    print('Total Cases when growth linear = ', total_cases)
+    ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
+    txt1 = "{per:2.2f} million total cases as $t(end)$"
+    ax1.text(t[-1]-x_axis_offset, 1.05*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+
+    # Estimated Final epidemic size (analytic) not-dependent on simulation
+
+    # Equation to estimate final epidemic size (infected)
+    def epi_size(x):        
+        return np.log(x) + r0_test*(1-x)
+
+    init_guess   = 0.0001
+    r0_test      = float(r0)
+    SinfN  = fsolve(epi_size, init_guess)
+    One_SinfN = 1 - SinfN
+    print('*****   Final Epidemic Size    *****')
+    print('r0 = ', r0_test, '1 - Sinf/S0 = ', One_SinfN[0])    
+
+    print('*****   Results    *****')
+    peak_inf_idx =  np.argmax(I)
+    peak_inf     = Inf[peak_inf_idx]
+    print('Peak Instant. Infected = ', peak_inf,'by day=', peak_inf_idx)
+
+    peak_total_inf  = T[peak_inf_idx]
+    print('Total Cases when Peak = ', peak_total_inf,'by day=', peak_inf_idx)
+
+    total_cases     = T[-1]
+    print('Total Cases when growth linear = ', total_cases)
+
+    peak_inf_plus_idx =  np.argmax(I_plus)
+    peak_inf_plus     = Inf_plus[peak_inf_plus_idx]
+    print('Peak Instant. Infected - Error= ', peak_inf_plus,'by day=', peak_inf_plus_idx)
+
+    peak_inf_minus_idx =  np.argmax(I_minus)
+    peak_inf_minus     = Inf_minus[peak_inf_minus_idx]
+    print('Peak Instant. Infected + Error= ', peak_inf_minus,'by day=', peak_inf_minus_idx)
+
+    # Plot peak points
+    ax1.plot(peak_inf_idx, peak_inf/N,'ro', markersize=8)
+    # Plot peak points
+    ax1.plot(peak_inf_plus_idx, peak_inf_plus/N,'ro', markersize=8)
+    # Plot peak points
+    ax1.plot(peak_inf_minus_idx, peak_inf_minus/N,'ro', markersize=8)
+    
+    txt_title = r"Peak infectuous (I+Q): {peak_inf:5.5f}million by day {peak_days:10.0f} " 
+    ax1.text(peak_inf_idx+10, (1.1)*peak_inf/N , txt_title.format(peak_inf=peak_inf/scale, peak_days= peak_inf_idx), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+    if plot_peaks:
+        txt_title = r"Peak infectuous (I+Q): {peak_inf:5.5f}million by day {peak_days:10.0f} " 
+        ax1.text(peak_inf_plus_idx+5, (1.4)*peak_inf_plus/N, txt_title.format(peak_inf=peak_inf_plus/scale, peak_days= peak_inf_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+        txt_title = r"Peak infectuous (I+Q): {peak_inf:5.5f}million by day {peak_days:10.0f} " 
+        ax1.text(peak_inf_minus_idx+5, (0.6)*peak_inf_minus/N, txt_title.format(peak_inf=peak_inf_minus/scale, peak_days= peak_inf_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+
+    if plot_all == 1:
+        ax1.plot(peak_inf_idx, peak_total_inf/N,'ro', markersize=8)
+        txt_title2 = r"Total Cases: {peak_total:5.5f}million by day {peak_days:10.0f} " 
+        ax1.text(peak_inf_idx+10, peak_total_inf/N, txt_title2.format(peak_total=peak_total_inf/scale, peak_days= peak_inf_idx), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+
+    ####### OPTIONAL STUFF #######  
+    if show_analytic_limit:
+        ax1.plot(t, covid_SinfS0*np.ones(len(t)), 'm--')
+        txt1 = "{per:2.2f} population infected"
+        ax1.text(t[0], covid_SinfS0 - 0.05, txt1.format(per=covid_SinfS0[0]), fontsize=20, color='m')
+
+
+    ax1.set_xlabel('Time /days', fontsize=20)
+    ax1.set_ylabel('Fraction of Population', fontsize=20)
+    ax1.yaxis.set_tick_params(length=0)
+    ax1.xaxis.set_tick_params(length=0)
+    ax1.grid(b=True, which='major', c='w', lw=2, ls='-')
+    legend = ax1.legend()
+    legend.get_frame().set_alpha(0.5)
+    for spine in ('top', 'right', 'bottom', 'left'):
+        ax1.spines[spine].set_visible(True)
+
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+
+    if store_plots:
+        plt.savefig(filename + "_all.png", bbox_inches='tight')
+        # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
 

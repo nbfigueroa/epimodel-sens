@@ -9,6 +9,7 @@ from   matplotlib import rc
 import matplotlib.pyplot as plt
 import pandas as pd
 import xlsxwriter
+
 from   epimodels.utils import *
 
 rc('font',**{'family':'serif','serif':['Times']})

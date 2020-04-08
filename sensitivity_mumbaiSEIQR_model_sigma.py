@@ -5,7 +5,7 @@ from   scipy.optimize import fsolve
 from   scipy import stats
 import matplotlib.pyplot as plt
 from matplotlib import rc
-
+import xlsxwriter
 
 # Importing models and plotting functions
 from epimodels.seiqr import *
@@ -30,7 +30,6 @@ scenario = 0
 N            = 1375987036 # Number from report
 days         = 712
 gamma_inv    = 7  
-sigma_inv    = 5.1
 m            = 0.0043
 tau_q_inv    = 14
 
@@ -40,7 +39,6 @@ D0           = 0
 Q0           = 28              
 
 # Derived Model parameters and 
-sigma      = 1.0 / sigma_inv
 gamma      = 1.0 / gamma_inv
 tau_q      = 1.0 /tau_q_inv
 
@@ -77,22 +75,21 @@ do_growth           = 0
 
 ###### Specify scenarios and beta values to test ################
 scenario = 0
-sensitivity_test = 1
 
 # infection rate 
-r0           = 2.28      
-beta_mumbai  = r0 / gamma_inv
+r0                  = 2.28      
+beta                = r0 / gamma_inv
+sigma_inv_mumbai    = 5.1
 
 # Variables for beta samples
-error_perc = 10
-beta_error = error_perc/100
-beta_mean  = beta_mumbai
-beta_sigma = beta_mumbai*(beta_error)
-beta_plus  = beta_mean + beta_sigma
-beta_minus = beta_mean - beta_sigma
+error_perc      = 50
+sigma_inv_error = error_perc/100
+sigma_inv_mean  = sigma_inv_mumbai
+sigma_inv_sigma = sigma_inv_mumbai*(sigma_inv_error)
+sigma_inv_plus  = sigma_inv_mean + sigma_inv_sigma
+sigma_inv_minus = sigma_inv_mean - sigma_inv_sigma
 
-beta_samples = [beta_mean, beta_plus, beta_minus]
-
+sigma_inv_samples = [sigma_inv_mean, sigma_inv_plus, sigma_inv_minus]
 
 ######## Record predictions ########
 S_samples       = np.empty([3, days])
@@ -101,15 +98,15 @@ I_samples       = np.empty([3, days])
 Q_samples       = np.empty([3, days])
 Re_samples      = np.empty([3, days])
 D_samples       = np.empty([3, days])
-file_extensions  = ["./results/Mumbai_Scenario{scenario:d}".format(scenario=scenario), 
-                    "./results/Mumbai_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=error_perc),
-                    "./results/Mumbai_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=error_perc),]
-header = ['beta', 'R0', 'I_42', 'T_42', 'I_70', 'T_70', 'I_90', 'T_90', 'I_120', 'T_120', 't_low', 't_c', 'I_peak', 'T_inf']
+file_extensions  = ["./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error".format(scenario=scenario, error=error_perc), 
+                    "./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error_plus".format(scenario=scenario, error=error_perc),
+                    "./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error_minus".format(scenario=scenario, error=error_perc),]
+header = ['sigma', 'R0', 'I_42', 'T_42', 'I_70', 'T_70', 'I_90', 'T_90', 'I_120', 'T_120', 't_low', 't_c', 'I_peak', 'T_inf']
 time_checkpoints = [42, 70, 90, 120] 
 
 if store_values:
     # Create a workbook and add a worksheet.
-    workbook = xlsxwriter.Workbook(file_extensions[0]+".xlsx")
+    workbook = xlsxwriter.Workbook(file_extensions[0]+"_sigma.xlsx")
     worksheet = workbook.add_worksheet()
     for jj in range(len(header)):
         worksheet.write(0, jj,  header[jj] )    
@@ -118,12 +115,13 @@ if store_values:
 ######## Start simulations ########
 for ii in range(3):
     #####  beta value to evaluate #####  
-    beta = beta_samples[ii]
-    r0   = beta/gamma
+    sigma_inv = sigma_inv_samples[ii]
+    sigma = 1.0 / sigma_inv
+    r0    = beta/gamma
 
     if store_values:
         # Store beta and r
-        worksheet.write(ii+1, 0,  beta )
+        worksheet.write(ii+1, 0,  sigma )
         worksheet.write(ii+1, 1,  float(r0) )
 
     print('*****   Hyper-parameters    *****')
@@ -182,15 +180,21 @@ for ii in range(3):
             worksheet.write(ii+1, (jj+1)*2 + 1,  T[time_checkpoints[jj]])
             print('Inf(',time_checkpoints[jj],')=',Inf[time_checkpoints[jj]], 'T(',time_checkpoints[jj],')=',T[time_checkpoints[jj]])
 
-    # Estimated Final epidemic size (analytic) not-dependent on simulation
-    init_guess   = 0.0001
-    r0_test      = r0
-    SinfN  = fsolve(epi_size, init_guess)
-    One_SinfN = 1 - SinfN
-    print('*****   Final Epidemic Size    *****')
-    print('r0 = ', r0_test, '1 - Sinf/S0 = ', One_SinfN[0])    
 
-    print('*****   Results    *****')
+    Ids_less_10  = np.nonzero(Inf < 11)
+    I_less_10 =  Ids_less_10[0][0]
+    print('I(t_low)=',I_less_10)
+
+    if show_analytic_limit:
+        # Estimated Final epidemic size (analytic) not-dependent on simulation
+        init_guess   = 0.0001
+        r0_test      = r0
+        SinfN  = fsolve(epi_size, init_guess)
+        One_SinfN = 1 - SinfN
+        print('*****   Final Epidemic Size    *****')
+        print('r0 = ', r0_test, '1 - Sinf/S0 = ', One_SinfN[0])    
+
+    print('*************   Results    *************')
     peak_All_I_idx =  np.argmax(All_I)
     peak_All_I     = All_I[peak_All_I_idx]
     print('Peak Instant. ALL Infectouos = ', peak_All_I,'by day=', peak_All_I_idx)
@@ -220,8 +224,8 @@ for ii in range(3):
     if store_values:
         # Store results
         worksheet.write(ii+1, 10,  I_less_10)
-        worksheet.write(ii+1, 11,  peak_inf_idx)
-        worksheet.write(ii+1, 12,  peak_inf)
+        worksheet.write(ii+1, 11,  peak_infe_idx)
+        worksheet.write(ii+1, 12,  peak_infe)
         worksheet.write(ii+1, 13,  total_cases)
 
     #####################################################################
@@ -229,12 +233,12 @@ for ii in range(3):
     #####################################################################
 
     txt_title = r"COVID-19 Mumbai SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
-    filename = './figures/mumbaiSEIQR_timeEvolution_%i'%sim_num
 
     SEIQRparams    = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
     SEIQRvariables = S, E, I, Q, Re ,D , t
+    plot_all_ii    = 1
     Plotoptions    = plot_all, show_S, show_E, show_Q, show_R, show_D, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
-    plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, store_plots, filename)
+    plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, store_plots, file_extensions[ii])
 
 
 if store_values:
@@ -244,9 +248,12 @@ if store_values:
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
 if plot_superimposed:
-    Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
-    plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, store_plots, file_extensions[0])
-
+    SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
+    plot_peaks_all = 0
+    Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks_all, x_axis_offset, y_axis_offset, sigma_inv_error
+    text_error   = r"$1/\sigma \pm %1.2f \sigma $"%sigma_inv_error
+    plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_samples, E_samples, I_samples, Q_samples, Re_samples, D_samples, Plotoptions, text_error, store_plots, file_extensions[0])
+    
 ###########################################################################
 ######## TO CHECK: Plots Simulation with reproductive/growth rates ########
 ###########################################################################
