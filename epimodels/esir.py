@@ -1,4 +1,6 @@
-from sir import *
+from .sir import *
+from tqdm import tqdm
+
 class eSIR(SIR):
     
     def __init__(self, N, time_points, values, **kwargs):
@@ -82,7 +84,7 @@ def create_plots(model, S,I,R, proportional=False, startdate = 'March 21'):
 
 def rollout_Mich(N = 1375987036, days = 365, log_r0_mean = 0.44, log_r0_sd = 0.57,
                  log_gamma_mean = -2.4, log_gamma_sd = 0.73,
-                 theta = [0.9999413, 3.12e-5, 2.75e-5], k = 1.5e6, time_points= [],
+                 theta = np.array([0.9999413, 3.12e-5, 2.75e-5]), k = 1.5e6, time_points= [],
                  values = []):
         
         #N = 1375987036  #population of India
@@ -92,6 +94,7 @@ def rollout_Mich(N = 1375987036, days = 365, log_r0_mean = 0.44, log_r0_sd = 0.5
         r0 = np.random.lognormal(log_r0_mean, log_r0_sd)
         gamma = np.random.lognormal(log_gamma_mean, log_gamma_sd)
         
+        kwargs = {}
         kwargs['r0'] = r0
         kwargs['inf_period'] = 1/gamma
     
@@ -99,8 +102,8 @@ def rollout_Mich(N = 1375987036, days = 365, log_r0_mean = 0.44, log_r0_sd = 0.5
         #k = 1.5e6
         
         y = np.random.dirichlet(k*theta)
-        kwargs['I0'] = y[1]
-        kwargs['R0'] = y[2]
+        kwargs['I0'] = y[1]*N
+        kwargs['R0'] = y[2]*N
         
         #assume no interventions
         #time_points = [-1,3]
