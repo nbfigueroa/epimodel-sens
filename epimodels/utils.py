@@ -196,7 +196,7 @@ def plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, sto
 
 def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_variables, Plotoptions, text_error, store_plots, filename):
     scale = 1000000    
-    scale_offset = 0 # Normally 5
+    scale_offset = 0.01 # Normally 5
 
     # Unpack
     scenario, r0, beta, gamma_inv, N = SIRparams
@@ -252,18 +252,18 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
         print('Total Cases when growth linear = ', total_cases)
         ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
         txt1 = "{per:2.2f} million total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, 0.8*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
+        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
 
         total_cases     = T_plus[-1]
         print('Total Cases when growth linear = ', total_cases)
         ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
         txt1 = "{per:2.2f} million total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, 1.1*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
+
+        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=20, color='r')
         fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-        ax1.text(Tf/2, 0.8, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+        ax1.text(0.8*Tf, 0.5, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
     else:
-        ax1.text(Tf/2, 0.0000007, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
-        print('bla')
+        ax1.text(0.8*Tf, 0.0000007, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
     # Estimated Final epidemic size (analytic) not-dependent on simulation
 
     # Equation to estimate final epidemic size (infected)
@@ -308,9 +308,9 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
         txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
         ax1.text(peak_inf_idx+2, (1)*peak_inf/N , txt_title.format(peak_inf=peak_inf/scale, peak_days= peak_inf_idx), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
         txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
-        ax1.text(peak_inf_plus_idx-25, (1 + scale_offset)*peak_inf_plus/N, txt_title.format(peak_inf=peak_inf_plus/scale, peak_days= peak_inf_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+        ax1.text(peak_inf_plus_idx-25, (1 + 10*scale_offset)*peak_inf_plus/N, txt_title.format(peak_inf=peak_inf_plus/scale, peak_days= peak_inf_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
         txt_title = r"Peak infected: {peak_inf:5.5f}million by day {peak_days:10.0f} " 
-        ax1.text(peak_inf_minus_idx+2, (1 - scale_offset)*peak_inf_minus/N, txt_title.format(peak_inf=peak_inf_minus/scale, peak_days= peak_inf_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+        ax1.text(peak_inf_minus_idx+2, (1 - 10*scale_offset)*peak_inf_minus/N, txt_title.format(peak_inf=peak_inf_minus/scale, peak_days= peak_inf_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         if plot_all == 1:
             ax1.plot(peak_inf_idx, peak_total_inf/N,'ro', markersize=8)

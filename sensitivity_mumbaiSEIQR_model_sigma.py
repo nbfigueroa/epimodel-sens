@@ -251,7 +251,7 @@ if plot_superimposed:
     SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv_mumbai, tau_q_inv, q, N
     plot_peaks_all = 0
     Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks_all, x_axis_offset, y_axis_offset, sigma_inv_error
-    text_error   = r"$1/\sigma \pm %1.2f \sigma $"%sigma_inv_error
+    text_error   = r"$\sigma \pm %1.2f \sigma $"%sigma_inv_error
     plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_samples, E_samples, I_samples, Q_samples, Re_samples, D_samples, Plotoptions, text_error, store_plots, file_extensions[0])
     
 ###########################################################################
