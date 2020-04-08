@@ -449,7 +449,7 @@ def plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_variables, E_variables, 
     print('r0 = ', r0_test, '1 - Sinf/S0 = ', One_SinfN[0])    
 
     print('*****   Results    *****')
-    peak_inf_idx =  np.argmax(I)
+    peak_inf_idx =  np.argmax(Inf)
     peak_inf     = Inf[peak_inf_idx]
     print('Peak Instant. Infected = ', peak_inf,'by day=', peak_inf_idx)
 
@@ -459,11 +459,11 @@ def plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_variables, E_variables, 
     total_cases     = T[-1]
     print('Total Cases when growth linear = ', total_cases)
 
-    peak_inf_plus_idx =  np.argmax(I_plus)
+    peak_inf_plus_idx =  np.argmax(Inf_plus)
     peak_inf_plus     = Inf_plus[peak_inf_plus_idx]
     print('Peak Instant. Infected - Error= ', peak_inf_plus,'by day=', peak_inf_plus_idx)
 
-    peak_inf_minus_idx =  np.argmax(I_minus)
+    peak_inf_minus_idx =  np.argmax(Inf_minus)
     peak_inf_minus     = Inf_minus[peak_inf_minus_idx]
     print('Peak Instant. Infected + Error= ', peak_inf_minus,'by day=', peak_inf_minus_idx)
 

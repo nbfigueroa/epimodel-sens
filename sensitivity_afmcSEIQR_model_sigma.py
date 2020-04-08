@@ -78,7 +78,7 @@ scenario = 0
 # infection rate 
 r0                  = 2.28      
 beta                = r0 / gamma_inv
-# sigma_inv_AFMC    = 5.1
+sigma_inv_AFMC    = 5.1
 sigma_inv_AFMC    = 11.5
 
 # Variables for beta samples
