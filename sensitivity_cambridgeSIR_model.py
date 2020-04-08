@@ -90,6 +90,7 @@ beta_samples = [beta_mean, beta_plus, beta_minus]
 # simulation time
 # Tf=365
 Tf= 712
+Tf = 90
 
 # A grid of time points (in simulation_time)
 t = np.arange(0, Tf, 1)
@@ -99,12 +100,13 @@ t = np.arange(0, Tf, 1)
 x_axis_offset       = 250
 y_axis_offset       = 0.0000000003
 store_plots         = 1 
-plot_all            = 1
+plot_all            = 0
 plot_peaks          = 1
 show_S              = 0
+show_T              = 0
 show_R              = 0
 plot_superimposed   = 1
-store_values        = 1
+store_values        = 0
 show_analytic_limit = 0
 do_growth           = 0
 
@@ -113,7 +115,7 @@ do_growth           = 0
 S_samples       = np.empty([3, Tf])
 I_samples       = np.empty([3, Tf])
 R_samples       = np.empty([3, Tf])
-file_extensions  = ["./results/Cambridge_Scenario{scenario:d}".format(scenario=scenario), 
+file_extensions  = ["./results/Cambridge_Scenario{scenario:d}_{days:d}".format(scenario=scenario, days=Tf), 
                     "./results/Cambridge_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=error_perc),
                     "./results/Cambridge_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=error_perc),]
 header = ['beta', 'R0', 'I_42', 'T_42', 'I_70', 'T_70', 'I_90', 'T_90', 'I_120', 'T_120', 't_low', 't_c', 'I_peak', 'T_inf']
@@ -247,8 +249,10 @@ for ii in range(3):
             print('I(',time_checkpoints[jj],')=',I[time_checkpoints[jj]], 'T(',time_checkpoints[jj],')=',T[time_checkpoints[jj]])
 
     Ids_less_10  = np.nonzero(I < 11)
-    I_less_10 =  Ids_less_10[0][0]
-    print('I(t_low)=',I_less_10)
+    a = np.array(Ids_less_10)
+    if a.size > 0:
+        I_less_10 =  Ids_less_10[0][0]
+        print('I(t_low)=',I_less_10)
 
     peak_inf_idx =  np.argmax(I)
     peak_inf     = I[peak_inf_idx]
@@ -270,23 +274,29 @@ for ii in range(3):
     #####################################################################
     ######## Plots Simulation with point estimates of parameters ########
     #####################################################################
-    txt_title    = r"COVID-19 Cambridge SIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
-    SIRparams    = scenario, float(r0), beta, gamma_inv, N
-    SIRvariables = S, I, R, T, t
-    plot_all_ii   = 1
-    Plotoptions  = plot_all_ii, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
+    txt_title     = r"COVID-19 Cambridge SIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
+    SIRparams     = scenario, float(r0), beta, gamma_inv, N
+    SIRvariables  = S, I, R, T, t
+    stor_plots_ii = 0
+    Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
     plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots, file_extensions[ii])
 
 
 if store_values:
     workbook.close()
 
+
 #####################################################################
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
 if plot_superimposed:
-    Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
-    plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, store_plots, file_extensions[0])
+    show_S        = 0
+    show_T        = 0
+    x_axis_offset = 0
+    plot_peaks    = 1
+    Plotoptions  = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
+    text_error   = r"$\beta \pm %1.2f \beta $"%beta_error
+    plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, text_error, store_plots, file_extensions[0])
 
 ############################################################################
 ######## TO CHECK : Plots Simulation with reproductive/growth rates ########

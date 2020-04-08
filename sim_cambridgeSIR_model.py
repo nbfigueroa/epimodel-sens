@@ -18,6 +18,7 @@ aM, aF = my_data[:, 1], my_data[:, 2]
 # set age groups
 Ni=aM+aF;   Ni=Ni[0:M];  N=np.sum(Ni)
 
+print("N",N)
 
 ################################################
 ####  Contact Matrices for Indian population  ##

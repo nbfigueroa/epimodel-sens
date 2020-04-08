@@ -72,7 +72,6 @@ plot_r0_dependence  = 0
 do_growth           = 0
 
 
-
 ###### Specify scenarios and beta values to test ################
 scenario = 0
 
@@ -80,9 +79,10 @@ scenario = 0
 r0                  = 2.28      
 beta                = r0 / gamma_inv
 sigma_inv_mumbai    = 5.1
+sigma_inv_mumbai    = 11.5
 
 # Variables for beta samples
-error_perc      = 50
+error_perc      = 15
 sigma_inv_error = error_perc/100
 sigma_inv_mean  = sigma_inv_mumbai
 sigma_inv_sigma = sigma_inv_mumbai*(sigma_inv_error)
@@ -248,7 +248,7 @@ if store_values:
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
 if plot_superimposed:
-    SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
+    SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv_mumbai, tau_q_inv, q, N
     plot_peaks_all = 0
     Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks_all, x_axis_offset, y_axis_offset, sigma_inv_error
     text_error   = r"$1/\sigma \pm %1.2f \sigma $"%sigma_inv_error
