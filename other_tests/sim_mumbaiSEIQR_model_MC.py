@@ -90,61 +90,50 @@ gamma_inv, gamma_inv_shape = 7 , 0.1    # From report (mean, shape)
 sigma_inv, sigma_inv_shape = 5.1, 0.1   # From report (mean, shape)
 r0, r0_shape               = 2.28 , 0.1 # From report (mean, shape)    
 
-gamma_calc_option = 1
+# For gamma pdf plots
+x           = np.linspace(1E-6, 10, 1000)
+num_samples = 1000
 
-if gamma_calc_option == 0:
-    # Sample 1000 points from gamma distribution of gamma_inv
-    # Trief this but its a hack to get some good numbers.. 
-    # How to convert from (mean, shape) params --> (shape, scale) params ???
-    # https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.gamma.html
-    gamma_inv_samples = gamma_inv*np.random.gamma(gamma_inv, gamma_inv_shape, 1000)
-    sigma_inv_samples = sigma_inv*np.random.gamma(sigma_inv, sigma_inv_shape, 1000)
-    r0_samples        = r0*np.random.gamma(r0, r0_shape, 1000)
-else:
-    # For gamma pdf plots
-    x           = np.linspace(1E-6, 10, 1000)
-    num_samples = 1000
+#### Gamma distributed samples for gamma_inv ####
+#### --> This might be wrong?!?!?
+k = 1
+loc = gamma_inv
+theta = gamma_inv_shape
+gamma_inv_dist    = gamma_dist(k, loc, theta)
+gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
 
-    #### Gamma distributed samples for gamma_inv ####
-    #### --> This might be wrong?!?!?
-    k = 1
-    loc = gamma_inv
-    theta = gamma_inv_shape
-    gamma_inv_dist    = gamma_dist(k, loc, theta)
-    gamma_inv_samples = gamma_inv_dist.rvs(num_samples)
+# Plot gamma samples and pdf
+count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
+plt.plot(x, gamma_inv_dist.pdf(x), 'r',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
 
-    # Plot gamma samples and pdf
-    count, bins, ignored = plt.hist(gamma_inv_samples, 50, density=True)
-    plt.plot(x, gamma_inv_dist.pdf(x), 'r',
-             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+#### Gamma distributed samples for sigma_inv ####
+k = 1
+loc = sigma_inv
+theta = sigma_inv_shape
+sigma_inv_dist = gamma_dist(k, loc, theta)
+sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
 
-    #### Gamma distributed samples for sigma_inv ####
-    k = 1
-    loc = sigma_inv
-    theta = sigma_inv_shape
-    sigma_inv_dist = gamma_dist(k, loc, theta)
-    sigma_inv_samples = sigma_inv_dist.rvs(num_samples)
+# Plot sigma samples and pdf
+plt.plot(x, sigma_inv_dist.pdf(x), 'g',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
 
-    # Plot sigma samples and pdf
-    plt.plot(x, sigma_inv_dist.pdf(x), 'g',
-             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
-
-    count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
+count, bins, ignored = plt.hist(sigma_inv_samples, 50, density=True)
 
 
-    #### Gamma distributed samples for r0 ####
-    k = 1
-    loc = r0
-    theta = r0_shape
-    r0_dist = gamma_dist(k, loc, theta)
-    r0_samples = r0_dist.rvs(num_samples)
+#### Gamma distributed samples for r0 ####
+k = 1
+loc = r0
+theta = r0_shape
+r0_dist = gamma_dist(k, loc, theta)
+r0_samples = r0_dist.rvs(num_samples)
 
-    # Plot r0 samples and pdf
-    plt.plot(x, r0_dist.pdf(x), 'b',
-             label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
-    count, bins, ignored = plt.hist(r0_samples, 50, density=True)
+# Plot r0 samples and pdf
+plt.plot(x, r0_dist.pdf(x), 'b',
+         label=r'$k=%.1f,\ \theta=%.1f$' % (k, theta))
+count, bins, ignored = plt.hist(r0_samples, 50, density=True)
 
-    plt.show()
+plt.show()
 
 # A grid of time points (in days) for each simulation
 t_eval = np.arange(0, days, 1)
@@ -156,6 +145,7 @@ I_sims  = np.empty(shape=(simulations,days))
 Q_sims  = np.empty(shape=(simulations,days))
 Re_sims = np.empty(shape=(simulations,days))
 D_sims  = np.empty(shape=(simulations,days))
+
 for ii in range(simulations):
     gamma_inv_sample = gamma_inv_samples[ii]
     sigma_inv_sample = sigma_inv_samples[ii]
@@ -397,44 +387,6 @@ if do_growth:
 
     plt.savefig('./snaps/mumbaiSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
     plt.savefig('./snaps/mumbaiSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
-
-
-#############################################################
-######## Dependence of R0 on Final Epidemic Behavior ########
-#############################################################
-# Final epidemic size (analytic)
-# r0_vals     = np.linspace(1,5,100) 
-# init_guess  = 0.0001
-# Sinf_N      =   []
-# Sinf_S0     =   []
-# for ii in range(len(r0_vals)):
-#     r0_test = r0_vals[ii]
-#     Sinf_N.append(fsolve(epi_size, init_guess))     
-#     Sinf_S0.append(1 - Sinf_N[ii])
-
-
-# # Plots
-# fig0, ax0 = plt.subplots()
-# ax0.plot(r0_vals, Sinf_S0, 'r', lw=2, label='Susceptible')
-# ax0.set_ylabel('$1 - S_{\infty}/N$ (percentage of population infected)', fontsize=12)
-# ax0.set_xlabel('$R_0$', fontsize=12)
-
-# # Current estimate of Covid R0
-# plt.title('Final Size of Epidemic Dependence on $R_0$ estimate',fontsize=15)
-# ax0.plot(r0, covid_1SinfN, 'ko', markersize=5, lw=2)
-
-# # Plot mean
-# txt = 'Covid R0({r0:3.3f})'
-# ax0.text(r0 - 0.45, covid_1SinfN + 0.05,txt.format(r0=r0_test), fontsize=10)
-# plt.plot([r0]*10,np.linspace(0,covid_1SinfN,10), color='black')
-# txt = "{Sinf:3.3f} Infected"
-# ax0.text(1.1, covid_1SinfN - 0.025,txt.format(Sinf=covid_1SinfN[0]), fontsize=8)
-# plt.plot(np.linspace(1,[r0],10), [covid_1SinfN]*10, color='black')
-
-# ax0.text(4, 0.75, r"${\cal R}_0 \equiv \frac{ \beta } {\gamma}$", fontsize=15, bbox=dict(facecolor='red', alpha=0.15))
-# fig0.set_size_inches(18.5/2, 12.5/2, forward=True)
-# plt.savefig('./snaps/armedSIR_finalSize_%i.png'%sim_num, bbox_inches='tight')
-# plt.savefig('./snaps/armedSIR_finalSize_%i.pdf'%sim_num, bbox_inches='tight')
 
 
 plt.show()

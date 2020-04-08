@@ -272,8 +272,9 @@ for ii in range(3):
     txt_title    = r"COVID-19 Cambridge SIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
     SIRparams    = scenario, float(r0), beta, gamma_inv, N
     SIRvariables = S, I, R, T, t
-    Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
-    plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots, file_extensions[0])
+    plot_all_ii   = 1
+    Plotoptions  = plot_all_ii, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
+    plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots, file_extensions[ii])
 
 
 if store_values:
@@ -284,12 +285,11 @@ if store_values:
 #####################################################################
 if plot_superimposed:
     Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
-    plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, store_plots, file_extensions[ii])
+    plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, store_plots, file_extensions[0])
 
-#################################################################
-######## Plots Simulation with reproductive/growth rates ########
-#################################################################
-
+############################################################################
+######## TO CHECK : Plots Simulation with reproductive/growth rates ########
+############################################################################
 if do_growth:
 
     # Final number of infected individuals

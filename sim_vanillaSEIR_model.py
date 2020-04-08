@@ -128,7 +128,8 @@ else:
         solver_type = 1 # ivp - LSODA
 
 # Simulate ODE equations
-sol_ode_timeseries = simulate_seirModel(seir_type, solver_type, y0, N, days, 1)
+SEIRparams = N, beta, gamma, sigma
+sol_ode_timeseries = simulate_seirModel(seir_type, SEIRparams, solver_type, y0, N, days, 1)
 
 # Unpack timseries
 if sim_num == 0:
@@ -235,8 +236,8 @@ fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
 fig.set_size_inches(20.5/2, 14.5/2, forward=True)
 
 
-plt.savefig('./snaps/vanillaSEIR_timeEvolution_%i.png'%sim_num, bbox_inches='tight')
-plt.savefig('./snaps/vanillaSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tight')
+plt.savefig('./figures/vanilla/vanillaSEIR_timeEvolution_%i.png'%sim_num, bbox_inches='tight')
+plt.savefig('./figures/vanilla/vanillaSEIR_timeEvolution_%i.pdf'%sim_num, bbox_inches='tight')
 
 #################################################################
 ######## Plots Simulation with reproductive/growth rates ########
@@ -296,8 +297,8 @@ if do_growth:
     ax2.text(rI_crossing-10, 0-0.04,str(rI_crossing), fontsize=10, color="r")
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)
 
-    plt.savefig('./snaps/vanillaSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
-    plt.savefig('./snaps/vanillaSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/vanilla/vanillaSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/vanilla/vanillaSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
 
 
 #############################################################
@@ -334,8 +335,8 @@ if do_growth:
 
 # ax0.text(4, 0.75, r"${\cal R}_0 \equiv \frac{ \beta } {\gamma}$", fontsize=15, bbox=dict(facecolor='red', alpha=0.15))
 # fig0.set_size_inches(18.5/2, 12.5/2, forward=True)
-# plt.savefig('./snaps/armedSIR_finalSize_%i.png'%sim_num, bbox_inches='tight')
-# plt.savefig('./snaps/armedSIR_finalSize_%i.pdf'%sim_num, bbox_inches='tight')
+# plt.savefig('./figures/vanilla/armedSIR_finalSize_%i.png'%sim_num, bbox_inches='tight')
+# plt.savefig('./figures/vanilla/armedSIR_finalSize_%i.pdf'%sim_num, bbox_inches='tight')
 
 
 plt.show()
