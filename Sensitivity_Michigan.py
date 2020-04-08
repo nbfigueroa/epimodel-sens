@@ -237,7 +237,7 @@ if __name__ == '__main__':
     
     for scenario, time_points, values in zip(Scenarios, t, v):
         
-        filename = f'Michigan_Scenario{scenario}.xlsx'
+        filename = os.path.join('results',f'Michigan_Scenario{scenario}.xlsx')
         workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet()
         
