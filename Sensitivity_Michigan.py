@@ -1,16 +1,18 @@
 from epimodels.sir import *
 from epimodels.esir import *
+import xlsxwriter
+import os
 
 N = 1375987036
-time_points = []
-values = [] #As per the Mich report
+#time_points = []
+#values = [] #As per the Mich report
 #Initial cases as per March 4th
 
 # time_points = [11, 15, 21, 71]
 # values = [0.8,0.6,0.2, 1]
 I0 = 25
 R0 = 3
-days = 365
+days = 1500
 
 #R0 = 2.2, gamma = 1/7 no error
 
@@ -145,7 +147,7 @@ def mc_vary_both(r0, inf_period, err):
     print('The infections will peak after: ', critical_days, ' [',critical_days_up, ', ',critical_days_d, ']', ' days\n\n')
     return I_peak, T_inf, critical_day, SIR
 
-def run_without_error_beta(beta, inf_period, show_plot = True, verbose = True):
+def run_without_error_beta(beta, inf_period, time_points, values, show_plot = True, verbose = True):
     
     r0 = beta*inf_period
     
@@ -191,16 +193,101 @@ def run_without_error_beta(beta, inf_period, show_plot = True, verbose = True):
     
     return (I_peak, T_inf, critical_day, (S,I,R))
 
+def run_final(beta, inf_period, time_points, values, query_days = [42, 70, 90, 120], low_threshold = 10):
+    
+    I_peak, T_inf, critical_day, y = run_without_error_beta(beta, inf_period, time_points, values, show_plot=False, verbose=False)
+    
+    I = y[1]
+    T = N - y[0]
+    
+    I_t = []
+    T_t = []
+    
+    
+    for d in query_days:
+        I_t.append(I[d])
+        T_t.append(T[d])
+    
+    t_lows = np.argwhere(I < low_threshold)
+    t_low = np.min(t_lows)
+    return I_t, T_t, I_peak, T_inf, critical_day, t_low
+    
+    
+
         
 
 
 
 if __name__ == '__main__':
     
-    I_peak = {}
-    T_inf = {}
-    critical_day = {}
-    SIR = {}
+    Scenarios = [0,1,2]
+    t = [[],[11,15,21,42],[11,15,21,70]]
+    v = [[],[0.8,0.6,0.2,1],[0.8,0.6,0.2,1]]
+    query_days = [42, 70, 90, 120]
+    err = 0.1
+    r0 = 1.78
+    inf_period = 1/0.119
+    beta = r0/inf_period
+    beta_up = beta*(1+err)
+    beta_down = beta*(1-err)
+        
+    betas = [beta, beta_up, beta_down]
+    #inf_period = 1/0.119
+    
+    
+    for scenario, time_points, values in zip(Scenarios, t, v):
+        
+        filename = f'Michigan_Scenario{scenario}.xlsx'
+        workbook = xlsxwriter.Workbook(filename)
+        worksheet = workbook.add_worksheet()
+        
+        header = ['beta', 'gamma', 'R_0',]
+        TI = [l  for d in query_days for l in [f'I_{d}', f'T_{d}']]
+        header.extend(TI)
+        header.extend(['t_low', 't_c', 'I_peak', 'T_inf'])
+        
+        for i in range(len(header)):
+            worksheet.write(0,i, header[i])
+        
+        #run sims for all beta values
+        for (p,beta) in enumerate(betas):
+            j=p+1
+            r0 = beta*inf_period
+            worksheet.write(j, 0, beta)
+            worksheet.write(j, 1, 1/inf_period)
+            worksheet.write(j, 2, r0)
+            cell = 2+1
+            I_t, T_t, I_peak, T_inf, critical_day, t_low = run_final(beta, inf_period, time_points, values)
+            
+            for (i,d) in enumerate(query_days):
+                worksheet.write(j, cell, I_t[i])
+                cell=cell+1
+                worksheet.write(j, cell, T_t[i])
+                cell = cell+1
+            
+            worksheet.write(j, cell, t_low)
+            cell+=1
+            worksheet.write(j, cell, critical_day)
+            cell+=1
+            worksheet.write(j, cell, I_peak)
+            cell+=1
+            worksheet.write(j, cell, T_inf)
+            
+        
+        workbook.close()
+        
+        
+        
+        
+    
+    
+    
+    
+    # I_peak = {}
+    # T_inf = {}
+    # critical_day = {}
+    # SIR = {}
+    # 
     '''
     key = (2.2,7,0)
     I_peak[key], T_inf[key], critical_day[key], SIR[key] = run_without_error()
