@@ -177,10 +177,6 @@ if __name__ == '__main__':
     create_plots(model1, S1, I1, R1, proportional = False)
     
     
-    
-    
-    
-
         
     #Recreating the UMich report numbers, need to get the posterior mean 
     #estimate of R0 from data per the report
@@ -200,21 +196,8 @@ if __name__ == '__main__':
     S2,I2,R2 = model2.project(60)
     
     create_plots(model2, S2, I2, R2, proportional = False, startdate = 'March 16')
-    60
-    
-    r0s, gammas, models, S, I, R = MC_Mich(10000)
-    S_mean = np.mean(S, axis=0)
-    I_mean = np.mean(I, axis = 0)
-    R_mean = np.mean(R, axis = 0)
-    
-    S_up = np.quantile(S, 0.975, axis = 0)
-    S_down = np.quantile(S, 0.025, axis = 0)
-    
-    I_up = np.quantile(I, 0.975, axis = 0)
-    I_down = np.quantile(I, 0.025, axis = 0)
-    
-    R_up = np.quantile(R, 0.975, axis=0)
-    R_down = np.quantile(R, 0.025, axis = 0)
+
+
     
     plt.figure(figsize = [10,8])
     plt.title('Michigan: Cumulative Cases', fontsize = 20)
@@ -231,3 +214,4 @@ if __name__ == '__main__':
     plt.plot(I_mean/N, label = 'Infected')
     plt.fill_between(np.arange(len(I_mean)), I_up/N, I_down/N, alpha = 0.5)
     
+    plt.show()

@@ -49,8 +49,10 @@ def seir_deaths_ivp(t, X, N, beta, gamma, sigma, m):
 def seir_deaths_ode(X, t, N, beta, gamma, sigma, m):
     return seir_deaths_ivp(t, X, N, beta, gamma, sigma, m)
 
-def simulate_seirModel(seir_type, solver_type, y0, N, simulation_time, dt):
+def simulate_seirModel(seir_type, SEIRparams, solver_type, y0, N, simulation_time, dt):
     
+    N, beta, gamma, sigma = SEIRparams 
+
     # A grid of time points (in simulation_time)
     t_eval = np.arange(0, simulation_time, dt)
 
