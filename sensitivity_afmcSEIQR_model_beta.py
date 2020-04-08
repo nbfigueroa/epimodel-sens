@@ -81,13 +81,13 @@ sensitivity_test = 1
 
 # infection rate 
 r0           = 2.28      
-beta_mumbai  = r0 / gamma_inv
+beta_AFMC  = r0 / gamma_inv
 
 # Variables for beta samples
 error_perc = 10
 beta_error = error_perc/100
-beta_mean  = beta_mumbai
-beta_sigma = beta_mumbai*(beta_error)
+beta_mean  = beta_AFMC
+beta_sigma = beta_AFMC*(beta_error)
 beta_plus  = beta_mean + beta_sigma
 beta_minus = beta_mean - beta_sigma
 
@@ -101,9 +101,9 @@ I_samples       = np.empty([3, days])
 Q_samples       = np.empty([3, days])
 Re_samples      = np.empty([3, days])
 D_samples       = np.empty([3, days])
-file_extensions  = ["./results/Mumbai_Scenario{scenario:d}".format(scenario=scenario), 
-                    "./results/Mumbai_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=error_perc),
-                    "./results/Mumbai_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=error_perc),]
+file_extensions  = ["./results/AFMC_Scenario{scenario:d}".format(scenario=scenario), 
+                    "./results/AFMC_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=error_perc),
+                    "./results/AFMC_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=error_perc),]
 header = ['beta', 'R0', 'I_42', 'T_42', 'I_70', 'T_70', 'I_90', 'T_90', 'I_120', 'T_120', 't_low', 't_c', 'I_peak', 'T_inf']
 time_checkpoints = [42, 70, 90, 120] 
 
@@ -234,7 +234,7 @@ for ii in range(3):
     ######## Plots Simulation with point estimates of parameters ########
     #####################################################################
 
-    txt_title = r"COVID-19 Mumbai SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
+    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
 
     SEIQRparams    = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
     SEIQRvariables = S, E, I, Q, Re ,D , t
@@ -288,7 +288,7 @@ if do_growth:
     ax1.set_xlabel('Time[days]', fontsize=20)
     ax1.set_ylim(0,4)
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    txt_title = r"COVID-19 Mumbai SEIQR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
+    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
     fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
 
     # Plot of temporal growth rate
@@ -317,8 +317,8 @@ if do_growth:
 
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)
 
-    plt.savefig('./figures/mumbaiSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
-    plt.savefig('./figures/mumbaiSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/AFMCSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/AFMCSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
 
 
 plt.show()

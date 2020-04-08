@@ -19,6 +19,7 @@ N = 1375987036
 I0 = 25
 R0 = 3
 days = 712
+days = 90
 
 #R0 = 2.2, gamma = 1/7 no error
 
@@ -219,9 +220,7 @@ def run_final(beta, inf_period, time_points, values, query_days = [42, 70, 90, 1
     t_low = np.min(t_lows)
     return I_t, T_t, I_peak, T_inf, critical_day, t_low, y
     
-    
-
-        
+            
 if __name__ == '__main__':
 
     ###########################################
@@ -255,7 +254,6 @@ if __name__ == '__main__':
     show_R              = 0
     show_T              = 1    
     plot_superimposed   = 1
-    store_values        = 1
     show_analytic_limit = 0
     
     for scenario, time_points, values in zip(Scenarios, t, v):    
@@ -267,7 +265,7 @@ if __name__ == '__main__':
                             "./results/Michigan_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=int(err*100)),
                             "./results/Michigan_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=int(err*100))]
 
-        filename = os.path.join('results',f'Michigan_Scenario{scenario}.xlsx')
+        filename = os.path.join('results',f'Michigan_Scenario{scenario}_days.xlsx')
         workbook = xlsxwriter.Workbook(filename)
         worksheet = workbook.add_worksheet()
         

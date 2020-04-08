@@ -78,14 +78,14 @@ scenario = 0
 # infection rate 
 r0                  = 2.28      
 beta                = r0 / gamma_inv
-sigma_inv_mumbai    = 5.1
-sigma_inv_mumbai    = 11.5
+# sigma_inv_AFMC    = 5.1
+sigma_inv_AFMC    = 11.5
 
 # Variables for beta samples
 error_perc      = 15
 sigma_inv_error = error_perc/100
-sigma_inv_mean  = sigma_inv_mumbai
-sigma_inv_sigma = sigma_inv_mumbai*(sigma_inv_error)
+sigma_inv_mean  = sigma_inv_AFMC
+sigma_inv_sigma = sigma_inv_AFMC*(sigma_inv_error)
 sigma_inv_plus  = sigma_inv_mean + sigma_inv_sigma
 sigma_inv_minus = sigma_inv_mean - sigma_inv_sigma
 
@@ -98,9 +98,9 @@ I_samples       = np.empty([3, days])
 Q_samples       = np.empty([3, days])
 Re_samples      = np.empty([3, days])
 D_samples       = np.empty([3, days])
-file_extensions  = ["./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error".format(scenario=scenario, error=error_perc), 
-                    "./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error_plus".format(scenario=scenario, error=error_perc),
-                    "./results/Mumbai_Scenario{scenario:d}_sigma{error:d}error_minus".format(scenario=scenario, error=error_perc),]
+file_extensions  = ["./results/AFMC_Scenario{scenario:d}_sigma{error:d}error".format(scenario=scenario, error=error_perc), 
+                    "./results/AFMC_Scenario{scenario:d}_sigma{error:d}error_plus".format(scenario=scenario, error=error_perc),
+                    "./results/AFMC_Scenario{scenario:d}_sigma{error:d}error_minus".format(scenario=scenario, error=error_perc),]
 header = ['sigma', 'R0', 'I_42', 'T_42', 'I_70', 'T_70', 'I_90', 'T_90', 'I_120', 'T_120', 't_low', 't_c', 'I_peak', 'T_inf']
 time_checkpoints = [42, 70, 90, 120] 
 
@@ -232,7 +232,7 @@ for ii in range(3):
     ######## Plots Simulation with point estimates of parameters ########
     #####################################################################
 
-    txt_title = r"COVID-19 Mumbai SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
+    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
 
     SEIQRparams    = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
     SEIQRvariables = S, E, I, Q, Re ,D , t
@@ -248,7 +248,7 @@ if store_values:
 ######## Plots Simulation with point estimates of parameters ########
 #####################################################################
 if plot_superimposed:
-    SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv_mumbai, tau_q_inv, q, N
+    SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv_AFMC, tau_q_inv, q, N
     plot_peaks_all = 0
     Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks_all, x_axis_offset, y_axis_offset, sigma_inv_error
     text_error   = r"$\sigma \pm %1.2f \sigma $"%sigma_inv_error
@@ -287,7 +287,7 @@ if do_growth:
     ax1.set_xlabel('Time[days]', fontsize=20)
     ax1.set_ylim(0,4)
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    txt_title = r"COVID-19 Mumbai SEIQR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
+    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics (N={N:10.0f},$R_0$={R0:1.3f}, $\beta$={beta:1.3f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.3f}, $q$={q:1.3f})"
     fig.suptitle(txt_title.format(N=N, R0=r0, beta= beta, gamma_inv = gamma_inv, sigma_inv = sigma_inv, tau_q_inv = tau_q_inv, q=q),fontsize=15)
 
     # Plot of temporal growth rate
@@ -316,8 +316,8 @@ if do_growth:
 
     fig.set_size_inches(27.5/2, 12.5/2, forward=True)
 
-    plt.savefig('./figures/mumbaiSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
-    plt.savefig('./figures/mumbaiSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/AFMCSIR_growthRates_%i.png'%sim_num, bbox_inches='tight')
+    plt.savefig('./figures/AFMCSIR_growthRates_%i.pdf'%sim_num, bbox_inches='tight')
 
 
 plt.show()
