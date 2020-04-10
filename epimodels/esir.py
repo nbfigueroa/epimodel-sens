@@ -1,6 +1,7 @@
 from .sir import *
 from tqdm import tqdm
 
+
 class eSIR(SIR):
     
     def __init__(self, N, time_points, values, **kwargs):
@@ -39,6 +40,7 @@ class eSIR(SIR):
             return dSdt, dIdt, dRdt
         return ddt
 
+######################################################################################
 def create_plots(model, S,I,R, proportional=False, startdate = 'March 21'):
         #Plot S,I,R populations on the same graph
         if proportional:
@@ -133,3 +135,4 @@ def MC_Mich(n_rollouts):
     I = np.array(I)
     R = np.array(R)
     return r0s, gammas, models, S, I, R
+######################################################################################

@@ -118,24 +118,9 @@ model   = eSIR(N, time_points[scenario], pi_values[scenario], **kwargs)
 S,I,R,t = model.project(days)
 T       = I + R
 
-def determine_betaScaling(t, time_points, values):    
-    if len(time_points) > 0:
-        idx = np.argmin(np.abs(np.array(time_points) - t))
-        closest_time = time_points[idx]
-
-        if closest_time > t:            
-            if idx==0:
-                return 1
-            else:
-                return values[idx-1]
-        else:            
-            return values[idx]
-    else:
-        return 1
-
 pi_t = np.zeros([t.size])
 for tt in range(t.size):
-    pi_t[tt] = determine_betaScaling(tt, time_points[scenario], pi_values[scenario])
+    pi_t[tt] = model.determine_scaling(tt)
 
 print(pi_t)
 print('*********   Results    *********')    
