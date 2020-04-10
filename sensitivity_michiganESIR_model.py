@@ -19,7 +19,7 @@ N = 1375987036
 I0 = 25
 R0 = 3
 days = 712
-days = 90
+# days = 90
 
 #R0 = 2.2, gamma = 1/7 no error
 
@@ -255,6 +255,8 @@ if __name__ == '__main__':
     show_T              = 1    
     plot_superimposed   = 1
     show_analytic_limit = 0
+    scale_offset        = 0.01 
+    title_scenario = [' [Scenario 0: No Intervention]', ' [Scenario 1: Short Lockdown]', ' [Scenario 2: Long Lockdown]']    
     
     for scenario, time_points, values in zip(Scenarios, t, v):    
         ######## Record predictions ########
@@ -309,7 +311,9 @@ if __name__ == '__main__':
             R =  y[2]
             T = I + R
             t = np.arange(0,days+1,1) 
-            txt_title     = r"COVID-19 Michigan ESIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
+
+            txt_title     = r"COVID-19 Michigan SIR Model Dynamic" + title_scenario[scenario]
+            # txt_title     = r"COVID-19 Michigan ESIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
             SIRparams     = scenario, float(r0), beta, gamma_inv, N
             SIRvariables  = S, I, R, T, t
             stor_plots_ii = 0
@@ -333,8 +337,8 @@ if __name__ == '__main__':
             show_T        = 1
             plot_peaks    = 1
             beta_error    = int(err*100)
-            Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
-            text_error    = r"$\beta \pm %1.2f \beta $"%beta_error
+            Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, err, scale_offset
+            text_error    = r"$\beta \pm %1.2f \beta $"%err
             plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, text_error, store_plots, file_extensions[0])
         
         plt.show()

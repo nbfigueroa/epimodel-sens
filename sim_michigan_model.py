@@ -177,8 +177,6 @@ if __name__ == '__main__':
     
     
     
-    
-    
 
         
     #Recreating the UMich report numbers, need to get the posterior mean 

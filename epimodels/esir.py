@@ -15,9 +15,7 @@ class eSIR(SIR):
         if len(self.time_points) > 0:
             idx = np.argmin(np.abs(np.array(self.time_points) - t))
             closest_time = self.time_points[idx]
-            
-            #value = self.values[idx]
-            
+
             if closest_time > t:
                 
                 if idx==0:

@@ -1,7 +1,8 @@
 import numpy as np
-from scipy.integrate import odeint
-import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
+from scipy.integrate  import odeint
+from scipy.integrate  import solve_ivp
+from scipy.optimize   import fsolve
+
 
 class SIR():
 
@@ -9,7 +10,7 @@ class SIR():
 
         #Default kwargs
         self.args = {}
-        self.args['r0'] = 2.65 #reproductive rate
+        self.args['r0'] = 2 #reproductive rate
         self.args['inf_period'] = 4.5 #Infection period
         self.args['I0'] = 1 #Initial infected population
         self.args['R0'] = 0 #Initial immune/recovered population
@@ -29,6 +30,9 @@ class SIR():
     def gamma(self):
         return 1/self.args['inf_period']
 
+    @property
+    def r0(self):
+        return self.args['r0']
 
     def deriv(self):
         def ddt(y,t):
@@ -39,17 +43,38 @@ class SIR():
             return dSdt, dIdt, dRdt
         return ddt
 
-    def project(self, days):
-        #Set initial conditions
-        y0 = (self.N - self.args['I0'] - self.args['R0'], self.args['I0'],self.args['R0'])
+    @staticmethod    
+    def deriv_static(t,y, N, beta, gamma):
+        S, I, R = y
+        dSdt = -beta/N * S * I
+        dIdt = beta/N * S * I  - gamma * I
+        dRdt = gamma * I
+        return dSdt, dIdt, dRdt
 
-        t = np.arange(days)
-        t = np.append(t,days)
+    def project(self, days, solver_type='ode_int', dt = 1):
+
+        # # A grid of time points (in simulation_time)
+        t = np.arange(0, days, dt)
+
+        #Set initial conditions
+        y0 = (self.N - self.args['I0'] - self.args['R0'], self.args['I0'], self.args['R0'])
 
         #Integrate the ODE
-        ode_sol = odeint(self.deriv(), y0, t)
-        S,I,R = ode_sol.T
-        return S,I,R
+        if solver_type == 'ode_int':
+            ode_sol  = odeint(self.deriv(), y0, t)
+            S,I,R    = ode_sol.T
+
+        elif solver_type == 'solve_ivp':
+            ode_sol  = solve_ivp(lambda t, y: SIR.deriv_static(t, y, self.N, self.beta, self.gamma), y0=y0, t_span=[0, days], t_eval=t)
+            t  = ode_sol['t']
+            S  = ode_sol['y'][0]
+            I  = ode_sol['y'][1]
+            R  = ode_sol['y'][2]
+
+        else: 
+            print("INVALID SOLVER TYPE")
+
+        return S, I, R, t
     
     def final_infection(self):
         
@@ -62,5 +87,5 @@ class SIR():
 
 if __name__ == '__main__':
     
-    sir = SIR(10000, 80)
-    S,I,R = sir.project()
+    sir = SIR(10000)
+    S,I,R,t = sir.project(80)
