@@ -128,8 +128,8 @@ def plotInfected_evolution(txt_title, SIRparams, Ivariables, Plotoptions, filena
     fig.set_size_inches(27.5/2, 20.5/2, forward=True)
     
     if store_plots:
-        plt.savefig(filename + "_infected.png", bbox_inches='tight')
-        # plt.savefig(filename + "_infected.pdf", bbox_inches='tight')
+        plt.savefig(filename + "_infected_" + str(T_limit) + ".png", bbox_inches='tight')
+        # plt.savefig(filename + "_infected_" + str(T_limit) + ".pdf", bbox_inches='tight')
 
 
 def getCriticalPointsAfterPeak(I):

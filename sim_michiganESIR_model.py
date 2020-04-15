@@ -28,7 +28,7 @@ if sim_num == 1:
     scenarios       = [0,1,2]
     time_points     = [[],[11,15,21,42],[11,15,21,70]]
     pi_values       = [[],[0.8,0.6,0.2,1],[0.8,0.6,0.2,1]]
-
+    check_points    = np.array([11,15,21,42])
     scenario        = 2
     N               = 1353344709
     days            = round(30.5*10)
@@ -145,7 +145,7 @@ plotSIR_evolution(figure_title, SIRparams, SIRvariables, Plotoptions, file_exten
 if scenario == 0:
     T_limit    = days   # days for infected plot only
 else: 
-    T_limit    = 91   # days for infected plot only
+    T_limit    = 61   # days for infected plot only
 
 number_scaling = 'none'
 
