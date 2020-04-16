@@ -234,8 +234,7 @@ for ii in range(3):
     ######## Plots Simulation with point estimates of parameters ########
     #####################################################################
 
-    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"
-
+    txt_title = r"COVID-19 AFMC SEIQR Model Dynamics [Scenario 0] ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma_inv:1.3f}, 1/$\sigma$={sigma_inv:1.3f}, 1/$\tau_q$={tau_q_inv:1.2f}, $q$={q:1.4f})"    
     SEIQRparams    = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
     SEIQRvariables = S, E, I, Q, Re ,D , t
     plot_all_ii    = 1
@@ -253,6 +252,7 @@ if plot_superimposed:
     SEIQRparams  = scenario, r0, beta, gamma_inv, sigma_inv, tau_q_inv, q, N
     Plotoptions  = plot_all, show_S, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
     text_error   = r"$\beta \pm %1.2f \beta $"%beta_error
+    txt_title     = r"COVID-19 AFMC SEIQR Model Dynamic [Scenario 0: No Intervention]"
     plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_samples, E_samples, I_samples, Q_samples, Re_samples, D_samples, Plotoptions, text_error, store_plots, file_extensions[0])
     
 ###########################################################################
