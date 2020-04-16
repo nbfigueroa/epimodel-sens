@@ -341,7 +341,6 @@ if __name__ == '__main__':
             show_S        = 0
             show_T        = 1
             plot_peaks    = 1
-<<<<<<< HEAD
             beta_error    = err
             Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
             text_error    = r"$\beta \pm %1.2f \beta $"%beta_error
