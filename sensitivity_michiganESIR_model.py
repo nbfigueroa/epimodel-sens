@@ -39,9 +39,9 @@ def run_without_error(r0 = 2.2, inf_period = 7, show_plot = True, verbose = True
     
     
     
-    model = eSIR(N, time_points, values, **kwargs)
-    
-    S,I,R = model.project(days)
+    model = eSIR(N, time_points, values, **kwargs)    
+    S,I,R,t = model.project(days)
+
     if show_plot:
         #plt.figure()
         plt.plot(I)
@@ -172,11 +172,9 @@ def run_without_error_beta(beta, inf_period, time_points, values, show_plot = Tr
     kwargs['I0'] = I0
     kwargs['R0'] = R0
     
-    
-    
     model = eSIR(N, time_points, values, **kwargs)
-    
-    S,I,R = model.project(days)
+    S,I,R,t = model.project(days)    
+    # S,I,R = model.project(days)
     if show_plot:
         #plt.figure()
         plt.plot(I)
@@ -265,12 +263,12 @@ if __name__ == '__main__':
     
     for scenario, time_points, values in zip(Scenarios, t, v):    
         ######## Record predictions ########
-        S_samples       = np.empty([3, days+1])
-        I_samples       = np.empty([3, days+1])
-        R_samples       = np.empty([3, days+1])
-        file_extensions  = ["./results/Michigan_Scenario{scenario:d}".format(scenario=scenario), 
-                            "./results/Michigan_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=int(err*100)),
-                            "./results/Michigan_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=int(err*100))]
+        S_samples       = np.empty([3, days])
+        I_samples       = np.empty([3, days])
+        R_samples       = np.empty([3, days])
+        file_extensions  = ["./results/india/Michigan_Scenario{scenario:d}".format(scenario=scenario), 
+                            "./results/india/Michigan_Scenario{scenario:d}_beta{error:d}error_plus".format(scenario=scenario, error=int(err*100)),
+                            "./results/india/Michigan_Scenario{scenario:d}_beta{error:d}error_minus".format(scenario=scenario, error=int(err*100))]
 
         filename = os.path.join('results',f'Michigan_Scenario{scenario}_days.xlsx')
         workbook = xlsxwriter.Workbook(filename)
@@ -315,7 +313,7 @@ if __name__ == '__main__':
             I =  y[1]
             R =  y[2]
             T = I + R
-            t = np.arange(0,days+1,1) 
+            t = np.arange(0,days,1) 
 
             txt_title     = r"COVID-19 Michigan SIR Model Dynamic" + title_scenario[scenario]
             # txt_title     = r"COVID-19 Michigan ESIR Model Dynamics [Scenario {scenario:d}] ($R_0^e$={R0:1.3f}, $\beta_e$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
@@ -323,7 +321,7 @@ if __name__ == '__main__':
             SIRvariables  = S, I, R, T, t
             stor_plots_ii = 0
             Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
-            plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots, file_extensions[p])
+            # plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots, file_extensions[p])
     
             if plot_superimposed:
                 # Storing run in matrix for post-processing

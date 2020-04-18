@@ -296,7 +296,7 @@ for ii in range(3):
     SIRvariables  = S, I, R, T, t
     store_plots_ii = 0
     Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
-    plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots_ii, file_extensions[ii])
+    # plotSIR_evolution(txt_title, SIRparams, SIRvariables, Plotoptions, store_plots_ii, file_extensions[ii])
 
 
 if store_values:
