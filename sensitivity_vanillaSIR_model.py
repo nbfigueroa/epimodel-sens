@@ -166,8 +166,8 @@ ax01.yaxis.set_tick_params(length=0)
 fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
 fig0.set_size_inches(18.5/2, 12.5/2, forward=True)
 
-plt.savefig('./snaps/vanillaSIR_finalSize_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
-plt.savefig('./snaps/vanillaSIR_finalSize_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_finalSize_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_finalSize_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
 
 ###################################################
 ######## Initial Parameters for Simulation ########
@@ -249,8 +249,8 @@ for spine in ('top', 'right', 'bottom', 'left'):
 fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
 fig.set_size_inches(18.5/2, 12.5/2, forward=True)
 
-plt.savefig('./snaps/vanillaSIR_timeEvolution_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
-plt.savefig('./snaps/vanillaSIR_timeEvolution_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_timeEvolution_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_timeEvolution_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
 
 #################################################################
 ######## Plots Simulation with reproductive/growth rates ########
@@ -361,8 +361,8 @@ ax2.plot(rI_crossing_minus, 0,'ro', markersize=12)
 ax2.text(rI_crossing_minus-10, 0-0.04,str(rI_crossing_minus), fontsize=10, color="r")
 fig.set_size_inches(27.5/2, 12.5/2, forward=True)
 
-plt.savefig('./snaps/vanillaSIR_growthRates_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
-plt.savefig('./snaps/vanillaSIR_growthRates_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_growthRates_%i_beta_%i.png'%(sim_num,error_perc), bbox_inches='tight')
+plt.savefig('./results/vanillaSIR_growthRates_%i_beta_%i.pdf'%(sim_num,error_perc), bbox_inches='tight')
 
 plt.show()
 

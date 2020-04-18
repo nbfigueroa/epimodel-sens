@@ -3,4 +3,3 @@ The file for India has four columns: days since the first case, recovered cases 
 
 The files for China and Italy has two columns: date and number of infected individuals. 
 
-TODO: Need to generate this file from Mexico data.
