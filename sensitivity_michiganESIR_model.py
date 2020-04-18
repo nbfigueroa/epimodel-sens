@@ -18,8 +18,13 @@ N = 1375987036
 # values = [0.8,0.6,0.2, 1]
 I0 = 25
 R0 = 3
+<<<<<<< HEAD
+days = 750
+#days = 90
+=======
 days = 712
 # days = 90
+>>>>>>> 31a5316a9ff06f7c0364db2fda6fa1b1bd8c6ca7
 
 #R0 = 2.2, gamma = 1/7 no error
 
@@ -334,9 +339,9 @@ if __name__ == '__main__':
             show_S        = 0
             show_T        = 1
             plot_peaks    = 1
-            beta_error    = int(err*100)
-            Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, err, scale_offset
-            text_error    = r"$\beta \pm %1.2f \beta $"%err
+            beta_error    = err
+            Plotoptions   = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, beta_error
+            text_error    = r"$\beta \pm %1.2f \beta $"%beta_error
             plotSIR_evolutionErrors(txt_title, SIRparams, S_samples, I_samples, R_samples, Plotoptions, text_error, store_plots, file_extensions[0])
         
         plt.show()
