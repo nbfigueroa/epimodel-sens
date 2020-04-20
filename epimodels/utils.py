@@ -130,6 +130,9 @@ def plotIR_realizations(I_samples, R_samples, **kwargs):
         plt.savefig(kwargs['file_extension'] + "_IRrealizations.png", bbox_inches='tight')
 
 
+    
+    
+
 
 def plotInfected_evolution(Ivariables, Plotoptions, number_scaling = 'million', **kwargs):
     # Unpacking variables
@@ -945,6 +948,214 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, Plotoptio
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')
         # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
+        
+
+def plotSIR_evolutionStochastic2(S_samples, I_samples, R_samples, Plotoptions, text_error, CI = 0.95, **kwargs):
+    scale = 1000000        
+    
+    upper_quantile = 1 - (1-CI)/2
+    lower_quantile = (1-CI)/2
+
+    # S       = S_variables[0,:]
+    # S_plus  = S_variables[1,:]
+    # S_minus = S_variables[2,:]
+    # S_std   = S_variables[3,:]
+
+    # I       = I_variables[0,:]
+    # I_plus  = I_variables[1,:]
+    # I_minus = I_variables[2,:]
+    # I_std   = I_variables[3,:]
+
+    # R       = R_variables[0,:]
+    # R_plus  = R_variables[1,:]
+    # R_minus = R_variables[2,:]
+    # R_std   = R_variables[3,:]
+
+    # T = I + R
+    # T_minus = I_minus+ R_minus
+    # T_plus  = I_plus + R_plus
+    # T_std   = I_std  + R_std
+    
+    S           = np.mean(S_samples, axis=0)
+    S_plus      = np.quantile(S_samples, upper_quantile, axis = 0)
+    S_minus     = np.quantile(S_samples, lower_quantile, axis = 0)
+    
+    I           = np.mean(I_samples, axis = 0)
+    I_plus      = np.quantile(I_samples, upper_quantile, axis = 0)
+    I_minus     = np.quantile(I_samples, lower_quantile, axis = 0)
+    
+    R           = np.mean(R_samples, axis = 0)
+    R_plus      = np.quantile(R_samples, upper_quantile, axis = 0)
+    R_minus     = np.quantile(R_samples, lower_quantile, axis = 0)
+    
+    T_samples   = I_samples + R_samples
+    T           = I + R
+    T_plus      = np.quantile(T_samples, upper_quantile, axis = 0)
+    T_minus     = np.quantile(T_samples, lower_quantile, axis = 0)
+
+    Tf = len(T_plus)
+    t = np.arange(0, Tf, 1)
+
+    # Unpack
+    plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset  = Plotoptions 
+
+    # Unpacking Simulation and Plotting Options    
+    figure_title   = kwargs['figure_title']
+    N              = kwargs['N']
+    r0             = kwargs['r0']
+    gamma          = 1/kwargs['gamma_inv']
+    filename       = kwargs['file_extension']
+    if 'x_tick_names' in kwargs:
+        x_tick_names   = kwargs['x_tick_names']
+        x_tick_numbers = np.arange(0, len(S), kwargs['x_tick_step'])
+    store_plots    = kwargs['store_plots']
+
+    # Plot the data of three separate curves for S(t), I(t) and R(t)
+    fig, ax1 = plt.subplots()
+    fig.suptitle(figure_title,fontsize=25)    
+
+    # Variable evolution
+    if show_S:
+        ax1.plot(t, S_plus/N, 'k--', lw=2, alpha=0.35)
+        ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
+        ax1.plot(t, S_minus/N, 'k--', lw=2, alpha=0.35)
+        # ax1.fill_between(t,(S - S_std)/N,(S + S_std)/N, color="#348ABD", alpha=0.15)
+        ax1.fill_between(t, S_plus/N, S_minus/N, color='k', alpha=0.15)
+
+    ax1.plot(t, I_plus/N, 'r--',  lw=2, alpha=0.25)
+    ax1.plot(t, I/N, 'r', lw=2,   label='Infected Cases')
+    ax1.plot(t, I_minus/N, 'r--', lw=2, alpha=0.25)
+    ax1.fill_between(t,I_plus/N,I_minus/N, color='r', alpha=0.10)
+
+    scenario = 2
+    if show_T:
+        ax1.plot(t, T_plus/N, 'm--',  lw=2, alpha=0.25)
+        ax1.plot(t, T/N, 'm',  lw=2, label='Total Cases')
+        ax1.plot(t, T_minus/N, 'm--',  lw=2, alpha=0.25)
+        ax1.fill_between(t,T_plus/N,T_minus/N, color='m', alpha=0.10)
+
+        total_cases     = T[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        txt1 = "{per:2.4f} million total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(per=total_cases/scale), fontsize=12, color='m')
+
+        total_cases     = T_minus[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        txt1 = "{per:2.4f} million total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, 0.98*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=12, color='m')
+
+        total_cases     = T_plus[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        txt1 = "{per:2.4f} million total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(per=total_cases/scale), fontsize=12, color='m')
+        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+
+        ax1.text(1, 0.5, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+    else:
+        if Tf == 90:
+            if scenario == 1:
+                ax1.text(0.2*Tf, 0.0012, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+            else:
+                ax1.text(0.5*Tf, 0.0000007, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+    
+
+    print('*****   Results    *****')
+    tc =  np.argmax(I)
+    I_tc     = I[tc]
+    print('Peak Instant. Infected = ', I_tc,'by day=', tc)
+
+    T_tc  = T[tc]
+    print('Total Cases when Peak = ', T_tc,'by day=', tc)
+
+    total_cases     = T[-1]
+    print('Total Cases when growth linear = ', total_cases)
+
+    I_tc_plus_idx =  np.argmax(I_plus)
+    I_tc_plus     = I_plus[I_tc_plus_idx]
+    print('Peak Instant. Infected - Error= ', I_tc_plus,'by day=', I_tc_plus_idx)
+
+    I_tc_minus_idx =  np.argmax(I_minus)
+    I_tc_minus     = I_minus[I_tc_minus_idx]
+    print('Peak Instant. Infected + Error= ', I_tc_minus,'by day=', I_tc_minus_idx)
+
+    do_plus = 1; do_minus = 1
+    if abs(tc-I_tc_plus_idx) < 3:
+        do_plus = 0
+    if abs(tc-I_tc_minus_idx) < 3:
+        do_minus = 0
+
+    if plot_peaks:
+        # Plot peak points
+        ax1.plot(tc, I_tc/N,'ro', markersize=8)
+        if do_plus:
+            # Plot peak points
+            ax1.plot(I_tc_plus_idx, I_tc_plus/N,'ro', markersize=8)
+        if do_minus:
+            # Plot peak points
+            ax1.plot(I_tc_minus_idx, I_tc_minus/N,'ro', markersize=8)
+
+        if Tf == 90:
+            if scenario == 2:
+                txt_title = r"Local peak infected: {I_tc:5.5f} by day {peak_days:10.0f} " 
+                ax1.text(tc+ 5, I_tc/N , txt_title.format(I_tc=I_tc, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Local peak infected: {I_tc:5.5f} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx- 30, 0.9*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Local peak infected: {I_tc:5.5f} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx+ 5,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            else:
+                txt_title = r"Peak infected: {I_tc:5.5f}mill. by day {peak_days:10.0f} " 
+                ax1.text(tc- 40, I_tc/N , txt_title.format(I_tc=I_tc/scale, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Peak infected: {I_tc:5.5f}mill. by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx- 20, I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Peak infected: {I_tc:5.5f}mill. by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx -30,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+
+        else:
+            # Adjust automatically
+            txt_title = r"Peak infected: {I_tc:5.5f}million by day {peak_days:10.0f} " 
+            ax1.text(tc+2, (1)*I_tc/N , txt_title.format(I_tc=I_tc/scale, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            if do_plus:        
+                txt_title = r"Peak infected: {I_tc:5.5f}million by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            if do_minus:
+                txt_title = r"Peak infected: {I_tc:5.5f}million by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+
+        if plot_all == 1:
+            ax1.plot(tc, T_tc/N,'mo', markersize=8)
+            txt_title2 = r"Total Cases: {peak_total:5.5f}million by day {peak_days:10.0f} " 
+            ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
+
+
+    ax1.set_xlabel('Time /days', fontsize=30)
+    ax1.set_ylabel('Fraction of Population', fontsize=30)
+    if 'x_tick_names' in kwargs:
+        ax1.set_xticks(x_tick_numbers)
+        ax1.set_xticklabels(x_tick_names)
+    
+    legend = ax1.legend(fontsize=20, loc='center right')
+    legend.get_frame().set_alpha(0.5)
+    for spine in ('top', 'right', 'bottom', 'left'):
+        ax1.spines[spine].set_visible(True)
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(20) 
+    for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(20) 
+    
+    # plt.grid(b=True, which='major', c='w', lw=2, ls='-')
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+
+    if store_plots:
+        plt.savefig(filename + ".png", bbox_inches='tight')
+        # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
+        
+
+
 
 
 
