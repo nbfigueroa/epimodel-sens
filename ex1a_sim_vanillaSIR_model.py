@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from   matplotlib import rc
 
 # For custom classes and functions
-from epimodels.sir   import *
-from epimodels.utils import *
-from epimodels.sims  import *
+from epimodels.sir    import *
+from epimodels.utils  import *
+from epimodels.plots  import *
+from epimodels.sims   import *
 
 
 def run_SIR_sim(**kwargs):
@@ -45,18 +46,11 @@ def plot_simulation(S, I, R, T, t, **kwargs):
     #################################################
     x_axis_offset           = 0.375*kwargs['days']
     y_axis_offset           = 0.003
-    plot_all                = 1
-    show_S                  = 1
-    show_R                  = 0
-    plot_peaks              = 1
-    show_T                  = 1
-    scale_offset            = 0.025 
-    show_analytic_limit     = 0
+    plot_all = 1; show_S = 1; show_R = 0; plot_peaks = 1; show_T = 1; scale_offset = 0.025; show_analytic_limit = 0
 
     SIRvariables   = S, I, R, T, t
-    Plotoptions    = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset
-    number_scaling = 'million'    
-    plotSIR_evolution(SIRvariables, Plotoptions, number_scaling, **kwargs)
+    Plotoptions    = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset  
+    plotSIR_evolution(SIRvariables, Plotoptions, **kwargs)
 
     if kwargs['do_growth']:
         tc_Reff, Rt_tc, tc_growth, rI_tc = plotSIR_growth((S, t), **kwargs)  
@@ -65,7 +59,7 @@ def plot_simulation(S, I, R, T, t, **kwargs):
     x_axis_offset  = -60
     Ivariables     = I, t
     Plotoptions    = T_limit, plot_peaks, x_axis_offset, y_axis_offset
-    plotInfected_evolution(Ivariables, Plotoptions, number_scaling, **kwargs)
+    plotInfected_evolution(Ivariables, Plotoptions, **kwargs)
     show_analytic_limit     = 1
     if show_analytic_limit:
         plotSIR_finalEpidemicR0(**kwargs)
@@ -86,7 +80,7 @@ def main():
         sim_num = 4  --> Yucatan case study
         sim_num = 5  --> Primer case study
     '''
-    sim_num    = 5;
+    sim_num    = 2;
     sim_kwargs = loadSimulationParams(sim_num, 0)
 
     #####################################################
@@ -95,7 +89,7 @@ def main():
     S,I,R,T,t = run_SIR_sim(**sim_kwargs)
 
     print('*********   Results    *********')    
-    tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)
+    tc, _, _, _, _ = getCriticalPointsAfterPeak(I)
     T_tc  = T[tc]
     print('Total Cases @ Peak = ', T_tc,'by day=', tc)
     total_infected     = I[-1]

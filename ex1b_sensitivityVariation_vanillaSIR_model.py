@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from   matplotlib import rc
 
 # For custom classes and functions
-from epimodels.sir   import *
-from epimodels.utils import *
-from epimodels.sims  import *
+from epimodels.sir    import *
+from epimodels.utils  import *
+from epimodels.plots  import *
+from epimodels.sims   import *
 
 
 def run_SIR(**kwargs):
@@ -78,7 +79,7 @@ def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
     ##############################################################
     x_axis_offset       = round(kwargs['days']*0.4)
     y_axis_offset       = 0.0000000003 
-    plot_all            = 1; plot_peaks = 1; show_S = 1; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
+    plot_all            = 1; plot_peaks = 1; show_S = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
     Plotoptions         = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset, scenario
     plotSIR_evolutionErrors_new(S_samples, I_samples, R_samples, Plotoptions, text_error, **kwargs)    
 
@@ -95,7 +96,7 @@ def main():
         sim_num = 4  --> Yucatan case study
         sim_num = 5  --> Primer case study
     '''
-    sim_num    = 5; scenario   = 0
+    sim_num    = 2; scenario   = 0
     sim_kwargs             = loadSimulationParams(sim_num, scenario, plot_data = 0)
     # Need to get rid of this variable here/..
     sim_kwargs['scenario'] = scenario
