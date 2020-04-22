@@ -101,7 +101,6 @@ def plotCriticalPointsStats(I_samples, R_samples, **kwargs):
 
     count, bins, ignored = ax1.hist(Ipeak_samples, bin_size, density=True, color='g', alpha = 0.35)
     ax1.plot([Ipeak_bar[0]]*100,np.linspace(0,count[np.argmax(count)], 100),'g', lw=2,label=r"mean[$I_{peak}$]")
-    ax1.axvplot([Ipeak_bar[0]]*100,np.linspace(0,count[np.argmax(count)], 100),'g', lw=2,label=r"mean[$I_{peak}$]")
     ax1.plot([Ipeak_med[0]]*100,np.linspace(0,count[np.argmax(count)], 100),'g--', lw=2,label=r"med[$I_{peak}$]")
     ax1.set_title(r"Peak Infectedes $I_{peak}$", fontsize=20)
     ax1.grid(True, alpha=0.3)
