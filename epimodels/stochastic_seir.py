@@ -4,6 +4,7 @@ import scipy.stats as stats
 from scipy.integrate  import odeint
 from sims import *
 import numpy as np
+from tqdm import tqdm
 
 class StochasticSEIR():
     
@@ -16,7 +17,7 @@ class StochasticSEIR():
         self.N = N #The default value only computes proportional prevalence
         
         # Load the default distribution parameters
-        sim_kwargs             = loadSimulationParams(5, 0, plot_data = 0)
+        sim_kwargs = loadSimulationParams(5, 0, plot_data = 0)
         text_error, prob_params, _ext = getSIRTestingParams(3, 'gamma',**sim_kwargs)
         
         # Generate the default distributions for beta
@@ -102,7 +103,7 @@ class StochasticSEIR():
         return (S,E,I,R), samples
         
     
-    def project(self, days, samples = 10000, dt = 1):
+    def project(self, days, samples = 10000, dt = 1, progbar = True):
         
         t = np.arange(0, days)
         S_samples = np.empty((samples, days))
@@ -111,7 +112,7 @@ class StochasticSEIR():
         R_samples = np.empty((samples, days))
         param_samples = []
         
-        for i in range(samples):
+        for i in (tqdm(range(samples)) if progbar else range(samples)):
             (S,E,I,R), sample = self.rollout(days, dt)
             S_samples[i,:] = S
             E_samples[i,:] = E
@@ -127,4 +128,4 @@ class StochasticSEIR():
 if __name__ == '__main__':
     
     model = StochasticSEIR()
-    traces, samples = model.project(30)
+    traces, samples = model.project(200, progbar = False)
