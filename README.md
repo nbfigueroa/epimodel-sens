@@ -1,6 +1,6 @@
-## EpiSens: Sensitivity Analysis of Compartmental Epidemic Models
+# EpiSens: Sensitivity Analysis of Compartmental Epidemic Models
 
-### Description
+## Description
 Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well as novel extensions to such models used for the COVID-19 pandemic (Cambridge & Michigan model). The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. 
 
 To make sense of this, in this repo we implement standard models, simple extensions and more complex extensions (further compartments and stochastic estimates) and apply sensitivity analysis techniques to understand what drives differences across models and how sensitive they are to parameter estimates.
@@ -30,21 +30,22 @@ To make sense of this, in this repo we implement standard models, simple extensi
   * **Model type:** An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period. The analysis considers hospital and ICU capacity.
   * **Dataset:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. 
   * **References:** Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
-  
-Other known models being used by governments/media for COVID-19:
- * CDDEP model (agent/Individual-based model on IndiaSIM)
- * Imperial College model (Stochastic agent/Individual-based model)
- * Oxford study (SEIR with Bayesian estimates)
 
-### Estimation and Extrapolation Techniques
+
+### Parameter Estimation and Extrapolation Techniques
 * Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
 
+## Installation
 
-### Contact
+
+## Usage
+
+
+## Contact
 Contributors: Nadia Figueroa and Ankit Shah.
 Advisors: David Kaiser and Julie Shah.
 
-### Publications
+## Publications
 
 
 
