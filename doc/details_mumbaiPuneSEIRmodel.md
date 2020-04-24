@@ -1,3 +1,8 @@
+### AFMC model
+  * **Model type:** An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period. The analysis considers hospital and ICU capacity.
+  * **Dataset:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. 
+  * **References:** Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
+
 Implementation of MumbaiPune model (An SEIR model with Quarantine compartment):
 
 Folowing are the values used to run our simulations:
