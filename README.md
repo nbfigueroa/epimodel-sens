@@ -6,14 +6,14 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 * SEIR model:
 
-* extended SIR (eSIR) model: time-varying beta (to simulate social distancing protocols/measures)
+* extended SIR (eSIR) model: Standard SIR model with a time-varying beta (transmission rate) which can be used to assess the impact of social distancing (non-pharma interventions) controls. This is implemented by scaling a nominal beta value with a time varying function pi(t), hence, beta(t) = beta_0pi(t)
 
-* extended SEIR (eSEIR) model: time-varying beta (to simulate social distancing protocols/measures)
+* extended SEIR (eSEIR) model: Standard SEIR model with time-varying beta(t) as described above.
 
-* Cambridge model: An extended SIR model that includes age and social contact structure. It can assess the impact of social distancing, predicts 21-day lockdown is not enough to prevent resurgence in virus spread. The model has been extended to SEIR form.
+* Cambridge model: A structured SIR model that includes age and social contact structure. It can assess the impact of social distancing (non-pharma interventions) controls by modifying the contact structures. The model has been extended to SEIR form.
   * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), Paper found in [arxiv-link](https://arxiv.org/pdf/2003.12055.pdf), code implemented in Python found in [github-link](https://github.com/rajeshrinet/pyross).
 
-* Michigan model: An extended SIR that is formulated as stochastic state-space model with time-varying transmission rate. Offers two types of models, one with quarantine and one without.
+* Michigan model: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without.
   * **Details:** Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. Does not justify why particular growth rate scaling is used for particular intervention strategies. Code implemented in R. 
 
 ### Parameter Estimation and Extrapolation Techniques
