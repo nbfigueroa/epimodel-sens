@@ -40,7 +40,7 @@ To make sense of this, in this repo we implement standard models, simple extensi
 
 
 ## Contact
-Contributors: Nadia Figueroa and Ankit Shah.
+Contributors: Nadia Figueroa and Ankit Shah.  
 Advisors: David Kaiser and Julie Shah.
 
 ## Publications
