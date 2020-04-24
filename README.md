@@ -28,12 +28,8 @@ Repository for code used to evaluate standard compartmental epidemic models (SIR
   * **Dataset:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. 
   * **References:** Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
   
-
-
-Other known models being used by other governments/media:
- * CDDEP (aka Johns Hopkins) model (will not evaluate due to lack of transparency)
-   * Don't know model structure yet
-   * Presumably uses CCSE Johns Hopkins data which we have access to.
+Other known models being used by governments/media for COVID-19:
+ * CDDEP model (agent/Individual-based model on IndiaSIM)
  * Imperial College model (Stochastic agent/Individual-based model)
  * Oxford study (SEIR with Bayesian estimates)
 
