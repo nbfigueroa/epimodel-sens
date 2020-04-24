@@ -12,8 +12,8 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
   * *Cambridge SIR model*: An age and social-contact structured SIR model. It can assess the impact of social distancing (non-pharma interventions) controls by modifying the contact structures.
     * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), [paper](https://arxiv.org/pdf/2003.12055.pdf) and [code](https://github.com/rajeshrinet/pyross).
 
-  * *Michigan SIR model*: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without.
-    * **Details:** Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. Does not justify why particular growth rate scaling is used for particular intervention strategies. Code implemented in R. 
+  * *Michigan eSIR model*: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without.
+    * **Details:** Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. Does not justify why particular growth rate scaling is used for particular intervention strategies. [paper]( https://doi.org/10.1101/2020.02.29.20029421) and [code](https://github.com/lilywang1988/eSIR).
 
 **SEIR (Susceptible-Exposed-Infected-Recovered) type**
   * *vanilla SEIR model*:
