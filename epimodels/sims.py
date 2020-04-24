@@ -91,10 +91,9 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1):
         figure_title    = figure_title.format(country=country, R0=float(r0), beta= beta, gamma = gamma_inv)
 
 
-    file_extension  = "./results/{country_dir}/VanillaSIR_Scenario{scenario:d}_{country}_{days:d}".format(country_dir= country.lower(), scenario=scenario, country= country, days = days)    
-    store_plots         = 1
-    do_growth           = 1
+    # file_extension  = "./results/{country_dir}/VanillaSIR_Scenario{scenario:d}_{country}_{days:d}".format(country_dir= country.lower(), scenario=scenario, country= country, days = days)    
 
+    # Create simulation arguments dictionary with keywords
     sim_kwargs = {}
     sim_kwargs['N']                   = N
     sim_kwargs['days']                = days
@@ -103,15 +102,15 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1):
     sim_kwargs['gamma_inv']           = gamma_inv
     sim_kwargs['I0']                  = I0
     sim_kwargs['R0']                  = R0
-    sim_kwargs['file_extension']      = file_extension
+    sim_kwargs['file_extension']      = "./results/{country_dir}/VanillaSIR_Scenario{scenario:d}_{country}_{days:d}".format(country_dir= country.lower(), scenario=scenario, country= country, days = days)    
     sim_kwargs['figure_title']        = figure_title
+    sim_kwargs['number_scaling']      = number_scaling    
+    sim_kwargs['Infected']            = Infected
+    sim_kwargs['store_plots']         = 1
+    sim_kwargs['do_growth']           = 1
     if len(x_tick_names) > 0:
         sim_kwargs['x_tick_names']    = x_tick_names
         sim_kwargs['x_tick_step']     = x_tick_step
-    sim_kwargs['number_scaling']      = number_scaling    
-    sim_kwargs['Infected']            = Infected
-    sim_kwargs['store_plots']         = store_plots
-    sim_kwargs['do_growth']           = do_growth
 
     return sim_kwargs
 
@@ -258,4 +257,4 @@ def getSIRTestingParams(test_num, prob_type,**sim_kwargs):
         text_error  =  r"$\beta \sim Log-\mathcal{N}(\bar{\beta},%2.3f)$"%beta_std + "\n" +  r"$\gamma^{-1} \sim Log-\mathcal{N}(\gamma^{-1},%2.3f)$"%gamma_inv_std
         prob_params = (prob_type, beta_mean, beta_std, gamma_inv_mean, gamma_inv_std) 
     
-    return text_error, prob_params, _ext
+    return prob_params, (text_error, _ext)

@@ -21,7 +21,6 @@ def unpack_simulationOptions():
     # This function will unpack all plotting./simulation arguments
     return 1
 
-
 def plotIT_realizations(I_samples, R_samples, **kwargs):
 
     # Compute random id's to plot realizations
@@ -70,11 +69,10 @@ def plotIT_realizations(I_samples, R_samples, **kwargs):
 
 def plotCriticalPointsStats(I_samples, R_samples, **kwargs):
 
-
     tc_samples, Ipeak_samples, Tend_samples = getCriticalPointsStats(I_samples, R_samples)
 
     # Plot histograms of t_c, I_peak and T_end
-    bin_size = 30    
+    bin_size = 10    
     fig, (ax0,ax1,ax2) = plt.subplots(1,3, constrained_layout=True)
 
     ### Histogram and stats for t_c
@@ -93,7 +91,6 @@ def plotCriticalPointsStats(I_samples, R_samples, **kwargs):
         tick.label.set_fontsize(15) 
     for tick in ax0.yaxis.get_major_ticks():
             tick.label.set_fontsize(15) 
-
 
     ### Histogram and stats for t_c
     Ipeak_bar, Ipeak_med, Ipeak_std, Ipeak_upper, Ipeak_lower = computeStats(Ipeak_samples, bound_type='Quantiles')
@@ -764,7 +761,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
 
 
-def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variables, Plotoptions, text_error, **kwargs):    
+def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variables, Plotoptions, **kwargs):    
 
     S       = S_variables[0,:]
     S_med   = S_variables[1,:]
@@ -798,10 +795,16 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     r0             = kwargs['r0']
     gamma          = 1/kwargs['gamma_inv']
     filename       = kwargs['file_extension']
+    store_plots    = kwargs['store_plots']
+
     if 'x_tick_names' in kwargs:
         x_tick_names   = kwargs['x_tick_names']
         x_tick_numbers = np.arange(0, len(S), kwargs['x_tick_step'])
-    store_plots    = kwargs['store_plots']
+    
+    if 'text_error' in kwargs:
+        text_error = kwargs['text_error']
+    else:
+        text_error = ''
 
     if 'number_scaling' in kwargs:
         number_scaling = kwargs['number_scaling']

@@ -60,13 +60,12 @@ def plot_simulation(S, I, R, T, t, **kwargs):
     Ivariables     = I, t
     Plotoptions    = T_limit, plot_peaks, x_axis_offset, y_axis_offset
     plotInfected_evolution(Ivariables, Plotoptions, **kwargs)
-    show_analytic_limit     = 1
+    show_analytic_limit  = 1
     if show_analytic_limit:
         plotSIR_finalEpidemicR0(**kwargs)
 
     # Show all the plots of chosen
     plt.show()
-
 
 
 def main():    

@@ -3,6 +3,8 @@ import numpy  as np
 import pandas as pd 
 from   scipy.optimize import fsolve
 from   scipy.signal   import find_peaks
+from   scipy          import stats
+from   scipy.stats    import gamma as gamma_dist
 
 import matplotlib.pyplot as plt
 from   matplotlib import rc
@@ -145,8 +147,14 @@ def getCriticalPointsStats(I_samples, R_samples):
     Ipeak_samples    = np.empty([n_samples, 1])
     Tend_samples     = np.empty([n_samples, 1])
     
+    # TODO: Vectorize
     for ii in range(n_samples):
         tc, _             = find_peaks(I_samples[ii,:], distance=1)
+        # tc, _             = np.argmax(I_samples[ii,:])
+
+        if tc.size == 0:
+            tc = 0
+
         tc_samples[ii]    = tc
         Ipeak_samples[ii] = I_samples[ii,tc]
         Tend_samples[ii]  = T_samples[ii,n_days-1]
@@ -175,6 +183,7 @@ def computeStats(X, bound_type='CI'):
            
     return X_bar, X_med, X_std, X_upper, X_lower
 
+
 def gatherMCstats(S_samples, I_samples, R_samples, bound_type='CI'):    
     '''
         Gather stats from MC simulations  
@@ -191,3 +200,90 @@ def gatherMCstats(S_samples, I_samples, R_samples, bound_type='CI'):
     R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower))    
     T_stats          = np.vstack((T_mean, T_med, T_upper, T_lower))    
     return S_stats, I_stats, R_stats, T_stats
+
+
+def printMeanResults(I_stats, R_stats):    
+    print('*********   MEAN Results    *********')    
+    I_mean = I_stats[0,:]
+    R_mean = R_stats[0,:]
+    T_mean = I_mean  + R_mean
+    tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I_mean)
+    T_tc  = T_mean[tc]
+    print('Total Cases @ Peak = ', T_tc,'by day=', tc)
+    total_infected     = I_mean[-1]
+    print('Infected @ t(end) = ', total_infected)
+    total_cases     = T_mean[-1]
+    print('Total Cases @ t(end) = ', total_cases)
+
+
+def sample_SIRparam_distributions(*prob_params):
+    '''
+        Sample beta and gamma_inv from selected distributions
+    '''
+    # Sample from Uniform Distributions        
+    if prob_params[0] == 'uniform':        
+        if prob_params[1] == prob_params[2]:
+            beta = prob_params[1]
+        else:
+            beta = np.random.uniform(prob_params[1],prob_params[2])
+        if prob_params[3] == prob_params[4]:
+            gamma_inv = prob_params[3]
+        else:
+            gamma_inv = np.random.uniform(prob_params[3],prob_params[4])
+
+    # Sample from Gaussian Distributions        
+    if prob_params[0] == 'gaussian':        
+        beta_mean       = prob_params[1]
+        beta_std        = prob_params[2]
+        gamma_inv_mean  = prob_params[3]
+        gamma_inv_std   = prob_params[4]
+        
+        # Sample from Gaussian Distributions
+        beta = 0
+        while beta < 0.02:
+            beta            = np.random.normal(beta_mean, beta_std)
+        gamma_inv = 0    
+        while gamma_inv < 0.1:
+            gamma_inv       = np.random.normal(gamma_inv_mean, gamma_inv_std)
+
+    # Sample from Gamma Distributions        
+    if prob_params[0] == 'gamma':        
+        beta_loc        = prob_params[1]
+        beta_shape      = prob_params[2]
+        beta_scale      = prob_params[3]
+        gamma_inv_loc   = prob_params[4]
+        gamma_inv_shape = prob_params[5]
+        gamma_inv_scale = prob_params[6]
+
+        # Sample from Gamma Distributions
+        if beta_scale == 0:
+            beta = beta_loc
+        else:        
+            beta_dist      = gamma_dist(beta_shape, beta_loc, beta_scale)
+            beta           = beta_dist.rvs(1)[0]
+        if gamma_inv_scale == 0:
+            gamma_inv = gamma_inv_loc
+        else:            
+            gamma_inv_dist = gamma_dist(gamma_inv_shape, gamma_inv_loc, gamma_inv_scale)
+            gamma_inv      = gamma_inv_dist.rvs(1)[0]
+
+    # Sample from LogNormal Distributions        
+    if prob_params[0] == 'log-normal':
+        beta_mean       = prob_params[1]
+        beta_std        = prob_params[2]
+        gamma_inv_mean  = prob_params[3]
+        gamma_inv_std   = prob_params[4]
+
+        # Sample from LogNormal if std not 0
+        if beta_std == 0:
+            beta = beta_mean
+        else:  
+            beta  = np.random.lognormal(beta_mean,beta_std)
+
+        # Sample from LogNormal if std not 0
+        if gamma_inv_std == 0:
+            gamma_inv = gamma_inv_mean
+        else:  
+            gamma_inv = np.random.lognormal(gamma_inv_mean, gamma_inv_std)
+
+    return beta, gamma_inv

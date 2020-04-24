@@ -20,7 +20,6 @@ class SIR():
             self.args[key] = kwargs[key]
 
         self.N = N
-        #self.days = days
 
     @property
     def beta(self):
@@ -74,7 +73,7 @@ class SIR():
         else: 
             print("INVALID SOLVER TYPE")
 
-        return S, I, R, t
+        return S, I, R
     
     def final_infection(self):
         
@@ -87,5 +86,5 @@ class SIR():
 
 if __name__ == '__main__':
     
-    sir = SIR(10000)
-    S,I,R,t = sir.project(80)
+    sir   = SIR(N = 10000)
+    S,I,R = sir.project(days = 80)
