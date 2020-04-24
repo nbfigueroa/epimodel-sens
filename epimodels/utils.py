@@ -149,12 +149,13 @@ def getCriticalPointsStats(I_samples, R_samples):
     
     # TODO: Vectorize
     for ii in range(n_samples):
-        tc, _             = find_peaks(I_samples[ii,:], distance=1)
+        tc_, _             = find_peaks(I_samples[ii,:], distance=1)
         # tc, _             = np.argmax(I_samples[ii,:])
 
-        if tc.size == 0:
+        if tc_.size == 0:
             tc = 0
-
+        else:
+            tc = tc_[0]   
         tc_samples[ii]    = tc
         Ipeak_samples[ii] = I_samples[ii,tc]
         Tend_samples[ii]  = T_samples[ii,n_days-1]

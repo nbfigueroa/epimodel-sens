@@ -35,9 +35,9 @@ def run_SIR_sim(**kwargs):
     model_kwargs['R0']         = kwargs['R0']
 
     model   = SIR(N,**model_kwargs)
-    S,I,R,t = model.project(days,'ode_int')
+    S,I,R   = model.project(days,'ode_int')
     T       = I + R    
-    return S,I,R,T,t
+    return S,I,R,T
 
 
 def plot_simulation(S, I, R, T, t, **kwargs):
@@ -48,7 +48,7 @@ def plot_simulation(S, I, R, T, t, **kwargs):
     y_axis_offset           = 0.003
     plot_all = 1; show_S = 1; show_R = 0; plot_peaks = 1; show_T = 1; scale_offset = 0.025; show_analytic_limit = 0
 
-    SIRvariables   = S, I, R, T, t
+    SIRvariables   = S, I, R, T, np.arange(0,kwargs['days'])
     Plotoptions    = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset  
     plotSIR_evolution(SIRvariables, Plotoptions, **kwargs)
 

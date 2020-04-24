@@ -8,48 +8,75 @@ from epimodels.utils import *
 from epimodels.sims import *
 
 
-def set_distribution_params(*prob_params):
+# def set_distribution_params(*prob_params):
 
-    # Sample from Gamma Distributions        
-    if prob_params[0] == 'gamma':   
-        beta_loc        = prob_params[1]
-        beta_shape      = prob_params[2]
-        beta_scale      = prob_params[3]
-        gamma_inv_loc   = prob_params[4]
-        gamma_inv_shape = prob_params[5]
-        gamma_inv_scale = prob_params[6]
+#     # Sample from Gamma Distributions        
+#     if prob_params[0] == 'gamma':   
+#         beta_loc        = prob_params[1]
+#         beta_shape      = prob_params[2]
+#         beta_scale      = prob_params[3]
+#         gamma_inv_loc   = prob_params[4]
+#         gamma_inv_shape = prob_params[5]
+#         gamma_inv_scale = prob_params[6]
         
 
-        if beta_scale == 0:
-            beta_dist      = stats.norm(loc = beta_loc, scale = beta_scale)
-        else:        
-            beta_dist      = stats.gamma(a = beta_shape, loc = beta_loc, scale = beta_scale)
+#         if beta_scale == 0:
+#             beta_dist      = stats.norm(loc = beta_loc, scale = beta_scale)
+#         else:        
+#             beta_dist      = stats.gamma(a = beta_shape, loc = beta_loc, scale = beta_scale)
         
-        if gamma_inv_scale == 0:
-            gamma_inv_dist = stats.norm(loc = gamma_inv_loc, scale = gamma_inv_scale)
-        else:    
-            gamma_inv_dist = stats.gamma(a = gamma_inv_shape, loc = gamma_inv_loc, scale = gamma_inv_scale)
+#         if gamma_inv_scale == 0:
+#             gamma_inv_dist = stats.norm(loc = gamma_inv_loc, scale = gamma_inv_scale)
+#         else:    
+#             gamma_inv_dist = stats.gamma(a = gamma_inv_shape, loc = gamma_inv_loc, scale = gamma_inv_scale)
 
-    # Sample from LogNormal Distributions        
-    if prob_params[0] == 'log-normal':
-        beta_mean       = prob_params[1]
-        beta_std        = prob_params[2]
-        gamma_inv_mean  = prob_params[3]
-        gamma_inv_std   = prob_params[4]
+#     # Sample from LogNormal Distributions        
+#     if prob_params[0] == 'log-normal':
+#         beta_mean       = prob_params[1]
+#         beta_std        = prob_params[2]
+#         gamma_inv_mean  = prob_params[3]
+#         gamma_inv_std   = prob_params[4]
 
 
-        if beta_std == 0:
-            beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
-        else:  
-            beta_dist  = stats.lognorm(scale = np.exp(beta_mean),s = beta_std)
+#         if beta_std == 0:
+#             beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
+#         else:  
+#             beta_dist  = stats.lognorm(scale = np.exp(beta_mean),s = beta_std)
 
-        # Sample from LogNormal if std not 0
-        if gamma_inv_std == 0:
-            gamma_inv_dist = stats.norm(loc = gamma_inv_loc, scale = gamma_inv_scale)
-        else:  
-            gamma_inv_dist = stats.lognorm(scale = np.exp(gamma_inv_mean), s = gamma_inv_std)        
+#         # Sample from LogNormal if std not 0
+#         if gamma_inv_std == 0:
+#             gamma_inv_dist = stats.norm(loc = gamma_inv_mean, scale = gamma_inv_std)
+#         else:  
+#             gamma_inv_dist = stats.lognorm(scale = np.exp(gamma_inv_mean), s = gamma_inv_std)        
 
-    return beta_dist, gamma_inv_dist
+
+#     # Sample from Gaussian Distributions        
+#     if prob_params[0] == 'gaussian':
+#         beta_mean       = prob_params[1]
+#         beta_std        = prob_params[2]
+#         gamma_inv_mean  = prob_params[3]
+#         gamma_inv_std   = prob_params[4]
+        
+#         # Sample from Gaussian Distributions
+#         beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
+#         gamma_inv_dist  = stats.norm(loc = gamma_inv_mean, scale = gamma_inv_std)
+
+
+
+#     # Sample from Uniform Distributions        
+#     if prob_params[0] == 'uniform':        
+#         if prob_params[1] == prob_params[2]:
+#             beta_dist = stats.norm(loc = prob_params[1], scale = 0)
+#         else:
+#             beta_dist = stats.uniform(loc = prob_params[1], scale = prob_params[2] - prob_params[1])
+
+#         if prob_params[3] == prob_params[4]:
+#             gamma_inv_dist = stats.norm(loc = prob_params[3], scale = 0)
+#         else:
+#             gamma_inv_dist = stats.uniform(loc = prob_params[3], scale = prob_params[4] - prob_params[3])
+
+
+#     return beta_dist, gamma_inv_dist
 
 
 class StochasticSIR():
@@ -71,7 +98,76 @@ class StochasticSIR():
             prob_params, _      = getSIRTestingParams(3, 'gamma',**sim_init_cond)
 
         # Set input parameter distributions
-        self.beta_dist, self.gamma_inv_dist = set_distribution_params(*prob_params)
+        self.beta_dist, self.gamma_inv_dist = self.set_distribution_params(*prob_params)
+
+
+    def set_distribution_params(*prob_params):
+
+        # Sample from Gamma Distributions        
+        if prob_params[1] == 'gamma':   
+            beta_loc        = prob_params[2]
+            beta_shape      = prob_params[3]
+            beta_scale      = prob_params[4]
+            gamma_inv_loc   = prob_params[5]
+            gamma_inv_shape = prob_params[6]
+            gamma_inv_scale = prob_params[7]
+            
+            if beta_scale == 0:
+                beta_dist      = stats.norm(loc = beta_loc, scale = beta_scale)
+            else:        
+                beta_dist      = stats.gamma(a = beta_shape, loc = beta_loc, scale = beta_scale)
+            
+            if gamma_inv_scale == 0:
+                gamma_inv_dist = stats.norm(loc = gamma_inv_loc, scale = gamma_inv_scale)
+            else:    
+                gamma_inv_dist = stats.gamma(a = gamma_inv_shape, loc = gamma_inv_loc, scale = gamma_inv_scale)
+
+        # Sample from LogNormal Distributions        
+        if prob_params[1] == 'log-normal':
+            beta_mean       = prob_params[2]
+            beta_std        = prob_params[3]
+            gamma_inv_mean  = prob_params[4]
+            gamma_inv_std   = prob_params[5]
+
+
+            if beta_std == 0:
+                beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
+            else:  
+                beta_dist  = stats.lognorm(scale = np.exp(beta_mean),s = beta_std)
+
+            # Sample from LogNormal if std not 0
+            if gamma_inv_std == 0:
+                gamma_inv_dist = stats.norm(loc = gamma_inv_mean, scale = gamma_inv_std)
+            else:  
+                gamma_inv_dist = stats.lognorm(scale = np.exp(gamma_inv_mean), s = gamma_inv_std)        
+
+
+        # Sample from Gaussian Distributions        
+        if prob_params[1] == 'gaussian':
+            beta_mean       = prob_params[2]
+            beta_std        = prob_params[3]
+            gamma_inv_mean  = prob_params[4]
+            gamma_inv_std   = prob_params[5]
+            
+            # Sample from Gaussian Distributions
+            beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
+            gamma_inv_dist  = stats.norm(loc = gamma_inv_mean, scale = gamma_inv_std)
+
+
+        # Sample from Uniform Distributions        
+        if prob_params[1] == 'uniform':        
+            if prob_params[2] == prob_params[3]:
+                beta_dist = stats.norm(loc = prob_params[2], scale = 0)
+            else:
+                beta_dist = stats.uniform(loc = prob_params[2], scale = prob_params[3] - prob_params[2])
+
+            if prob_params[4] == prob_params[5]:
+                gamma_inv_dist = stats.norm(loc = prob_params[4], scale = 0)
+            else:
+                gamma_inv_dist = stats.uniform(loc = prob_params[4], scale = prob_params[5] - prob_params[4])
+
+
+        return beta_dist, gamma_inv_dist
 
     
     def deriv(self, beta, gamma):
@@ -88,12 +184,18 @@ class StochasticSIR():
         samples = {}
         
         if isinstance(self.beta_dist, stats._distn_infrastructure.rv_frozen):
-            samples['beta'] = self.beta_dist.rvs(1)[0]
+            beta = 0
+            while beta < 0.1:
+                beta = self.beta_dist.rvs(1)[0]             
+            samples['beta'] = beta
         else:
             samples['beta'] = self.beta_dist.rvs(1)[0]            
 
         if isinstance(self.gamma_inv_dist, stats._distn_infrastructure.rv_frozen):
-            samples['gamma'] = 1/self.gamma_inv_dist.rvs(1)[0]
+            gamma_inv = 0
+            while gamma_inv < 2:
+                gamma_inv = self.gamma_inv_dist.rvs(1)[0]
+            samples['gamma'] = 1/gamma_inv
         else:
             samples['gamma'] = 1/self.gamma_inv_dist.rvs(1)[0]
 
@@ -102,7 +204,6 @@ class StochasticSIR():
     def rollout(self, days, dt = 1):
         
         samples = self.sample_params()
-        print(samples)
         
         #With the samples and the initial conditions for the models, rollout the IVP
         deriv_fun = self.deriv(samples['beta'], samples['gamma'])
@@ -117,18 +218,17 @@ class StochasticSIR():
     
     def project(self, days, samples = 10000, dt = 1, progbar = True):
         
-        t = np.arange(0, days)
-        S_samples = np.empty((samples, days))
-        I_samples = np.empty((samples, days))
-        R_samples = np.empty((samples, days))
-        param_samples = []
+        S_samples     = np.empty((samples, days))
+        I_samples     = np.empty((samples, days))
+        R_samples     = np.empty((samples, days))
+        param_samples = np.empty((samples, 2))
         
         for i in (tqdm(range(samples)) if progbar else range(samples)):
             (S,I,R), sample = self.rollout(days, dt)
             S_samples[i,:] = S
             I_samples[i,:] = I
             R_samples[i,:] = R
-            param_samples.append(sample)
+            param_samples[i,:]= [sample['beta'],1/sample['gamma']]
         
         return (S_samples, I_samples, R_samples), param_samples
 

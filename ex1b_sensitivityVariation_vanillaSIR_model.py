@@ -35,8 +35,9 @@ def run_SIR(**kwargs):
     model_kwargs['R0']         = kwargs['R0']
 
     model   = SIR(N,**model_kwargs)
-    S,I,R,t = model.project(days,'ode_int')
+    S,I,R   = model.project(days,'ode_int')
     T       = I + R    
+
     return S,I,R,T,t
 
 
@@ -58,7 +59,7 @@ def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
         kwargs['beta']      = beta_samples[ii]
         kwargs['gamma_inv'] = gamma_inv_samples[ii]
         kwargs['r0']        = beta_samples[ii]*gamma_inv_samples[ii]
-        S,I,R,T,t           = run_SIR(**kwargs)
+        S,I,R,T             = run_SIR(**kwargs)
 
         print('*********   Results    *********')    
         tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)

@@ -12,98 +12,47 @@ from epimodels.sims   import *
 
 
 ### TODO: Add the growth rate plots with errors
-
-def rollout_stochastic_SIR(*prob_params, **sim_kwargs):
-    '''
-        Run a single simulation of stochastic SIR dynamics
-    '''
-    N        = sim_kwargs['N']
-    days     = sim_kwargs['days']
-
-    use_class = 1
-
-    if use_class:
-        init_cond = {}
-        init_cond['I0'] = sim_kwargs['I0']
-        init_cond['R0'] = sim_kwargs['R0']
-        model = StochasticSIR(N, *prob_params, **init_cond)
-        SIR_curves, SIR_params  = model.rollout(days)
-        S,I,R = SIR_curves
-        beta  = SIR_params['beta']
-        gamma = SIR_params['gamma']
-        gamma_inv = 1/gamma
-
-    else:
-        beta, gamma_inv = sample_SIRparam_distributions(*prob_params)    
-        print(beta, 1/gamma_inv)    
-        gamma           = 1.0 / gamma_inv
-        r0              = beta * gamma_inv
-
-        # Create Model
-        model_sim_kwargs = {}
-        model_sim_kwargs['r0']         = r0
-        model_sim_kwargs['inf_period'] = gamma_inv
-        model_sim_kwargs['I0']         = sim_kwargs['I0']
-        model_sim_kwargs['R0']         = sim_kwargs['R0']
-
-        model  = SIR(N,**model_sim_kwargs)
-        S,I,R  = model.project(days)
-
-    return S, I, R, beta, gamma_inv
-
-
 def run_MC_SIRparams(rollouts, *prob_params, **sim_kwargs):
     '''
         Run Monte Carlo Simulations of the Stochastic Estimate of SIR
     '''
 
-    ########################################################################
-    ####### Predictions for Sampled Values of \beta and \gamma^{-1} ########
-    ########################################################################
-    use_class = 0
+    #################################################################################
+    ####### Generate Predictions for Sampled Values of \beta and \gamma^{-1} ########
+    #################################################################################
 
-    if use_class:
-        print('Testing')
+    # Run MC rollouts
+    init_cond = {}
+    init_cond['I0'] = sim_kwargs['I0']
+    init_cond['R0'] = sim_kwargs['R0']
+    model = StochasticSIR(sim_kwargs['N'], *prob_params, **init_cond)
+    SIR_traces, SIR_params = model.project(days = sim_kwargs['days'], samples = rollouts, progbar = True)
 
-    else:
-        S_samples          = np.empty([rollouts, sim_kwargs['days']])
-        I_samples          = np.empty([rollouts, sim_kwargs['days']])
-        R_samples          = np.empty([rollouts, sim_kwargs['days']])
-        beta_samples       = np.empty([rollouts, 1])
-        gamma_inv_samples  = np.empty([rollouts, 1])
-
-        for ii in tqdm(range(rollouts)):
-            S, I, R, beta, gamma_inv   = rollout_stochastic_SIR(*prob_params, **sim_kwargs)
-
-            # Storing run in matrix for post-processing
-            S_samples[ii,:]         = S
-            I_samples[ii,:]         = I
-            R_samples[ii,:]         = R
-            beta_samples[ii,:]      = beta
-            gamma_inv_samples[ii,:] = gamma_inv
-
-
-    # Compute stats from MC rollouts
-    S_stats, I_stats, R_stats, T_stats = gatherMCstats(S_samples, I_samples, R_samples, bound_type = 'Quantiles')    
-    printMeanResults(I_stats, R_stats)
 
     ##############################################################
-    ######## Plots Simulation Statistics and Realizations ########
+    ######## Plots and Results Statistics and Realizations #######
     ##############################################################
+    # Unpack rollout traces
+    S_samples, I_samples, R_samples = SIR_traces
+    beta_samples      = SIR_params[:,0]
+    gamma_inv_samples = SIR_params[:,1]
+
+    # Plot Histogram of Sampled Parameters beta and gamma    
+    filename          = sim_kwargs['file_extension'] + "_paramSamples"
+    plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename,  *prob_params)
+    print('Beta interval: [', beta_samples[np.argmin(beta_samples)], ',', beta_samples[np.argmax(beta_samples)],']')
+    print('Gamma^-1 interval: [', gamma_inv_samples[np.argmin(gamma_inv_samples)], ',', gamma_inv_samples[np.argmax(gamma_inv_samples)],']')
+    
     # Plot Realizations of Infected and Total Cases
     plotIT_realizations(I_samples, R_samples, **sim_kwargs)
 
     # Plot of Critical Points on realizations
     plotCriticalPointsStats(I_samples, R_samples, **sim_kwargs)
 
-    # Plot Histogram of Sampled Parameters beta and gamma
-    filename = sim_kwargs['file_extension'] + "_paramSamples"
-    plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename,  *prob_params)
-
-    print('Beta interval: [', beta_samples[np.argmin(beta_samples)], ',', beta_samples[np.argmax(beta_samples)],']')
-    print('Gamma^-1 interval: [', gamma_inv_samples[np.argmin(gamma_inv_samples)], ',', gamma_inv_samples[np.argmax(gamma_inv_samples)],']')
-
     # Plot SIR Curves with expected values, CI and standard deviation
+    S_stats, I_stats, R_stats, T_stats = gatherMCstats(S_samples, I_samples, R_samples, bound_type = 'Quantiles')    
+    printMeanResults(I_stats, R_stats)
+
     x_axis_offset       = round(sim_kwargs['days']*0.25)
     y_axis_offset       = 0.0000003 
     plot_all            = 1; plot_peaks = 1; show_S = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
@@ -146,18 +95,17 @@ def main():
     rollouts  = pow(10,3)  
     viz_plots = 1 
     
-    # for test_num in range(1):
-    #     prob_params, plot_vars        = getSIRTestingParams(test_num+1, prob_type,**sim_kwargs)
+    for test_num in range(3):
+        prob_params, plot_vars        = getSIRTestingParams(test_num+1, prob_type,**sim_kwargs)
+        
+        # unpack plotting and file variables
+        text_error, _ext              = plot_vars
+        sim_kwargs['file_extension']  = basefilename + _ext
+        sim_kwargs['text_error']      = text_error
+        sim_kwargs['viz_plots']       = viz_plots
 
-    prob_params, plot_vars        = getSIRTestingParams(3, prob_type,**sim_kwargs)
-    # unpack plotting variables
-    text_error, _ext              = plot_vars
-    sim_kwargs['file_extension']  = basefilename + _ext
-    sim_kwargs['text_error']      = text_error
-    sim_kwargs['viz_plots']       = viz_plots
-
-    # Run Montecarlo simulation for chosen parameter test
-    run_MC_SIRparams(rollouts, *prob_params, **sim_kwargs)
+        # Run Montecarlo simulation for chosen parameter test
+        run_MC_SIRparams(rollouts, *prob_params, **sim_kwargs)
     
 if __name__ == '__main__':
     main()

@@ -65,7 +65,6 @@ class SIR():
 
         elif solver_type == 'solve_ivp':
             ode_sol  = solve_ivp(lambda t, y: SIR.deriv_static(t, y, self.N, self.beta, self.gamma), y0=y0, t_span=[0, days], t_eval=t)
-            t  = ode_sol['t']
             S  = ode_sol['y'][0]
             I  = ode_sol['y'][1]
             R  = ode_sol['y'][2]
