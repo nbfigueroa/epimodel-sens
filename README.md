@@ -5,11 +5,11 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 ### Compartmental Epidemic Models
 **SIR (Susceptible-Infected-Recovered) type**
-  * *vanilla SIR model*: 
+  * *vanilla SIR model*: The standard SIR model.
 
-  * *extended SIR (eSIR) model*: Standard SIR model with a time-varying beta (transmission rate) which can be used to assess the impact of social distancing (non-pharma interventions) controls. This is implemented by scaling a nominal beta value with a time varying function pi(t), hence, beta(t) = beta_0pi(t)  
+  * *extended SIR (eSIR) model*: A standard SIR model extended with a time-varying beta (transmission rate) which can be used to assess the impact of social distancing (non-pharma interventions) controls. This is implemented by scaling a nominal beta value with a time varying function pi(t), hence, beta(t) = beta_0pi(t)  
 
-  * *Michigan eSIR model*: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without (eSIR).
+  * *Michigan eSIR model*: An eSIR model that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (stoch-eSQIR) and one without (stoch-eSIR).
     * **Details:** Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. Does not justify why particular growth rate scaling is used for particular intervention strategies. [paper]( https://doi.org/10.1101/2020.02.29.20029421) and [code](https://github.com/lilywang1988/eSIR).
 
 * *Cambridge SIR model*: An age and social-contact structured SIR model. It can assess the impact of social distancing (non-pharma interventions) controls by modifying the contact structures.
