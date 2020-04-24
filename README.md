@@ -5,23 +5,23 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 ### Compartmental Epidemic Models
 **SIR (Susceptible-Infected-Recovered) type**
-  * vanilla SIR model: 
+  * *vanilla SIR model*: 
 
-  * extended SIR (eSIR) model: Standard SIR model with a time-varying beta (transmission rate) which can be used to assess the impact of social distancing (non-pharma interventions) controls. This is implemented by scaling a nominal beta value with a time varying function pi(t), hence, beta(t) = beta_0pi(t)  
+  * *extended SIR (eSIR) model*: Standard SIR model with a time-varying beta (transmission rate) which can be used to assess the impact of social distancing (non-pharma interventions) controls. This is implemented by scaling a nominal beta value with a time varying function pi(t), hence, beta(t) = beta_0pi(t)  
 
-  * Cambridge model: An age and social-contact structured SIR model. It can assess the impact of social distancing (non-pharma interventions) controls by modifying the contact structures.
+  * *Cambridge SIR model*: An age and social-contact structured SIR model. It can assess the impact of social distancing (non-pharma interventions) controls by modifying the contact structures.
     * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/), [paper](https://arxiv.org/pdf/2003.12055.pdf) and [code](https://github.com/rajeshrinet/pyross).
 
-  * Michigan model: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without.
+  * *Michigan SIR model*: An eSIR that is formulated as stochastic state-space model. Offers two types of models, one with quarantine compartment (i.e. eSQIR) and one without.
     * **Details:** Estimates r0, infection period from observed data so far, accepts prior distributions over these parameters to represent known values, uses time varying quarantine and growth rate parameters. Does not justify why particular growth rate scaling is used for particular intervention strategies. Code implemented in R. 
 
 **SEIR (Susceptible-Exposed-Infected-Recovered) type**
-  * vanilla SEIR model:
+  * *vanilla SEIR model*:
 
-  * extended SEIR (eSEIR) model: Standard SEIR model with time-varying beta(t) as described for eSIR.
+  * *extended SEIR (eSEIR) model*: Standard SEIR model with time-varying beta(t) as described for eSIR.
   
-  * AFMC model: An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period. The analysis considers hospital and ICU capacity.
-  * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
+  * *AFMC SEIQR model*: An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period. The analysis considers hospital and ICU capacity.
+    * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
 
 ---
 
