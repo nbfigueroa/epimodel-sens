@@ -1,4 +1,4 @@
-# Epidemic Models Sensitivity Analysis
+## EpiSens: Epidemic Models Sensitivity Analysis
 
 Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well as novel extensions to such models used for the COVID-19 pandemic (Cambridge & Michigan model). The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. 
 
