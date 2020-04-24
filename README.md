@@ -1,7 +1,5 @@
 ## EpiModel-Sens: Sensitivity Analysis of Compartmental Epidemic Models
-Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well as novel extensions to such models used for the COVID-19 pandemic ([Cambridge](https://github.com/rajeshrinet/pyross) & [Michigan](https://github.com/lilywang1988/eSIR) model). The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. 
-
-To make sense of this, in this repo we implement standard models, simple extensions and more complex extensions (further compartments and stochastic estimates) and apply sensitivity analysis techniques to understand what drives differences across models and how sensitive they are to parameter uncertainty.
+Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well as novel extensions to such models used for the COVID-19 pandemic ([Cambridge](https://github.com/rajeshrinet/pyross) & [Michigan](https://github.com/lilywang1988/eSIR) model). The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. To make sense of this, in this repo we reproduce these models and apply sensitivity analysis techniques to understand what drives differences across models and how sensitive they are to parameter uncertainty.
 
 ### Models
 * SIR model: 
