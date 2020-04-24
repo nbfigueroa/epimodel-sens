@@ -1,5 +1,6 @@
-## EpiSens: Epidemic Models Sensitivity Analysis
+## EpiSens: Sensitivity Analysis of Compartmental Epidemic Models
 
+### Description
 Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well as novel extensions to such models used for the COVID-19 pandemic (Cambridge & Michigan model). The main problem with existing models is that they all provide a varied range of predictions which make it hard for policy-makers to decide courses of action to control the epidemic. 
 
 To make sense of this, in this repo we implement standard models, simple extensions and more complex extensions (further compartments and stochastic estimates) and apply sensitivity analysis techniques to understand what drives differences across models and how sensitive they are to parameter estimates.
@@ -38,6 +39,13 @@ Other known models being used by governments/media for COVID-19:
 ### Estimation and Extrapolation Techniques
 * Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
 
----
+
+### Contact
 Contributors: Nadia Figueroa and Ankit Shah.
+Advisors: David Kaiser and Julie Shah.
+
+### Publications
+
+
+
 
