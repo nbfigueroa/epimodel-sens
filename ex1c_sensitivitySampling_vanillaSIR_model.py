@@ -32,8 +32,11 @@ def plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     ### TODO: Add the growth rate plots with errors
     # plotSIR_growth_realizations(SIR_traces, SIR_params)
 
-    # Plot of Critical Points on realizations
-    plotCriticalPointsStats(I_samples, R_samples, **sim_kwargs)
+    # Critical outputs from realizations
+    CO_samples = getCriticalPointsStats(I_samples, R_samples)
+    # tc_samples, Ipeak_samples, Tend_samples = CO_samples
+
+    plotCriticalPointsStats(SIR_params, CO_samples, **sim_kwargs)
 
     # Plot SIR Curves with expected values, CI and standard deviation
     S_stats, I_stats, R_stats, T_stats = gatherMCstats(S_samples, I_samples, R_samples, bound_type = 'Quantiles')    
@@ -72,6 +75,7 @@ def run_MC_stochastic_est_SIR(rollouts, *prob_params, **sim_kwargs):
     plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs)
 
 
+
 def main():
 
     # Choose Simulation (includes initial conditions, fixed model parameters and plotting options)
@@ -101,12 +105,13 @@ def main():
     '''
 
     prob_type = 'gamma'    
-    rollouts  = pow(10,4)  
-    viz_plots = 0
+    rollouts  = pow(10,3)  
+    viz_plots = 1
     
-    for test_num in range(3):
-        prob_params, plot_vars        = getSIRTestingParams(test_num+1, prob_type,**sim_kwargs)
-        
+    # for test_num in range(3):
+    if viz_plots:    
+        # prob_params, plot_vars        = getSIRTestingParams(test_num+1, prob_type,**sim_kwargs)
+        prob_params, plot_vars        = getSIRTestingParams(3, prob_type,**sim_kwargs)
         # unpack plotting and file variables
         text_error, _ext              = plot_vars
         sim_kwargs['file_extension']  = basefilename + _ext

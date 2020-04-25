@@ -160,7 +160,7 @@ def getCriticalPointsStats(I_samples, R_samples):
         Ipeak_samples[ii] = I_samples[ii,tc]
         Tend_samples[ii]  = T_samples[ii,n_days-1]
     
-    return tc_samples, Ipeak_samples, Tend_samples
+    return (tc_samples, Ipeak_samples, Tend_samples)
 
 
 def computeStats(X, bound_type='CI'):
