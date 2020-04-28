@@ -136,7 +136,7 @@ def getCriticalPointsAfterPeak(I):
 
     return (tc, t_I100, t_I500, t_I100, t_I10)
 
-def getCriticalPointsStats(I_samples, R_samples):
+def getCriticalPointsDistribution(I_samples, R_samples):
 
     # Compute Total Cases
     T_samples = I_samples + R_samples
@@ -163,10 +163,11 @@ def getCriticalPointsStats(I_samples, R_samples):
     return (tc_samples, Ipeak_samples, Tend_samples)
 
 
-def computeStats(X, bound_type='CI'):
+def computeStats(X, bound_type='CI', bound_param = [1.96]):
     '''
         Compute mean, median and confidence intervals/quantiles
     '''
+
     X_bar = np.mean(X, axis=0)    # mean of vector
     X_std = np.std(X, axis=0)     # std of vector
     X_med = np.median(X, axis=0)  # median of vector
@@ -174,26 +175,31 @@ def computeStats(X, bound_type='CI'):
     # Computing 95% Confidence Intervals
     if bound_type == 'CI':
         n     = len(X_bar) # number of obs
-        z     = 1.96 # for a 95% CI
+        # z     = 1.96 # for a 95% CI
+        z     = bound_param[0]
         X_lower = X_bar - (z * (X_std/math.sqrt(n)))
         X_upper = X_bar + (z * (X_std/math.sqrt(n)))
 
     if bound_type == 'Quantiles':    
-        X_lower = np.quantile(X, 0.025, axis = 0)
-        X_upper = np.quantile(X, 0.975, axis = 0)
-           
+        # X_lower = np.quantile(X, 0.025, axis = 0)
+        # X_upper = np.quantile(X, 0.975, axis = 0)
+        X_lower = np.quantile(X, bound_param[0], axis = 0)
+        X_upper = np.quantile(X, bound_param[1], axis = 0)   
+
+
     return X_bar, X_med, X_std, X_upper, X_lower
 
 
-def gatherMCstats(S_samples, I_samples, R_samples, bound_type='CI'):    
+def gatherMCstats(S_samples, I_samples, R_samples, bound_type='CI', bound_param = [1.96]):    
     '''
         Gather stats from MC simulations  
     '''
+
     T_samples = I_samples + R_samples
-    S_mean, S_med, S_std, S_upper, S_lower = computeStats(S_samples, bound_type)
-    I_mean, I_med, I_std, I_upper, I_lower = computeStats(I_samples, bound_type)
-    R_mean, R_med, R_std, R_upper, R_lower = computeStats(R_samples, bound_type)
-    T_mean, T_med, T_std, T_upper, T_lower = computeStats(T_samples, bound_type)
+    S_mean, S_med, S_std, S_upper, S_lower = computeStats(S_samples, bound_type, bound_param)
+    I_mean, I_med, I_std, I_upper, I_lower = computeStats(I_samples, bound_type, bound_param)
+    R_mean, R_med, R_std, R_upper, R_lower = computeStats(R_samples, bound_type, bound_param)
+    T_mean, T_med, T_std, T_upper, T_lower = computeStats(T_samples, bound_type, bound_param)
 
     # Pack values for plotting and analysis
     S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower))    
