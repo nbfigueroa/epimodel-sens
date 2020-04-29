@@ -121,7 +121,7 @@ def run(prob_type = 'gamma'):
     
 if __name__ == '__main__':
     """ Defined type of probability distributions to sample from:
-        gamma, log-Normal (proper distr)
-        gaussian, uniform (not adequate for \beta or \gamma_{-1})
+        gamma, log-Normal (proper distributions)
+        gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gamma')
+    run(prob_type = 'log-normal')

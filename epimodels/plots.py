@@ -8,17 +8,17 @@ from   scipy.stats       import gamma as gamma_dist
 from   scipy.stats       import kde
 from scipy.interpolate   import UnivariateSpline
 
-import statsmodels.api as sm
-
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from   matplotlib import rc
-
-from   epimodels.utils import *
-
-
 # For beautiful plots
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
+
+
+import statsmodels.api       as sm
+from statsmodels.formula.api import ols
+from   epimodels.utils import *
 
 
 ############################################################################################################
@@ -101,8 +101,9 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
     beta_samples      = SIR_params[:,0]
     gamma_inv_samples = SIR_params[:,1]
     tc_samples, Ipeak_samples, Tend_samples = CO_samples
+    R0_samples = beta_samples * gamma_inv_samples
 
-    # Compute Stats for each critical point distributions (t_c, I_peak, T_end)
+    # Compute Stats for each critical point distributions (t_c, I_peak, T_end and R0)
     tc_bar, tc_med, tc_std, tc_upper95, tc_lower95 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     _, _, _, tc_upper68, tc_lower68 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     tc_skew = stats.skew(tc_samples)    
@@ -117,6 +118,12 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
     _, _, _, Tend_upper68, Tend_lower68 = computeStats(Tend_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     Tend_skew = stats.skew(Tend_samples)
     print('Mean Tend=',Tend_bar, ' Med Tend=', Tend_med, 'Skew Tend=', Tend_skew)
+
+
+    R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    R0_skew = stats.skew(R0_samples)    
+    print('Mean tc=',R0_bar, ' Med tc=', R0_med, 'Skew tc=', R0_skew)
 
     ####################################################################
     #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
@@ -259,8 +266,6 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
     beta_std      = np.std(beta_samples, axis=0)
     gamma_inv_std = np.std(gamma_inv_samples, axis=0)
     if beta_std != 0 and gamma_inv_std != 0:
-        fig0, (ax01,ax02,ax03) = plt.subplots(1,3, constrained_layout=True)        
-
         # Variables for KDE Contour Plots of Parameter Samples
         x = beta_samples
         y = gamma_inv_samples
@@ -294,9 +299,48 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
             masked_Ipeak = t_Ipeak[idx_Ipeak]
             idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
             masked_Tend  = t_Tend[idx_Tend]
+        
+        # Contour plots of 2D gaussian kde Param distribution with R0 Samples
+        # Find regressive model
+        x = beta_samples; y = gamma_inv_samples; z = R0_samples
+        X = x.flatten()
+        Y = y.flatten()
+        Z = z.flatten()
+        data = pandas.DataFrame({'x': X, 'y': Y, 'z': Z})
+        # Fit the model
+        model = ols("z ~ x + y", data).fit()
+        # Print the summary
+        print(model.summary())
+        print("\nRetrieving manually the parameter estimates:")
+        print(model._results.params)
 
-        # Contour plot for 2D gaussian kde distribution        
-        cset = ax01.contour(xx, yy, f, colors='k', alpha = 0.85)
+
+        fig00, ax00 = plt.subplots()     
+        cset = ax00.contour(xx, yy, f, colors='k', alpha = 0.9)
+        ax00.clabel(cset, inline=1, fontsize=10)        
+        cax = ax00.scatter(beta_samples, gamma_inv_samples, c=R0_samples,  cmap='tab20c', alpha = 0.55, s= 10)
+        # cax = ax00.scatter(beta_samples, gamma_inv_samples, R0_samples, c=R0_samples,  cmap='bwr', s=5, alpha = 0.55)
+        ax00.set_xlabel(r"$\beta$", fontsize=20)
+        ax00.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
+        for tick in ax00.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax00.yaxis.get_major_ticks():
+            tick.label.set_fontsize(15)     
+        ax00.grid(True, alpha=0.3)
+        ax00.set_title(r"Distribution of $\beta,\gamma^{-1}$ vs. $R_{0}$", fontsize=20)
+        cbar = fig00.colorbar(cax, ax=ax00, orientation='vertical')
+        print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
+        num_intervals = int(np.ceil((np.max(R0_samples)-np.min(R0_samples))/0.15 ))
+        cbarlabels = np.around(np.linspace(np.min(R0_samples), np.max(R0_samples), num = 20, endpoint=True),decimals=2)
+        cbar.set_ticks(cbarlabels)
+        cbar.set_ticklabels(cbarlabels)
+        fig00.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        # fig00.tight_layout()
+        fig00.set_size_inches(29/2 * 0.35, 9/2, forward=True)
+
+        # Contour plots of 2D gaussian kde Param distribution with        
+        fig0, (ax01,ax02,ax03) = plt.subplots(1,3)        
+        cset = ax01.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
         ax01.clabel(cset, inline=1, fontsize=10)        
         cax = ax01.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='RdBu', alpha = 0.35, s= 10)
@@ -307,8 +351,13 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         for tick in ax01.yaxis.get_major_ticks():
             tick.label.set_fontsize(15) 
         ax01.grid(True, alpha=0.3)
+        if do_95:
+            ax01.set_title(r'$95\% t_{c}$ Values')
+        else:
+            ax01.set_title(r'$ 68\% t_{c}$ Values')
+        fig0.colorbar(cax, ax=ax01, shrink=0.9)
         
-        cset = ax02.contour(xx, yy, f, colors='k', alpha = 0.85)
+        cset = ax02.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
         ax02.clabel(cset, inline=1, fontsize=10)        
         cax = ax02.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='PiYG', alpha = 0.35, s= 10)
@@ -319,9 +368,13 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         for tick in ax02.yaxis.get_major_ticks():
             tick.label.set_fontsize(15) 
         ax02.grid(True, alpha=0.3)
-        
+        if do_95:
+            ax02.set_title(r'$95\% I_{peak}$ Values')
+        else:
+            ax02.set_title(r'$68\% I_{peak}$ Values')
+        fig0.colorbar(cax, ax=ax02, shrink=0.9)
 
-        cset = ax03.contour(xx, yy, f, colors='k', alpha = 0.85)
+        cset = ax03.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
         ax03.clabel(cset, inline=1, fontsize=10)
         cax = ax03.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='bwr', alpha = 0.35, s= 10)        
@@ -332,23 +385,13 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         for tick in ax03.yaxis.get_major_ticks():
             tick.label.set_fontsize(15)     
         ax03.grid(True, alpha=0.3)
-
-        # Build your secondary mirror axes:
-        fig2, (ax3, ax4, ax5) = plt.subplots(1, 3)
-
-        # Build maps that parallel the color-coded data
-        # map1 = ax3.imshow(np.stack([t_tc, t_tc]),cmap='RdBu')
-        map1 = ax3.imshow(np.stack([masked_tc, masked_tc]),cmap='RdBu')
-        map2 = ax4.imshow(np.stack([t_Ipeak, t_Ipeak]),cmap='PiYG')
-        map3 = ax5.imshow(np.stack([t_Tend, t_Tend]),cmap='bwr')
-
-
-        # Add your maps onto your original figure/axes
-        fig0.colorbar(map1, ax=ax01)
-        fig0.colorbar(map2, ax=ax02)
-        fig0.colorbar(map3, ax=ax03)
-        # fig0.set_size_inches(25/2, 8.5/2, forward=True)
-        fig0.set_size_inches(27/2, 9/2, forward=True)
+        if do_95:
+            ax03.set_title(r'$95\% T_{end}$ Values')
+        else:
+            ax03.set_title(r'$68\% T_{end}$ Values')
+        fig0.colorbar(cax, ax=ax03, shrink=0.9)
+        fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        fig0.set_size_inches(29/2, 8/2, forward=True)
 
 
 
@@ -1235,7 +1278,7 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
             tick.label.set_fontsize(15) 
     plt.xlim(0, 1.0)            
     ax1.grid(True, alpha=0.3)
-    ax1.set_title(r"Histogram of $\beta$ samples", fontsize=20)
+    ax1.set_title(r"Distribution of $\beta$ samples", fontsize=20)
     
     ###############################################################
     ################## Plot for Gamma^-1 Samples ##################
@@ -1272,7 +1315,7 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
             tick.label.set_fontsize(15)  
     plt.xlim(1, 17) 
     ax2.grid(True, alpha=0.3)    
-    plt.title(r"Histogram of $\gamma^{-1}$ samples", fontsize=20)    
+    plt.title(r"Distribution of $\gamma^{-1}$ samples", fontsize=20)    
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
     fig.set_size_inches(20/2, 8/2, forward=True)    
