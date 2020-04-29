@@ -78,7 +78,7 @@ class StochasticSIR():
             gamma_inv_std   = prob_params[5]
             
             # Sample from Gaussian Distributions
-            beta_dist  = stats.norm(loc = beta_mean, scale = beta_std)
+            beta_dist       = stats.norm(loc = beta_mean, scale = beta_std)
             gamma_inv_dist  = stats.norm(loc = gamma_inv_mean, scale = gamma_inv_std)
 
 
@@ -114,7 +114,8 @@ class StochasticSIR():
         if isinstance(self.beta_dist, stats._distn_infrastructure.rv_frozen):
             beta = 0
             while beta < 0.1:
-                beta = self.beta_dist.rvs(1)[0]             
+                beta = self.beta_dist.rvs(1)[0]     
+
             samples['beta'] = beta
         else:
             samples['beta'] = self.beta_dist.rvs(1)[0]            
@@ -123,6 +124,7 @@ class StochasticSIR():
             gamma_inv = 0
             while gamma_inv < 2:
                 gamma_inv = self.gamma_inv_dist.rvs(1)[0]
+
             samples['gamma'] = 1/gamma_inv
         else:
             samples['gamma'] = 1/self.gamma_inv_dist.rvs(1)[0]

@@ -103,7 +103,7 @@ def run(prob_type = 'gamma'):
         gamma     --> loc, shape (k), scale (theta)        
         log-Normal --> mean, std
     '''    
-    rollouts  = pow(10,4)  
+    rollouts  = pow(10,3)  
     viz_plots = 1
     
     # for test_num in range(3):
@@ -124,4 +124,4 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'log-normal')
+    run(prob_type = 'gamma')

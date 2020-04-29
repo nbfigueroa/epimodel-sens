@@ -18,6 +18,7 @@ rc('text', usetex=True)
 
 import statsmodels.api       as sm
 from statsmodels.formula.api import ols
+import pandas as pd
 from   epimodels.utils import *
 
 
@@ -282,44 +283,26 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         t_Ipeak = Ipeak_samples[:,0]
         t_Tend = Tend_samples[:,0]
 
-        # Masked tc point samples for 95% of outcomes
-        do_95 = 1
-        if do_95:
-            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower95, t_tc < tc_kde_upper95))
-            masked_tc    = t_tc[idx_tc]
-            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower95, t_Ipeak < Ipeak_kde_upper95))
-            masked_Ipeak = t_Ipeak[idx_Ipeak]
-            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower95, t_Tend < Tend_kde_upper95))
-            masked_Tend  = t_Tend[idx_Tend]
-        else:
-            # Masked tc point samples for 68% of outcomes
-            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
-            masked_tc    = t_tc[idx_tc]
-            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
-            masked_Ipeak = t_Ipeak[idx_Ipeak]
-            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
-            masked_Tend  = t_Tend[idx_Tend]
-        
-        # Contour plots of 2D gaussian kde Param distribution with R0 Samples
-        # Find regressive model
-        x = beta_samples; y = gamma_inv_samples; z = R0_samples
-        X = x.flatten()
-        Y = y.flatten()
-        Z = z.flatten()
-        data = pandas.DataFrame({'x': X, 'y': Y, 'z': Z})
-        # Fit the model
-        model = ols("z ~ x + y", data).fit()
-        # Print the summary
-        print(model.summary())
-        print("\nRetrieving manually the parameter estimates:")
-        print(model._results.params)
-
+        # Learn linear regressor between params and R0
+        from sklearn import linear_model
+        regr = linear_model.LinearRegression()
+        X = SIR_params; Y = R0_samples
+        regr.fit(X, Y)
+        dim, N = positions.shape
+        Y = np.empty([1,N])
+        for ii in range(N):
+            y_regr =  regr.predict([[positions[0,ii],positions[1,ii]]])
+            Y[0,ii]  = y_regr[0]
+        f_R0 = np.reshape(Y.T, xx.shape)
+        print('R0 Coeff:', regr.coef_, 'R0 Intercept:', regr.intercept_)
+        print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
 
         fig00, ax00 = plt.subplots()     
-        cset = ax00.contour(xx, yy, f, colors='k', alpha = 0.9)
+        cset = ax00.contour(xx, yy, f, colors='k', levels = 10, alpha = 0.75)
         ax00.clabel(cset, inline=1, fontsize=10)        
-        cax = ax00.scatter(beta_samples, gamma_inv_samples, c=R0_samples,  cmap='tab20c', alpha = 0.55, s= 10)
-        # cax = ax00.scatter(beta_samples, gamma_inv_samples, R0_samples, c=R0_samples,  cmap='bwr', s=5, alpha = 0.55)
+        cset = ax00.contour(xx, yy, f_R0, colors='k', levels = 10, alpha = 0.75)
+        ax00.clabel(cset, inline=1, fontsize=10)                
+        cax = ax00.scatter(beta_samples, gamma_inv_samples, c=R0_samples,  cmap='tab20c', alpha = 0.85, s= 10)
         ax00.set_xlabel(r"$\beta$", fontsize=20)
         ax00.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
         for tick in ax00.xaxis.get_major_ticks():
@@ -329,8 +312,6 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         ax00.grid(True, alpha=0.3)
         ax00.set_title(r"Distribution of $\beta,\gamma^{-1}$ vs. $R_{0}$", fontsize=20)
         cbar = fig00.colorbar(cax, ax=ax00, orientation='vertical')
-        print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
-        num_intervals = int(np.ceil((np.max(R0_samples)-np.min(R0_samples))/0.15 ))
         cbarlabels = np.around(np.linspace(np.min(R0_samples), np.max(R0_samples), num = 20, endpoint=True),decimals=2)
         cbar.set_ticks(cbarlabels)
         cbar.set_ticklabels(cbarlabels)
@@ -338,10 +319,57 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         # fig00.tight_layout()
         fig00.set_size_inches(29/2 * 0.35, 9/2, forward=True)
 
+
+        # Masked point samples for 95% of outcomes
+        mask_type = '95'
+        if mask_type == '95':
+            do_95 = 1
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower95, t_tc < tc_kde_upper95))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower95, t_Ipeak < Ipeak_kde_upper95))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower95, t_Tend < Tend_kde_upper95))
+            masked_Tend  = t_Tend[idx_Tend]
+
+        # Masked point samples for 68% of outcomes
+        if mask_type == '68':
+            do_95 = 0            
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
+            masked_Tend  = t_Tend[idx_Tend]        
+
+        # Masked point samples for r0 slice
+        if mask_type == 'R0':
+            do_95        = -1            
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
+            masked_Tend  = t_Tend[idx_Tend]        
+
+
         # Contour plots of 2D gaussian kde Param distribution with        
+        # Learn linear regressor between params and tc
+        regr_tc = linear_model.LinearRegression()
+        X = SIR_params; Y = tc_samples
+        regr_tc.fit(X, Y)
+        dim, N = positions.shape
+        Y = np.empty([1,N])
+        for ii in range(N):
+            y_regr =  regr_tc.predict([[positions[0,ii],positions[1,ii]]])
+            Y[0,ii]  = y_regr[0]
+        f_tc = np.reshape(Y.T, xx.shape)
+        print('t_c Coeff:', regr_tc.coef_, 't_c Intercept:', regr_tc.intercept_)
+
         fig0, (ax01,ax02,ax03) = plt.subplots(1,3)        
-        cset = ax01.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
-        ax01.clabel(cset, inline=1, fontsize=10)        
+        cset = ax01.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+        # ax01.clabel(cset, inline=1, fontsize=10)        
+        cset = ax01.contour(xx, yy, f_tc, colors='k', levels = 10, alpha = 0.75)
+        ax01.clabel(cset, inline=1, fontsize=10)          
         cax = ax01.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='RdBu', alpha = 0.35, s= 10)
         ax01.set_xlabel(r"$\beta$", fontsize=20)
@@ -356,9 +384,23 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         else:
             ax01.set_title(r'$ 68\% t_{c}$ Values')
         fig0.colorbar(cax, ax=ax01, shrink=0.9)
+
+
+        regr_Ipeak = linear_model.LinearRegression()
+        X = SIR_params; Y = Ipeak_samples
+        regr_Ipeak.fit(X, Y)
+        dim, N = positions.shape
+        Y = np.empty([1,N])
+        for ii in range(N):
+            y_regr =  regr_Ipeak.predict([[positions[0,ii],positions[1,ii]]])
+            Y[0,ii]  = y_regr[0]
+        f_Ipeak = np.reshape(Y.T, xx.shape)
+        print('Ipeak Coeff:', regr_Ipeak.coef_, 't_c Intercept:', regr_Ipeak.intercept_)
         
-        cset = ax02.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
-        ax02.clabel(cset, inline=1, fontsize=10)        
+        cset = ax02.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+        # ax02.clabel(cset, inline=1, fontsize=10)        
+        cset = ax02.contour(xx, yy, f_Ipeak, colors='k', levels = 10, alpha = 0.75)
+        ax02.clabel(cset, inline=1, fontsize=10)          
         cax = ax02.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='PiYG', alpha = 0.35, s= 10)
         ax02.set_xlabel(r"$\beta$", fontsize=20)
@@ -374,8 +416,22 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
             ax02.set_title(r'$68\% I_{peak}$ Values')
         fig0.colorbar(cax, ax=ax02, shrink=0.9)
 
-        cset = ax03.contour(xx, yy, f, colors='k', levels=10, alpha = 0.85)
-        ax03.clabel(cset, inline=1, fontsize=10)
+
+        regr_Tend = linear_model.LinearRegression()
+        X = SIR_params; Y = Tend_samples
+        regr_Tend.fit(X, Y)
+        dim, N = positions.shape
+        Y = np.empty([1,N])
+        for ii in range(N):
+            y_regr =  regr_Tend.predict([[positions[0,ii],positions[1,ii]]])
+            Y[0,ii]  = y_regr[0]
+        f_Tend = np.reshape(Y.T, xx.shape)
+        print('Tend Coeff:', regr_Tend.coef_, 'Tend Intercept:', regr_Tend.intercept_)
+
+        cset = ax03.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+        # ax02.clabel(cset, inline=1, fontsize=10)        
+        cset = ax03.contour(xx, yy, f_Tend, colors='k', levels = 10, alpha = 0.75)
+        ax02.clabel(cset, inline=1, fontsize=10)          
         cax = ax03.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
         cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='bwr', alpha = 0.35, s= 10)        
         ax03.set_xlabel(r"$\beta$", fontsize=20)
@@ -393,7 +449,40 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
         fig0.set_size_inches(29/2, 8/2, forward=True)
 
+        # Compute similarities (Could make this a matrix)
+        d_R0tc      = hyperplane_similarity(regr.coef_,regr.intercept_,regr_tc.coef_[0],regr_tc.intercept_[0])
+        d_R0IPeak   = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0])
+        d_R0Tend    = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Tend.coef_[0],regr_Tend.intercept_[0])
+        d_tcIpeak   = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0])
+        d_tcTend    = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0])
+        d_IpeakTend = hyperplane_similarity(regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0])
 
+        print('d_R0tc = ',d_R0tc, ' d_R0IPeak=', d_R0IPeak, ' d_R0Tend=', d_R0Tend)
+        print('d_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
+
+def hyperplane_similarity(w_1,b_1,w_2,b_2):
+    """
+        Equation for Hyper-plane similarity measure 
+        https://math.stackexchange.com/questions/2124611/on-a-measure-of-similarity-between-two-hyperplanes
+    """
+    # Original version    
+    d = (np.linalg.norm(w_1)*np.linalg.norm(w_2)) - abs(np.dot(w_1, w_2)) + abs(b_1 - b_2)
+    
+    # Normalized version
+    d = 1 - abs(np.dot(w_1, w_2))/(np.linalg.norm(w_1)*np.linalg.norm(w_2)) + abs(b_1 - b_2)
+
+    # Dihedral angle (angle between two intersecting planes.. are they?)
+    n_1  = np.random.randn(2)
+    n_1 -= n_1.dot(w_1)  * w_1 / np.linalg.norm(w_1)**2
+    n_1 /= np.linalg.norm(n_1)
+    
+    n_2  = np.random.randn(2)
+    n_2 -= n_2.dot(w_2)  * w_2 / np.linalg.norm(w_2)**2
+    n_2 /= np.linalg.norm(n_2)
+    
+    d_ = math.acos(abs(np.dot(n_1,n_2))/abs(np.linalg.norm(n_1) * np.linalg.norm(n_2)))
+    print(d_)
+    return d
 
 def plotInfected_evolution(Ivariables, Plotoptions, **kwargs):
     # Unpacking variables
