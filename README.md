@@ -31,7 +31,8 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 ## Installation
 ...
-**Dependencies**:
+
+**Dependencies**: .. ALOT
 
 ## Usage 
 ### Code for Model Simulation
