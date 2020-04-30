@@ -212,28 +212,41 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
 
     # Learn linear regressor between params and R0
     from sklearn import linear_model
+    from sklearn.metrics import mean_squared_error, r2_score
+
     regr = linear_model.LinearRegression()
-    X = SIR_params; Y = R0_samples
+    X = SIR_params; 
+    # X = np.vstack((beta_samples, gamma_inv_samples, R0_samples)).T
+    # X = np.vstack((beta_samples, gamma_inv_samples, R0_samples, beta_samples**2, gamma_inv_samples**2)).T
+    Y = R0_samples
     regr.fit(X, Y)
+    Y_pred = np.empty([1,len(Y)])
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr.predict([X[ii,:]])
+    print('R0 MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('R0 R2: ',  r2_score(Y_pred.T, Y))
     print('R0 Coeff:', regr.coef_, 'R0 Intercept:', regr.intercept_)
     print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
 
     # Learn linear regressor between params and tc
     regr_tc = linear_model.LinearRegression()
-    X = SIR_params; Y = tc_samples
+    Y = tc_samples
     regr_tc.fit(X, Y)
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr_tc.predict([X[ii,:]])
+    print('t_c MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('t_c R2: ',  r2_score(Y_pred.T, Y))
     print('t_c Coeff:', regr_tc.coef_, 't_c Intercept:', regr_tc.intercept_)
 
     regr_Ipeak = linear_model.LinearRegression()
-    X = SIR_params; Y = Ipeak_samples
+    Y = Ipeak_samples
     regr_Ipeak.fit(X, Y)    
     print('Ipeak Coeff:', regr_Ipeak.coef_, 't_c Intercept:', regr_Ipeak.intercept_)
 
     regr_Tend = linear_model.LinearRegression()
-    X = SIR_params; Y = Tend_samples
+    Y = Tend_samples    
     regr_Tend.fit(X, Y)
     print('Tend Coeff:', regr_Tend.coef_, 'Tend Intercept:', regr_Tend.intercept_)
-
 
     # Compute similarities (Could make this a matrix)
     d_R0tc      = hyperplane_similarity(regr.coef_,regr.intercept_,regr_tc.coef_[0],regr_tc.intercept_[0])
@@ -247,7 +260,7 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
     print('d_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
 
     # Options for masking data
-    mask_type = 'R0'
+    mask_type = '95'
 
     # Masked point samples for 95% of outcomes            
     if mask_type == '95':
@@ -283,7 +296,7 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         masked_Ipeak = t_Ipeak[idx_Ipeak]
         masked_Tend  = t_Tend[idx_Tend]        
 
-    print('R0 Error band:' , (R0_max - R0_min)/2.1)
+        print('R0 Error band:' , (R0_max - R0_min)/R0_nom)
 
     maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
     print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
@@ -314,17 +327,17 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         # Plot kde curve and quantile stats    
         ax0.plot(x_vals_tc,tc_kde_pdf,'k', lw=1, label=r"kde")
         ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax0.plot([tc_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95%]")
+        ax0.plot([tc_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
         ax0.plot([tc_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax0.plot([tc_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68%]")
+        ax0.plot([tc_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
         ax0.plot([tc_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
 
         # Plot raw mean and quantile stats
         ax0.plot([tc_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r', lw=2,label=r"mean")
         if plot_data_quant:
-            ax0.plot([tc_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5, label=r"Q[95%]")
+            ax0.plot([tc_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5, label=r"Q[95\%]")
             ax0.plot([tc_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5)
-            ax0.plot([tc_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5, label=r"Q[68%]")
+            ax0.plot([tc_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5, label=r"Q[68\%]")
             ax0.plot([tc_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5)
         ax0.set_title(r"Critical point $t_c$", fontsize=20)
         ax0.grid(True, alpha=0.3)
@@ -346,17 +359,17 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         # Plot kde curve and quantile stats    
         ax1.plot(x_vals_Ipeak,Ipeak_kde_pdf,'k', lw=1, label=r"kde")
         ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax1.plot([Ipeak_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95%]")
+        ax1.plot([Ipeak_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
         ax1.plot([Ipeak_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax1.plot([Ipeak_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68%]")
+        ax1.plot([Ipeak_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
         ax1.plot([Ipeak_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
 
         # Plot raw median and quantile stats
         ax1.plot([Ipeak_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g', lw=2,label=r"mean")    
         if plot_data_quant:
-            ax1.plot([Ipeak_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5, label=r"Q[95%]")
+            ax1.plot([Ipeak_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5, label=r"Q[95\%]")
             ax1.plot([Ipeak_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5)
-            ax1.plot([Ipeak_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5, label=r"Q[68%]")
+            ax1.plot([Ipeak_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5, label=r"Q[68\%]")
             ax1.plot([Ipeak_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5)
 
         ax1.set_title(r"Peak Infectedes $I_{peak}$", fontsize=20)
@@ -379,17 +392,17 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
         # Plot kde curve and quantile stats    
         ax2.plot(x_vals_Tend,Tend_kde_pdf,'k', lw=1, label=r"kde")    
         ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax2.plot([Tend_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95%]")
+        ax2.plot([Tend_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
         ax2.plot([Tend_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax2.plot([Tend_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68%]")
+        ax2.plot([Tend_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
         ax2.plot([Tend_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
 
         # Plot raw median and quantile stats 
         ax2.plot([Tend_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b', lw=2,label=r"mean")    
         if plot_data_quant:
-            ax2.plot([Tend_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5, label=r"Q[95%]")
+            ax2.plot([Tend_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5, label=r"Q[95\%]")
             ax2.plot([Tend_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5)
-            ax2.plot([Tend_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5, label=r"Q[68%]")
+            ax2.plot([Tend_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5, label=r"Q[68\%]")
             ax2.plot([Tend_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5)
 
         ax2.set_title(r"Total cases @ $t_{end}$", fontsize=20)
@@ -436,6 +449,8 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 Y = np.empty([1,N])
                 for ii in range(N):
                     y_regr =  regr.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]])
                     Y[0,ii]  = y_regr[0]
                 f_R0 = np.reshape(Y.T, xx.shape)
                 cset = ax00.contour(xx, yy, f_R0, colors='k', levels = 10, alpha = 0.75)
@@ -472,6 +487,8 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 Y = np.empty([1,N])
                 for ii in range(N):
                     y_regr =  regr_tc.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_tc.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_tc.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
                     Y[0,ii]  = y_regr[0]
                 f_tc = np.reshape(Y.T, xx.shape)
                 cset = ax01.contour(xx, yy, f_tc, colors='k', levels = 10, alpha = 0.75)
@@ -506,6 +523,8 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 Y = np.empty([1,N])
                 for ii in range(N):
                     y_regr =  regr_Ipeak.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_Ipeak.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_Ipeak.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
                     Y[0,ii]  = y_regr[0]
                 f_Ipeak = np.reshape(Y.T, xx.shape)
                 cset = ax02.contour(xx, yy, f_Ipeak, colors='k', levels = 15, alpha = 0.75)
@@ -542,6 +561,8 @@ def plotCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 Y = np.empty([1,N])
                 for ii in range(N):
                     y_regr =  regr_Tend.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_Tend.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_Tend.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
                     Y[0,ii]  = y_regr[0]
                 f_Tend = np.reshape(Y.T, xx.shape)
                 cset = ax03.contour(xx, yy, f_Tend, colors='k', levels = 10, alpha = 0.75)
@@ -1284,7 +1305,8 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     # ax1.plot(t, I_plus/N, 'r--',  lw=2, alpha=0.25)
     ax1.plot(t, I/N, 'r', lw=2,   label='Infected Cases')
     ax1.plot(t, I_med/N, 'r--', lw=2, alpha=0.55)
-    # ax1.plot(t, I_minus/N, 'r--', lw=2, alpha=0.25)
+    ax1.plot(t, I_minus/N, 'r:', lw=2, alpha=0.25)
+    ax1.plot(t, I_plus/N, 'r:', lw=2, alpha=0.25)
     # ax1.fill_between(t,(I - I_std)/N,(I + I_std)/N, color='r', alpha=0.10)
     ax1.fill_between(t,(I_minus)/N,(I_plus)/N, color='r', alpha=0.10)
 
@@ -1293,7 +1315,8 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
         # ax1.plot(t, T_plus/N, 'm--',  lw=2, alpha=0.25)
         ax1.plot(t, T/N, 'm',  lw=2, label='Total Cases')
         ax1.plot(t, T_med/N, 'm--', lw=2,  alpha=0.55)
-        # ax1.plot(t, T_minus/N, 'm--',  lw=2, alpha=0.25)
+        ax1.plot(t, T_minus/N, 'm:',  lw=2, alpha=0.25)
+        ax1.plot(t, T_plus/N, 'm:',  lw=2, alpha=0.25)
         # ax1.fill_between(t,(T - T_std)/N,(T + T_std)/N, color='m', alpha=0.10)
         ax1.fill_between(t,(T_minus)/N,(T_plus)/N, color='m', alpha=0.10)
 

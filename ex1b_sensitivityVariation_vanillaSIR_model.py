@@ -38,7 +38,7 @@ def run_SIR(**kwargs):
     S,I,R   = model.project(days,'ode_int')
     T       = I + R    
 
-    return S,I,R,T,t
+    return S,I,R,T
 
 
 def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
@@ -97,7 +97,7 @@ def main():
         sim_num = 4  --> Yucatan case study
         sim_num = 5  --> Primer case study
     '''
-    sim_num    = 2; scenario   = 0
+    sim_num    = 5; scenario   = 0
     sim_kwargs             = loadSimulationParams(sim_num, scenario, plot_data = 0)
     # Need to get rid of this variable here/..
     sim_kwargs['scenario'] = scenario

@@ -1,6 +1,6 @@
-import numpy             as np
+# import numpy             as np
 import matplotlib.pyplot as plt
-from tqdm                import tqdm
+import xlsxwriter
 
 # Custom classes and helper/plotting functions
 from epimodels.stochastic_sir    import *
@@ -31,7 +31,7 @@ def plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     # Variables: tc_samples, Ipeak_samples, Tend_samples = CO_samples
     plotCriticalPointsStats(SIR_params, CO_samples, **sim_kwargs)
 
-    plot_traces = 0
+    plot_traces = 1
     if plot_traces:
         ### TODO: Add the growth rate plots with errors    
         # plotSIR_growth_realizations(SIR_traces, SIR_params)
@@ -91,6 +91,17 @@ def run(prob_type = 'gamma'):
     sim_kwargs             = loadSimulationParams(sim_num, 0, plot_data = 0)
     basefilename           = sim_kwargs['file_extension']
     
+    results_filename = basefilename + '_' + prob_type + '.xlsx'
+    workbook = xlsxwriter.Workbook(results_filename)
+    worksheet = workbook.add_worksheet()
+    
+    header = ['R_0-mean','R_0-Q97.5','R_0-Q2.5', 'R_0-Q83.5', 'R_0-Q15.5',
+              't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
+              'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
+              'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+    for i in range(len(header)):
+        worksheet.write(0,i, header[i])
+
     # Testing Variants (includes test type and probability distribution type)
     '''Testing options defined in sims.py
         test_num = 1  --> Sample beta, gamma fixed
@@ -103,7 +114,7 @@ def run(prob_type = 'gamma'):
         gamma     --> loc, shape (k), scale (theta)        
         log-Normal --> mean, std
     '''    
-    rollouts  = pow(10,3)  
+    rollouts  = pow(10,4)  
     viz_plots = 1
     
     # for test_num in range(3):
@@ -115,10 +126,12 @@ def run(prob_type = 'gamma'):
         sim_kwargs['file_extension']  = basefilename + _ext
         sim_kwargs['text_error']      = text_error
         sim_kwargs['viz_plots']       = viz_plots
+        sim_kwargs['worksheet']       = worksheet
 
         # Run Montecarlo simulation for chosen parameter test
         run_MC_stochastic_est_SIR(rollouts, *prob_params, **sim_kwargs)
-    
+
+    workbook.close()
 if __name__ == '__main__':
     """ Defined type of probability distributions to sample from:
         gamma, log-Normal (proper distributions)
