@@ -36,11 +36,10 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 
 ## Contact
-Contributors: Nadia Figueroa and Ankit Shah.  
-Advisors: David Kaiser and Julie Shah.
+Nadia Figueroa and Ankit Shah
 
 ## References
-
+Primer paper by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
 
 
 
