@@ -32,8 +32,11 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ## Installation
 
 
-## Example Usage
+## Code Usage for Model Simulation
+...
 
+## Example Sensitivity Analysis
+...
 
 ## Contact
 Nadia Figueroa and Ankit Shah
