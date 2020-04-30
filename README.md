@@ -26,7 +26,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ---
 
 ### Parameter Estimation and Extrapolation Techniques
-* Parameter Optimization
+* Parameter Optimization technique like [fitviruscovid19](https://www.mathworks.com/matlabcentral/fileexchange/74658-fitviruscovid19)
 * Bayesian estimates: Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
 
 ## Installation
