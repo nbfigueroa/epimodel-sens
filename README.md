@@ -39,7 +39,8 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 Nadia Figueroa and Ankit Shah
 
 ## References
-Primer paper by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
+* Primer paper (Analysis of Standard Models) by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
+* Second paper (Analysis of Extended Models) by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
 
 
 
