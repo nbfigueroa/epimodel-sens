@@ -26,7 +26,8 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ---
 
 ### Parameter Estimation and Extrapolation Techniques
-* Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
+* Parameter Optimization
+* Bayesian estimates: Luis. B code for extrapolation, uses data from [here](https://hgis.uw.edu/virus/) csv file can be updated from this [link](https://github.com/jakobzhao/virus/blob/master/assets/virus.csv)
 
 ## Installation
 
