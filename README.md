@@ -32,10 +32,11 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ## Installation
 
 
-## Code Usage for Model Simulation
+## Usage 
+### Code for Model Simulation
 ...
 
-## Example Sensitivity Analysis
+### Example Sensitivity Analysis
 ...
 
 ## Contact
