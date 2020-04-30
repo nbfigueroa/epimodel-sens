@@ -20,7 +20,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
   * *extended SEIR (eSEIR) model*: Standard SEIR model with time-varying beta(t) as described for eSIR.
   
-  * *AFMC SEIQR model*: An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period.
+  * *AFMC SEIQR model*: [might remove] An extended SEIR (with disease related mortality rates) which includes a Quarantine compartment that transitions from the infectedes; i.e. SEIQR. Control/predictions of lockdown policies are modeled by increasing the percentage of quarantined individuals as well as the quarantine period.
     * **Details:** The data of infected people is obtained from the website [Worldometers](https://www.worldometers.info/coronavirus/) to estimate R0 and growth rate parameters. Paper found [here](https://www.sciencedirect.com/science/article/pii/S0377123720300605?via%3Dihub), code not available, but we have an implementation of it [does not match results].
 
 ---
@@ -32,7 +32,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ## Installation
 
 
-## Usage
+## Example Usage
 
 
 ## Contact
