@@ -27,7 +27,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 
 ### Parameter Estimation and Extrapolation Techniques
 * Parameter Optimization technique (curve fitting) like [fitviruscovid19](https://www.mathworks.com/matlabcentral/fileexchange/74658-fitviruscovid19)
-* Bayesian estimates of R_t (Luis B. approcach) as in [here](https://github.com/mansueto-institute/Rt_Real-time_Estimation_Case_Prediction) and [here](https://github.com/k-sys/covid-19/blob/master/Realtime%20R0.ipynb)
+* Bayesian estimates of R_t (Luis B. approach) as in [here](https://github.com/mansueto-institute/Rt_Real-time_Estimation_Case_Prediction) and [here](https://github.com/k-sys/covid-19/blob/master/Realtime%20R0.ipynb)
 
 ## Installation
 
