@@ -32,7 +32,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 ## Installation
 ...
 
-**Dependencies**: .. ALOT
+**Dependencies**: .. NumPy, SciPy, Sci-Kit Learn, StatsModels, Matplotlib, Pyross, Pandas  ...
 
 ## Usage 
 ### Code for Model Simulation
