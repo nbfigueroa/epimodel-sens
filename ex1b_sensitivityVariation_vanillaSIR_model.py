@@ -87,14 +87,14 @@ def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
         kwargs['r0']        = beta_samples[ii]*gamma_inv_samples[ii]
         S,I,R,T             = run_SIR(**kwargs)
 
-        print('*********   Results    *********')    
-        tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)
-        T_tc  = T[tc]
-        print('Total Cases @ Peak = ', T_tc,'by day=', tc)
-        Peak_infected     = I[-1]
-        print('Infected @ tc = ', Peak_infected)
-        total_cases     = T[-1]
-        print('Total Cases @ t(end) = ', total_cases)
+        # print('*********   Results    *********')    
+        # tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)
+        # T_tc  = T[tc]
+        # print('Total Cases @ Peak = ', T_tc,'by day=', tc)
+        # Peak_infected     = I[-1]
+        # print('Infected @ tc = ', Peak_infected)
+        # total_cases     = T[-1]
+        # print('Total Cases @ t(end) = ', total_cases)
 
         # Storing run in matrix for post-processing
         S_samples[ii,:] = S
@@ -138,7 +138,7 @@ def main():
     gamma_inv  = sim_kwargs['gamma_inv']
 
     # Variables for +/- errors on beta
-    error_perc        = 10
+    error_perc        = 30
     err               = error_perc/100
     
     ########### Test 1: Vary beta, fix gamma ############
