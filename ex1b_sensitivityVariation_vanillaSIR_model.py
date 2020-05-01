@@ -41,9 +41,35 @@ def run_SIR(**kwargs):
     return S,I,R,T
 
 
+def storeVariationResults(beta_samples, gamma_inv_samples, I_samples, R_samples, **kwargs):
+    
+    T_samples  = I_samples+ R_samples
+    R0_samples = np.array(beta_samples) * np.array(gamma_inv_samples)
+    tc         = np.argmax(I_samples, axis=1)
+    
+    # Store stats
+    worksheet        = kwargs['worksheet']
+    row_num          = kwargs['row_num']
+
+    tests, days = T_samples.shape
+    tc_samples = []; Ipeak_samples = []; Tend_samples = [];
+    for test in range(tests):      
+        tc_samples.append(tc[test])
+        Ipeak_samples.append(I_samples[test,tc[test]])
+        Tend_samples.append(T_samples[test,days-1])
+
+    worksheet.write_row(row_num, 0,  beta_samples)
+    worksheet.write_row(row_num, 3,  gamma_inv_samples)
+    worksheet.write_row(row_num, 6,  R0_samples)    
+    worksheet.write_row(row_num, 9,  tc_samples)
+    worksheet.write_row(row_num, 12, Ipeak_samples)
+    worksheet.write_row(row_num, 15, Tend_samples)
+
+
+
 def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
     '''
-        Run a multiple SIR simulations (means +/- errors)
+        Run multiple SIR simulations (means +/- errors)
     '''
     scenario = kwargs['scenario']
 
@@ -65,8 +91,8 @@ def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
         tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)
         T_tc  = T[tc]
         print('Total Cases @ Peak = ', T_tc,'by day=', tc)
-        total_infected     = I[-1]
-        print('Infected @ t(end) = ', total_infected)
+        Peak_infected     = I[-1]
+        print('Infected @ tc = ', Peak_infected)
         total_cases     = T[-1]
         print('Total Cases @ t(end) = ', total_cases)
 
@@ -74,6 +100,9 @@ def run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **kwargs):
         S_samples[ii,:] = S
         I_samples[ii,:] = I
         R_samples[ii,:] = R
+
+
+    storeVariationResults(beta_samples, gamma_inv_samples, I_samples, R_samples, **kwargs)
 
     ##############################################################
     ######## Plots Simulation Variables with Error Bounds ########
@@ -102,6 +131,7 @@ def main():
     # Need to get rid of this variable here/..
     sim_kwargs['scenario'] = scenario
     basefilename           = sim_kwargs['file_extension']
+    workbook, worksheet    = createResultsfile(basefilename, 'errorVary', test_type='varying')
 
     ## For variation on these parameters
     beta       = sim_kwargs['beta']
@@ -114,6 +144,8 @@ def main():
     ########### Test 1: Vary beta, fix gamma ############
     text_error                    = r"$\beta \pm %1.2f \beta $"%err
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryBeta"
+    sim_kwargs['worksheet']       = worksheet
+    sim_kwargs['row_num']         = 1
     beta_samples                  = [beta, beta*(1+err), beta*(1-err)]
     gamma_inv_samples             = [gamma_inv, gamma_inv, gamma_inv]
     run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **sim_kwargs)
@@ -122,6 +154,8 @@ def main():
     ########### Test 2: fix beta, vary gamma ############
     text_error                    = r"$\gamma^{-1} \pm %1.2f \gamma^{-1} $"%err
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryGamma"
+    sim_kwargs['worksheet']       = worksheet
+    sim_kwargs['row_num']         = 2
     beta_samples                  = [beta, beta, beta]
     gamma_inv_samples             = [gamma_inv, gamma_inv*(1+err), gamma_inv*(1-err)]
     run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **sim_kwargs)
@@ -130,11 +164,14 @@ def main():
     ########### Test 3: fix beta, vary gamma ############
     text_error                    =  r"$\beta \pm %1.2f \beta $"%err + "\n" +  r"$\gamma^{-1} \pm %1.2f \gamma^{-1} $"%err
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryBetaGamma"
+    sim_kwargs['worksheet']       = worksheet
+    sim_kwargs['row_num']         = 3
     beta_samples      = [beta, beta*(1+err), beta*(1-err)]
     gamma_inv_samples = [gamma_inv, gamma_inv*(1+err), gamma_inv*(1-err)]
     run_SIR_wErrors(beta_samples, gamma_inv_samples, text_error, **sim_kwargs)
     plt.show()
     
+    workbook.close()
 
 if __name__ == '__main__':
     main()

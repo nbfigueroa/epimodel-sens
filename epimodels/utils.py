@@ -1,6 +1,5 @@
 import math
 import numpy  as np
-import pandas as pd 
 from   scipy.optimize import fsolve
 from   scipy.signal   import find_peaks
 from   scipy          import stats
@@ -12,8 +11,11 @@ from   matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
+import pandas as pd 
+import xlsxwriter
+
 ###########################################################################################################
-#############                          FUNCTIONS FOR DATA LOADING                             ############
+#############                          FUNCTIONS FOR DATA LOADING/WRITING                      ############
 ###########################################################################################################
 def loadYucatanData():
     file           = r'./data/covid_yucatan.xlsx'
@@ -90,8 +92,34 @@ def loadCSSEData(country, plot_data):
     return data
 
 
+def createResultsfile(basefilename = './results/test', append_name= 'results', test_type='sampling'):
+    results_filename = basefilename + '_' + append_name + '.xlsx'
+    workbook = xlsxwriter.Workbook(results_filename)
+    worksheet = workbook.add_worksheet()
+
+    if test_type == 'sampling':    
+        header = ['beta-mean','beta-Q97.5','beta-Q2.5', 'beta-Q83.5', 'beta-Q15.5',
+                  'gamma-inv-mean','gamma-inv-Q97.5','gamma-inv-Q2.5', 'gamma-inv-Q83.5', 'gamma-inv-Q15.5',
+                  'R_0-mean','R_0-Q97.5','R_0-Q2.5', 'R_0-Q83.5', 'R_0-Q15.5',
+                  't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
+                  'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
+                  'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+
+    if test_type == 'varying':    
+                header = ['beta','beta-max', 'beta-max',
+                          'gamma_inv', 'gamma_inv-max','gamma_inv-min',
+                          'R_0', 'R_0-max', 'R_0-min',
+                          't_c', 't_c-max','t_c-min',
+                          'I_peak', 'I_peak-max', 'I_peak-min',
+                          'T_end', 'T_end-max', 'T_end-min']
+
+    for i in range(len(header)):
+        worksheet.write(0,i, header[i])
+
+    return workbook, worksheet    
+
 ########################################################################################################
-#############                       Functions FOR ALL MODELS                               #############
+#############                   Functions FOR ALL MODEL TESTS                               ############
 ########################################################################################################
 def getCriticalPointsAfterPeak(I):
     """

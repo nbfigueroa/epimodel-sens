@@ -1,18 +1,13 @@
-# import numpy             as np
-import matplotlib.pyplot as plt
-import xlsxwriter
-
 # Custom classes and helper/plotting functions
 from epimodels.stochastic_sir    import *
-from epimodels.sir    import *
 from epimodels.utils  import *
 from epimodels.plots  import *
 from epimodels.sims   import *
 
 
-def plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
+def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     '''
-        Plot results from Monte Carlo simulation of SIR-type models
+        Compute and Plot results from Monte Carlo simulation of SIR-type models
     '''
 
     # Unpack rollout traces
@@ -29,7 +24,7 @@ def plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     # Critical outputs from realizations
     CO_samples = getCriticalPointsDistribution(I_samples, R_samples)
     # Variables: tc_samples, Ipeak_samples, Tend_samples = CO_samples
-    plotCriticalPointsStats(SIR_params, CO_samples, **sim_kwargs)
+    computeCriticalPointsStats(SIR_params, CO_samples, **sim_kwargs)
 
     plot_traces = 1
     if plot_traces:
@@ -73,7 +68,7 @@ def run_MC_stochastic_est_SIR(rollouts, *prob_params, **sim_kwargs):
     ##############################################################
     ######## Plots and Results Statistics and Realizations #######
     ##############################################################
-    plotSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs)
+    computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs)
 
 
 def run(prob_type = 'gamma'):
@@ -87,20 +82,10 @@ def run(prob_type = 'gamma'):
         sim_num = 4  --> Yucatan case study
         sim_num = 5  --> Primer case study
     '''
-    sim_num                = 5
-    sim_kwargs             = loadSimulationParams(sim_num, 0, plot_data = 0)
-    basefilename           = sim_kwargs['file_extension']
-    
-    results_filename = basefilename + '_' + prob_type + '.xlsx'
-    workbook = xlsxwriter.Workbook(results_filename)
-    worksheet = workbook.add_worksheet()
-    
-    header = ['R_0-mean','R_0-Q97.5','R_0-Q2.5', 'R_0-Q83.5', 'R_0-Q15.5',
-              't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
-              'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
-              'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
-    for i in range(len(header)):
-        worksheet.write(0,i, header[i])
+    sim_num             = 5
+    sim_kwargs          = loadSimulationParams(sim_num, 0, plot_data = 0)
+    basefilename        = sim_kwargs['file_extension']
+    workbook, worksheet = createResultsfile(basefilename, prob_type, test_type='sampling')
 
     # Testing Variants (includes test type and probability distribution type)
     '''Testing options defined in sims.py
@@ -113,28 +98,29 @@ def run(prob_type = 'gamma'):
         gaussian  --> mean, std
         gamma     --> loc, shape (k), scale (theta)        
         log-Normal --> mean, std
-    '''    
-    rollouts  = pow(10,4)  
-    viz_plots = 1
-    
-    # for test_num in range(3):
-    if viz_plots:    
-        # prob_params, plot_vars        = getSIRTestingParams(test_num+1, prob_type,**sim_kwargs)
-        prob_params, plot_vars        = getSIRTestingParams(3, prob_type,**sim_kwargs)
+    '''
+    rollouts  = pow(10,4)
+    viz_plots = 0
+
+    for test_num in [1, 2, 3]:
+        prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
+        
         # unpack plotting and file variables
         text_error, _ext              = plot_vars
         sim_kwargs['file_extension']  = basefilename + _ext
         sim_kwargs['text_error']      = text_error
         sim_kwargs['viz_plots']       = viz_plots
         sim_kwargs['worksheet']       = worksheet
+        sim_kwargs['row_num']         = test_num
 
         # Run Montecarlo simulation for chosen parameter test
         run_MC_stochastic_est_SIR(rollouts, *prob_params, **sim_kwargs)
 
     workbook.close()
+
 if __name__ == '__main__':
     """ Defined type of probability distributions to sample from:
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gamma')
+    run(prob_type = 'gaussian')

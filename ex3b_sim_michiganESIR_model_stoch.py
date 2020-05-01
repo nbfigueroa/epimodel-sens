@@ -227,4 +227,4 @@ if __name__ == '__main__':
     plt.ylabel('Proportion of population', fontsize = 18)
     plt.plot(I_mean/N, label = 'Infected')
     plt.fill_between(np.arange(len(I_mean)), I_up/N, I_down/N, alpha = 0.5)
-    
+    plt.show()

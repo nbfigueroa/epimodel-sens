@@ -115,7 +115,7 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1):
     return sim_kwargs
 
 
-def getSIRTestingParams(test_num, prob_type,**sim_kwargs):
+def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
     '''
         Generate the parameters for different testing 
         and probability distribution variants
@@ -188,8 +188,11 @@ def getSIRTestingParams(test_num, prob_type,**sim_kwargs):
     ########### Method 3: Drawing from Gamma Distributions ############
     ###################################################################
     if prob_type  == 'gamma':           
-        beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
-        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
+        # beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
+        # gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
+
+        beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
+        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
         
         ########### Test 1: Sample beta, fix gamma ############
         if test_num == 1:
@@ -197,6 +200,7 @@ def getSIRTestingParams(test_num, prob_type,**sim_kwargs):
             gamma_inv_loc   = sim_kwargs['gamma_inv']
             _ext          = "_errorsSampleBeta_Gamma"
             text_error  =  r"$\beta \sim Gamma(.)$"
+
         ############ Test 2: fix beta, Sample gamma ############
         if test_num == 2:
             beta_scale     = 0

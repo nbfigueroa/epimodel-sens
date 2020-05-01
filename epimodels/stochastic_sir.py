@@ -111,23 +111,24 @@ class StochasticSIR():
         
         samples = {}
         
+        # These hacks are necessary for the gaussian distribution, which is wrong to use anyway
         if isinstance(self.beta_dist, stats._distn_infrastructure.rv_frozen):
-            beta = 0
-            while beta < 0.1:
-                beta = self.beta_dist.rvs(1)[0]     
+            beta = self.beta_dist.rvs(1)[0]
+            while beta < 0.15:
+                beta = self.beta_dist.rvs(1)[0]
 
             samples['beta'] = beta
         else:
-            samples['beta'] = self.beta_dist.rvs(1)[0]            
+            samples['beta'] = self.beta_dist
 
         if isinstance(self.gamma_inv_dist, stats._distn_infrastructure.rv_frozen):
-            gamma_inv = 0
-            while gamma_inv < 2:
+            gamma_inv = self.gamma_inv_dist.rvs(1)[0]
+            while gamma_inv < 3:
                 gamma_inv = self.gamma_inv_dist.rvs(1)[0]
 
             samples['gamma'] = 1/gamma_inv
         else:
-            samples['gamma'] = 1/self.gamma_inv_dist.rvs(1)[0]
+            samples['gamma'] = 1/self.gamma_inv_dist
 
         return samples
     
