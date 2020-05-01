@@ -99,10 +99,11 @@ def run(prob_type = 'gamma'):
         gamma     --> loc, shape (k), scale (theta)        
         log-Normal --> mean, std
     '''
-    rollouts  = pow(10,4)
+    rollouts  = pow(10,5)
     viz_plots = 0
 
     for test_num in [1, 2, 3]:
+    # for test_num in [1]:
         prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables
@@ -123,4 +124,4 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gaussian')
+    run(prob_type = 'log-normal')
