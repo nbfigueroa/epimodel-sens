@@ -230,10 +230,10 @@ def gatherMCstats(S_samples, I_samples, R_samples, bound_type='CI', bound_param 
     T_mean, T_med, T_std, T_upper, T_lower = computeStats(T_samples, bound_type, bound_param)
 
     # Pack values for plotting and analysis
-    S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower))    
-    I_stats          = np.vstack((I_mean, I_med, I_upper, I_lower))    
-    R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower))    
-    T_stats          = np.vstack((T_mean, T_med, T_upper, T_lower))    
+    S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower, S_std))    
+    I_stats          = np.vstack((I_mean, I_med, I_upper, I_lower, I_std))    
+    R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower, R_std))    
+    T_stats          = np.vstack((T_mean, T_med, T_upper, T_lower, T_std))    
     return S_stats, I_stats, R_stats, T_stats
 
 

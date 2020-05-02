@@ -18,13 +18,17 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     # Plot Histogram of Sampled Parameters beta and gamma    
     filename          = sim_kwargs['file_extension'] + "_paramSamples"
     plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename,  *prob_params)
-    print('Beta interval: [', beta_samples[np.argmin(beta_samples)], ',', beta_samples[np.argmax(beta_samples)],']')
-    print('Gamma^-1 interval: [', gamma_inv_samples[np.argmin(gamma_inv_samples)], ',', gamma_inv_samples[np.argmax(gamma_inv_samples)],']')
+    print('Beta interval: [', np.mean(beta_samples), beta_samples[np.argmin(beta_samples)], ',', beta_samples[np.argmax(beta_samples)],']')
+    print('Gamma^-1 interval: [', np.mean(gamma_inv_samples), gamma_inv_samples[np.argmin(gamma_inv_samples)], ',', gamma_inv_samples[np.argmax(gamma_inv_samples)],']')
     
-    # Critical outputs from realizations
+    # Critical outputs from realizations Variables: tc_samples, Ipeak_samples, Tend_samples = CO_samples
     CO_samples = getCriticalPointsDistribution(I_samples, R_samples)
-    # Variables: tc_samples, Ipeak_samples, Tend_samples = CO_samples
-    computeCriticalPointsStats(SIR_params, CO_samples, **sim_kwargs)
+
+    # Compute Stats on Critical Quantities and Plots 
+    # TODO: Split this function to plot and compute..
+    plot_data_quant  = 0; plot_regress_lines = 0; do_histograms = 1; do_contours = 1; do_mask = 1
+    plot_options = plot_data_quant, plot_regress_lines, do_histograms, do_contours, do_mask
+    computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **sim_kwargs)
 
     plot_traces = 1
     if plot_traces:
@@ -38,11 +42,16 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
         S_stats, I_stats, R_stats, T_stats = gatherMCstats(S_samples, I_samples, R_samples, bound_type = 'Quantiles', bound_param = [0.025, 0.975])    
         printMeanResults(I_stats, R_stats)
 
-        x_axis_offset       = round(sim_kwargs['days']*0.25)
-        y_axis_offset       = 0.0000003 
-        plot_all            = 1; plot_peaks = 1; show_S = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
-        Plotoptions         = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset
-        plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, Plotoptions, **sim_kwargs)    
+        x_axis_offset        = round(sim_kwargs['days']*0.25)
+        y_axis_offset        = 0.0000003 
+        plot_all             = 1; plot_peaks = 1; show_S = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
+        plot_options          = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset
+        plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
+
+        # Plot curves with std error bars [Optional.. for analysis purposes]
+        sim_kwargs["do_std"] = 1
+        plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
+
 
     if sim_kwargs['viz_plots']:
         plt.show()
@@ -103,6 +112,7 @@ def run(prob_type = 'gamma'):
     viz_plots = 0
 
     for test_num in [1, 2, 3]:
+    # for test_num in [3]:        
         prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables
@@ -123,4 +133,4 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'log-normal')
+    run(prob_type = 'gamma')

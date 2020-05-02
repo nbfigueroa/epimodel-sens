@@ -163,9 +163,11 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
         gamma_inv_mean        = gamma_inv    
 
         # TODO: Compute the std's with equations from Dave's report
-        beta_std              = 0.09
-        gamma_inv_std         = 1.73 
-        
+        # beta_std              = 0.09
+        # gamma_inv_std         = 1.73 
+        beta_std              = 0.09 * 0.5
+        gamma_inv_std         = 1.73 * 0.55
+
         ########### Test 1: Sample beta, fix gamma ############
         if test_num == 1:
             gamma_inv_std = 0.00
@@ -188,8 +190,8 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
     ########### Method 3: Drawing from Gamma Distributions ############
     ###################################################################
     if prob_type  == 'gamma':           
-        # beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
-        # gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
+        beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
+        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
         beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301

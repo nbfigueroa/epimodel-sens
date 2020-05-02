@@ -129,12 +129,9 @@ def hyperplane_similarity(w_1,b_1,w_2,b_2, sim_type = 'sim'):
     return d
 
 
-def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
+def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
 
-    plot_data_quant    = 0
-    plot_regress_lines = 0
-    do_histograms      = 1
-    do_contours        = 1
+    plot_data_quant, plot_regress_lines, do_histograms, do_contours, do_mask = plot_options
 
     beta_samples      = SIR_params[:,0]
     gamma_inv_samples = SIR_params[:,1]
@@ -288,59 +285,60 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
     print('d_R0tc = ',d_R0tc, ' d_R0IPeak=', d_R0IPeak, ' d_R0Tend=', d_R0Tend)
     print('d_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
 
-    # Options for masking data
-    mask_type = '95'
+    if do_mask:
+        # Options for masking data
+        mask_type = '95'
 
-    # Masked point samples for 95% of outcomes            
-    if mask_type == '95':
-        do_95 = 1
-        idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower95, t_tc < tc_kde_upper95))
-        masked_tc    = t_tc[idx_tc]
-        idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower95, t_Ipeak < Ipeak_kde_upper95))
-        masked_Ipeak = t_Ipeak[idx_Ipeak]
-        idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower95, t_Tend < Tend_kde_upper95))
-        masked_Tend  = t_Tend[idx_Tend]
+        # Masked point samples for 95% of outcomes            
+        if mask_type == '95':
+            do_95 = 1
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower95, t_tc < tc_kde_upper95))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower95, t_Ipeak < Ipeak_kde_upper95))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower95, t_Tend < Tend_kde_upper95))
+            masked_Tend  = t_Tend[idx_Tend]
 
-    # Masked point samples for 68% of outcomes
-    if mask_type == '68':
-        do_95 = 0            
-        idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
-        masked_tc    = t_tc[idx_tc]
-        idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
-        masked_Ipeak = t_Ipeak[idx_Ipeak]
-        idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
-        masked_Tend  = t_Tend[idx_Tend]        
+        # Masked point samples for 68% of outcomes
+        if mask_type == '68':
+            do_95 = 0            
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
+            masked_Tend  = t_Tend[idx_Tend]        
 
-    # Masked point samples for r0 slice
-    if mask_type == 'R0':
-        do_95        = -1           
+        # Masked point samples for r0 slice
+        if mask_type == 'R0':
+            do_95        = -1           
 
-        R0_nom = 2.3; R0_err = 0.20
-        R0_min = R0_nom - R0_nom*R0_err
-        R0_max = R0_nom + R0_nom*R0_err
+            R0_nom = 2.3; R0_err = 0.20
+            R0_min = R0_nom - R0_nom*R0_err
+            R0_max = R0_nom + R0_nom*R0_err
 
-        idx_R0       = np.nonzero(np.logical_and(R0_samples > R0_min, R0_samples < R0_max))
-        idx_tc = idx_R0; idx_Ipeak = idx_R0; idx_Tend = idx_R0
-        masked_tc    = t_tc[idx_tc]
-        masked_Ipeak = t_Ipeak[idx_Ipeak]
-        masked_Tend  = t_Tend[idx_Tend]        
+            idx_R0       = np.nonzero(np.logical_and(R0_samples > R0_min, R0_samples < R0_max))
+            idx_tc = idx_R0; idx_Ipeak = idx_R0; idx_Tend = idx_R0
+            masked_tc    = t_tc[idx_tc]
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            masked_Tend  = t_Tend[idx_Tend]        
 
-        print('R0 Error band:' , (R0_max - R0_min)/R0_nom)
+            print('R0 Error band:' , (R0_max - R0_min)/R0_nom)
 
-    maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
-    tc_error = (maskedtc_upper95 - maskedtc_lower95)/maskedtc_bar
-    print('Error band:' , tc_error)
+            maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
+            tc_error = (maskedtc_upper95 - maskedtc_lower95)/maskedtc_bar
+            print('Error band:' , tc_error)
 
-    maskedIpeak_bar, maskedIpeak_med, Ipeak_std, maskedIpeak_upper95, maskedIpeak_lower95 = computeStats(masked_Ipeak, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    print('MASKED:: Mean Ipeak=',maskedIpeak_bar, ' Med Ipeak=', maskedIpeak_med, 'Up.Q Ipeak=', maskedIpeak_upper95, 'Low.Q Ipeak=', maskedIpeak_lower95)
-    Ipeak_error = (maskedIpeak_upper95 - maskedIpeak_lower95)/maskedIpeak_bar
-    print('Error band:' , Ipeak_error)
+            maskedIpeak_bar, maskedIpeak_med, Ipeak_std, maskedIpeak_upper95, maskedIpeak_lower95 = computeStats(masked_Ipeak, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean Ipeak=',maskedIpeak_bar, ' Med Ipeak=', maskedIpeak_med, 'Up.Q Ipeak=', maskedIpeak_upper95, 'Low.Q Ipeak=', maskedIpeak_lower95)
+            Ipeak_error = (maskedIpeak_upper95 - maskedIpeak_lower95)/maskedIpeak_bar
+            print('Error band:' , Ipeak_error)
 
-    maskedTend_bar, maskedTend_med, Tend_std, maskedTend_upper95, maskedTend_lower95 = computeStats(masked_Tend, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
-    Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
-    print('Error band:' , Tend_error)
+            maskedTend_bar, maskedTend_med, Tend_std, maskedTend_upper95, maskedTend_lower95 = computeStats(masked_Tend, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
+            Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
+            print('Error band:' , Tend_error)
 
     ####################################################################
     #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
@@ -485,7 +483,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 cset = ax00.contour(xx, yy, f_R0, colors='k', levels = 10, alpha = 0.75)
                 ax00.clabel(cset, inline=1, fontsize=10)                
             else:
-                cset = ax00.contour(xx, yy, f, colors='k', levels = 8, alpha = 0.85)
+                cset = ax00.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
                 ax00.clabel(cset, inline=1, fontsize=10)        
 
             cax = ax00.scatter(beta_samples, gamma_inv_samples, c=R0_samples,  cmap='tab20c', alpha = 0.85, s= 10)
@@ -504,6 +502,12 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
             fig00.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
             # fig00.tight_layout()
             fig00.set_size_inches(29/2 * 0.35, 9/2, forward=True)
+
+            if kwargs['store_plots']:
+                if plot_regress_lines:
+                    plt.savefig(kwargs['file_extension'] + "_ParamSamplesContours_regress.png", bbox_inches='tight')
+                else: 
+                    plt.savefig(kwargs['file_extension'] + "_ParamSamplesContours.png", bbox_inches='tight')
 
             ##########################################################################################
             #### Contour plots of 2D gaussian kde Param distribution with regression hyper-plane  ####
@@ -526,7 +530,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='tab20c', alpha = 0.55, s= 10)
             else:
                 cax = ax01.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
-                cset = ax01.contour(xx, yy, f, colors='k', levels = 8, alpha = 0.85)
+                cset = ax01.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
                 ax01.clabel(cset, inline=1, fontsize=10)                
                 # cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='RdBu', alpha = 0.35, s= 10)
                 cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='tab20c', alpha = 0.85, s= 10)
@@ -562,7 +566,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='tab20c', alpha = 0.55, s= 10)
             else:
                 cax = ax02.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
-                cset = ax02.contour(xx, yy, f, colors='k', levels = 8, alpha = 0.85)
+                cset = ax02.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
                 ax02.clabel(cset, inline=1, fontsize=10)        
                 # cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='PiYG', alpha = 0.35, s= 10)
                 cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='tab20c', alpha = 0.85, s= 10)
@@ -600,7 +604,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
                 cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='tab20c', alpha = 0.55, s= 10)
             else:
                 cax = ax03.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
-                cset = ax03.contour(xx, yy, f, colors='k', levels = 8, alpha = 0.85)
+                cset = ax03.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
                 ax02.clabel(cset, inline=1, fontsize=10)        
                 # cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='bwr', alpha = 0.35, s= 10)
                 cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='tab20c', alpha = 0.85, s= 10)
@@ -624,6 +628,13 @@ def computeCriticalPointsStats(SIR_params, CO_samples, **kwargs):
             # Global figure adjustments            
             fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
             fig0.set_size_inches(29/2, 8/2, forward=True)
+
+            if kwargs['store_plots']:
+                if plot_regress_lines:
+                    plt.savefig(kwargs['file_extension'] + "_CriticalPointsContours_regress.png", bbox_inches='tight')
+                else: 
+                    plt.savefig(kwargs['file_extension'] + "_CriticalPointsContours.png", bbox_inches='tight')
+
 
 def plotInfected_evolution(Ivariables, Plotoptions, **kwargs):
     # Unpacking variables
@@ -1256,23 +1267,34 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
     S       = S_variables[0,:]
     S_med   = S_variables[1,:]
-    S_plus  = S_variables[2,:]
-    S_minus = S_variables[3,:]
-
     I       = I_variables[0,:]
     I_med   = I_variables[1,:]
-    I_plus  = I_variables[2,:]
-    I_minus = I_variables[3,:]
-
     R       = R_variables[0,:]
     R_med   = R_variables[1,:]
-    R_plus  = R_variables[2,:]
-    R_minus = R_variables[3,:]
-
     T       = T_variables[0,:]
     T_med   = T_variables[1,:]
-    T_plus  = T_variables[2,:]
-    T_minus = T_variables[3,:]
+
+
+
+    if 'do_std' in kwargs and kwargs["do_std"]:
+        S_plus  = S + 2*S_variables[4,:]
+        S_minus = S - 2*S_variables[4,:]
+        I_plus  = I + 2*I_variables[4,:]
+        I_minus = I - 2*I_variables[4,:]
+        R_plus  = R + 2*R_variables[4,:]
+        R_minus = R - 2*R_variables[4,:]
+        T_plus  = T + 2*T_variables[4,:]
+        T_minus = T - 2*T_variables[4,:]        
+    else:        
+        S_plus  = S_variables[2,:]
+        S_minus = S_variables[3,:]
+        I_plus  = I_variables[2,:]
+        I_minus = I_variables[3,:]
+        R_plus  = R_variables[2,:]
+        R_minus = R_variables[3,:]    
+        T_plus  = T_variables[2,:]
+        T_minus = T_variables[3,:]
+
 
     Tf = len(T_plus)
     t = np.arange(0, Tf, 1)
@@ -1334,25 +1356,28 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     # ax1.plot(t, I_plus/N, 'r--',  lw=2, alpha=0.25)
     ax1.plot(t, I/N, 'r', lw=2,   label='Infected Cases')
     ax1.plot(t, I_med/N, 'r--', lw=2, alpha=0.55)
-    ax1.plot(t, I_minus/N, 'r:', lw=2, alpha=0.25)
-    ax1.plot(t, I_plus/N, 'r:', lw=2, alpha=0.25)
+    # ax1.plot(t, I_minus/N, 'r:', lw=2, alpha=0.25)
+    # ax1.plot(t, I_plus/N, 'r:', lw=2, alpha=0.25)
     # ax1.fill_between(t,(I - I_std)/N,(I + I_std)/N, color='r', alpha=0.10)
-    ax1.fill_between(t,(I_minus)/N,(I_plus)/N, color='r', alpha=0.10)
+    if 'do_std' in kwargs and kwargs["do_std"]:
+        ax1.fill_between(t,(I_minus)/N,(I_plus)/N, color='r', alpha=0.10, label=r'$\pm2\sigma$')
+    else:
+        ax1.fill_between(t,(I_minus)/N,(I_plus)/N, color='r', alpha=0.10, label=r'$Q[95\%]$')
 
     scenario = 2
     if show_T:
         # ax1.plot(t, T_plus/N, 'm--',  lw=2, alpha=0.25)
         ax1.plot(t, T/N, 'm',  lw=2, label='Total Cases')
         ax1.plot(t, T_med/N, 'm--', lw=2,  alpha=0.55)
-        ax1.plot(t, T_minus/N, 'm:',  lw=2, alpha=0.25)
-        ax1.plot(t, T_plus/N, 'm:',  lw=2, alpha=0.25)
+        # ax1.plot(t, T_minus/N, 'm:',  lw=2, alpha=0.25)
+        # ax1.plot(t, T_plus/N, 'm:',  lw=2, alpha=0.25)
         # ax1.fill_between(t,(T - T_std)/N,(T + T_std)/N, color='m', alpha=0.10)
         ax1.fill_between(t,(T_minus)/N,(T_plus)/N, color='m', alpha=0.10)
 
         total_cases     = T[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
-        txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        txt1 = "{per:2.3f} {number_scaling} total cases as $t(end)$"
         ax1.text(t[-1]-x_axis_offset, 1.02*(total_cases/N), txt1.format(number_scaling =number_scaling,  per=total_cases/scale), fontsize=15, color='m')
 
         total_cases     = T_minus[-1]
@@ -1398,7 +1423,9 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     I_tc_minus     = I_minus[I_tc_minus_idx]
     print('Peak Instant. Infected + Error= ', I_tc_minus,'by day=', I_tc_minus_idx)
 
-    do_plus = 1; do_minus = 1
+
+    do_plus = 0
+    do_minus = do_plus
     if abs(tc-I_tc_plus_idx) < 3:
         do_plus = 0
     if abs(tc-I_tc_minus_idx) < 3:
@@ -1432,18 +1459,18 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
         else:
             # Adjust automatically
-            txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
             ax1.text(tc+10, (1)*I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_plus:        
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
                 ax1.text(I_tc_plus_idx-25, 1.05*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_minus:
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
                 ax1.text(I_tc_minus_idx+10, I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         if plot_all == 1:
             ax1.plot(tc, T_tc/N,'mo', markersize=8)
-            txt_title2 = r"Total Cases: {peak_total:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            txt_title2 = r"Total Cases: {peak_total:2.3f} {number_scaling} by day {peak_days:10.0f} " 
             ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
 
 
@@ -1468,8 +1495,12 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     fig.set_size_inches(27.5/2, 16.5/2, forward=True)
 
     if store_plots:
-        plt.savefig(filename + ".png", bbox_inches='tight')
-        # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
+        if 'do_std' in kwargs and kwargs["do_std"]:
+            plt.savefig(filename + "_std.png", bbox_inches='tight')
+            # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
+        else:
+            plt.savefig(filename + ".png", bbox_inches='tight')
+            # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
 
 
 def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_params):
@@ -1481,15 +1512,18 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
     count, bins, ignored = ax1.hist(beta_samples, 30, density=True, alpha=0.55, edgecolor='k')
 
     if prob_params[0] == 'uniform':
-        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)        
+        ax1.set_xlabel(r"$\beta \sim \mathcal{U}$", fontsize=15)        
+        ax1.set_xlim(0, 1.0)    
 
     if prob_params[0] == 'gaussian':
         mu    = prob_params[1]
         sigma = prob_params[2] + 0.00001
+        bins  = np.arange(0,1,0.001)
         ax1.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
                        np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
         ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)    
-
+        ax1.set_xlim(0, 1.0)    
+        
     if prob_params[0] == 'gamma':
         g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
         # Plot gamma samples and pdf
