@@ -162,11 +162,14 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
         beta_mean             = beta        
         gamma_inv_mean        = gamma_inv    
 
-        # TODO: Compute the std's with equations from Dave's report
+        # TODO: Theoretical range is 1-sigma (from Dave's report)
         # beta_std              = 0.09
-        # gamma_inv_std         = 1.73 
+        # gamma_inv_std         = 1.73
+
+        # Theoretical range is 2-sigma
         beta_std              = 0.09 * 0.5
         gamma_inv_std         = 1.73 * 0.55
+        gamma_inv_std         = 1.73 * 0.5
 
         ########### Test 1: Sample beta, fix gamma ############
         if test_num == 1:
@@ -229,6 +232,7 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
         ### TODO: Compute the std's with equations from Dave's report to make it generalizable.. need to define intervals
         beta_std_X              = 0.09 / 3.475
         gamma_inv_std_X         = 1.73  / 2
+        # These values are tighter than the ones used for the standard gaussian distribution
 
         # Convert to logs for log-normal distribution method 1
         beta_mean             = np.log(pow(beta_X,2)/(math.sqrt(pow(beta_X,2) + pow(beta_std_X,2))))       

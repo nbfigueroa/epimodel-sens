@@ -80,7 +80,7 @@ def main():
         sim_num = 4  --> Yucatan case study
         sim_num = 5  --> Primer case study
     '''
-    sim_num    = 5;
+    sim_num    = 2;
     sim_kwargs = loadSimulationParams(sim_num, 0)
 
     #####################################################

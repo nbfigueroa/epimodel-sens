@@ -1523,20 +1523,22 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
                        np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
         ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)    
         ax1.set_xlim(0, 1.0)    
-        
+
     if prob_params[0] == 'gamma':
         g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
         # Plot gamma samples and pdf
         x = np.arange(0,1,0.001)
         ax1.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[1], prob_params[2]))
+        ax1.set_xlabel(r"$\beta \sim Gamma$", fontsize=15)    
 
     if prob_params[0] == 'log-normal':
         mu    = prob_params[1]
         sigma = prob_params[2] + 0.00001 
         # x = np.linspace(min(bins), max(bins), 10000)
         x = np.arange(0,1,0.001)
-        pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
+        pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))        
         ax1.plot(x, pdf, linewidth=2, color='r')
+        ax1.set_xlabel(r"$\beta \sim LogNormal$", fontsize=15)    
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
@@ -1566,6 +1568,7 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
         # Plot gamma samples and pdf
         x = np.arange(1,15,0.1)
         ax2.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[3], prob_params[4]))
+        ax2.set_xlabel(r"$\gamma^{-1} \sim Gamma$", fontsize=15)          
 
     if prob_params[0] == 'log-normal':
         mu    = prob_params[3]
@@ -1573,6 +1576,7 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
         x = np.arange(1,15,0.1)
         pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
         plt.plot(x, pdf, linewidth=2, color='r')
+        ax2.set_xlabel(r"$\gamma^{-1} \sim LogNormal$", fontsize=15)          
 
 
     for tick in ax2.xaxis.get_major_ticks():
