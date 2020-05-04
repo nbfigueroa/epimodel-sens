@@ -26,7 +26,7 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
 
     # Compute Stats on Critical Quantities and Plots 
     # TODO: Split this function to plot and compute..
-    plot_data_quant  = 0; plot_regress_lines = 0; do_histograms = 1; do_contours = 1; do_mask = 1
+    plot_data_quant  = 0; plot_regress_lines = 1; do_histograms = 1; do_contours = 1; do_mask = 1
     plot_options = plot_data_quant, plot_regress_lines, do_histograms, do_contours, do_mask
     computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **sim_kwargs)
 
@@ -133,4 +133,4 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gaussian')
+    run(prob_type = 'gamma')
