@@ -1744,6 +1744,359 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
 ##..
 ##..
 ##..
+def plotSEIR_evolutionStochastic(S_variables, E_variables, I_variables, R_variables, T_variables, Plotoptions, **kwargs):    
+
+    S       = S_variables[0,:]
+    S_med   = S_variables[1,:]
+    S_plus  = S_variables[2,:]
+    S_minus = S_variables[3,:]
+    
+    E       = E_variables[0,:]
+    E_med   = E_variables[1,:]
+    E_plus  = E_variables[2,:]
+    E_minus = E_variables[3,:]
+
+    I       = I_variables[0,:]
+    I_med   = I_variables[1,:]
+    I_plus  = I_variables[2,:]
+    I_minus = I_variables[3,:]
+
+    R       = R_variables[0,:]
+    R_med   = R_variables[1,:]
+    R_plus  = R_variables[2,:]
+    R_minus = R_variables[3,:]
+
+    T       = T_variables[0,:]
+    T_med   = T_variables[1,:]
+    T_plus  = T_variables[2,:]
+    T_minus = T_variables[3,:]
+
+    Tf = len(T_plus)
+    t = np.arange(0, Tf, 1)
+
+    # Unpack
+    plot_all, show_S, show_E, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset  = Plotoptions 
+
+    # Unpacking Simulation and Plotting Options    
+    figure_title   = kwargs['figure_title']
+    N              = kwargs['N']
+    r0             = kwargs['r0']
+    gamma          = 1/kwargs['gamma_inv']
+    filename       = kwargs['file_extension']
+    store_plots    = kwargs['store_plots']
+
+    if 'x_tick_names' in kwargs:
+        x_tick_names   = kwargs['x_tick_names']
+        x_tick_numbers = np.arange(0, len(S), kwargs['x_tick_step'])
+    
+    if 'text_error' in kwargs:
+        text_error = kwargs['text_error']
+    else:
+        text_error = ''
+
+    if 'number_scaling' in kwargs:
+        number_scaling = kwargs['number_scaling']
+    else:
+        number_scaling = 'million'
+
+
+    # Defining scaling for text     
+    if number_scaling == 'million':
+        scale      = 1000000
+    elif number_scaling == '100k':
+        scale      = 100000
+    elif number_scaling == '10k':
+        scale      = 10000
+    elif number_scaling == 'k':
+        scale      = 1000
+    elif number_scaling == 'none':
+        scale     = 1 
+        number_scaling = ""
+    elif number_scaling == 'fraction':
+        scale     = N 
+        number_scaling = "fraction"
+
+
+    # Plot the data of three separate curves for S(t), I(t) and R(t)
+    fig, ax1 = plt.subplots()
+    fig.suptitle(figure_title,fontsize=25)    
+
+    # Variable evolution
+    if show_S:
+        # ax1.plot(t, S_plus/N, 'k--', lw=2, alpha=0.35)
+        ax1.plot(t, S/N, 'k', lw=2, label='Susceptible')
+        ax1.plot(t, S_med/N, 'k--', lw=2, alpha=0.55)
+        ax1.fill_between(t,(S_minus)/N,(S_plus)/N, color='k', alpha=0.15)
+    
+    if show_E:
+        # ax1.plot(t, S_plus/N, 'k--', lw=2, alpha=0.35)
+        ax1.plot(t, E/N, 'g', lw=2, label='Exposed')
+        ax1.plot(t, E_med/N, 'g--', lw=2, alpha=0.55)
+        ax1.fill_between(t,(E_minus)/N,(E_plus)/N, color='g', alpha=0.15)
+
+    # ax1.plot(t, I_plus/N, 'r--',  lw=2, alpha=0.25)
+    ax1.plot(t, I/N, 'r', lw=2,   label='Infected Cases')
+    ax1.plot(t, I_med/N, 'r--', lw=2, alpha=0.55)
+    ax1.plot(t, I_minus/N, 'r:', lw=2, alpha=0.25)
+    ax1.plot(t, I_plus/N, 'r:', lw=2, alpha=0.25)
+    # ax1.fill_between(t,(I - I_std)/N,(I + I_std)/N, color='r', alpha=0.10)
+    ax1.fill_between(t,(I_minus)/N,(I_plus)/N, color='r', alpha=0.10)
+
+    scenario = 2
+    if show_T:
+        # ax1.plot(t, T_plus/N, 'm--',  lw=2, alpha=0.25)
+        ax1.plot(t, T/N, 'm',  lw=2, label='Total Cases')
+        ax1.plot(t, T_med/N, 'm--', lw=2,  alpha=0.55)
+        ax1.plot(t, T_minus/N, 'm:',  lw=2, alpha=0.25)
+        ax1.plot(t, T_plus/N, 'm:',  lw=2, alpha=0.25)
+        # ax1.fill_between(t,(T - T_std)/N,(T + T_std)/N, color='m', alpha=0.10)
+        ax1.fill_between(t,(T_minus)/N,(T_plus)/N, color='m', alpha=0.10)
+
+        total_cases     = T[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, 1.02*(total_cases/N), txt1.format(number_scaling =number_scaling,  per=total_cases/scale), fontsize=15, color='m')
+
+        total_cases     = T_minus[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        # ax1.text(t[-1]-x_axis_offset, 0.98*(total_cases/N), txt1.format(number_scaling =number_scaling,per=total_cases/scale), fontsize=12, color='m')
+
+        total_cases     = T_plus[-1]
+        print('Total Cases when growth linear = ', total_cases)
+        # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
+        # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        # ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(number_scaling =number_scaling, per=total_cases/scale), fontsize=12, color='m')
+        # fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        if show_S:
+            ax1.text(0, 0.5, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
+        else:
+            ax1.text(0, 0.8, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
+    else:
+        if Tf == 90:
+            if scenario == 1:
+                ax1.text(0.2*Tf, 0.0012, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+            else:
+                ax1.text(0.5*Tf, 0.0000007, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
+    
+
+    print('*****   Results    *****')
+    tc =  np.argmax(I)
+    I_tc     = I[tc]
+    print('Peak Instant. Infected = ', I_tc,'by day=', tc)
+
+    T_tc  = T[tc]
+    print('Total Cases when Peak = ', T_tc,'by day=', tc)
+
+    total_cases     = T[-1]
+    print('Total Cases when growth linear = ', total_cases)
+
+    I_tc_plus_idx =  np.argmax(I_plus)
+    I_tc_plus     = I_plus[I_tc_plus_idx]
+    print('Peak Instant. Infected - Error= ', I_tc_plus,'by day=', I_tc_plus_idx)
+
+    I_tc_minus_idx =  np.argmax(I_minus)
+    I_tc_minus     = I_minus[I_tc_minus_idx]
+    print('Peak Instant. Infected + Error= ', I_tc_minus,'by day=', I_tc_minus_idx)
+
+    do_plus = 1; do_minus = 1
+    if abs(tc-I_tc_plus_idx) < 3:
+        do_plus = 0
+    if abs(tc-I_tc_minus_idx) < 3:
+        do_minus = 0
+
+    if plot_peaks:
+        # Plot peak points
+        ax1.plot(tc, I_tc/N,'ro', markersize=8)
+        if do_plus:
+            # Plot peak points
+            ax1.plot(I_tc_plus_idx, I_tc_plus/N,'ro', markersize=8)
+        if do_minus:
+            # Plot peak points
+            ax1.plot(I_tc_minus_idx, I_tc_minus/N,'ro', markersize=8)
+
+        if Tf == 90:
+            if scenario == 2:
+                txt_title = r"Local peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(tc+ 5, I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Local peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx- 30, 0.9*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Local peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx+ 5,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            else:
+                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(tc- 40, I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx- 20, I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx -30,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+
+        else:
+            # Adjust automatically
+            txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            ax1.text(tc+10, (1)*I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            if do_plus:        
+                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx-25, 1.05*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            if do_minus:
+                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx+10, I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+
+        if plot_all == 1:
+            ax1.plot(tc, T_tc/N,'mo', markersize=8)
+            txt_title2 = r"Total Cases: {peak_total:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
+
+
+    ax1.set_xlabel('Time /days', fontsize=30)
+    ax1.set_ylabel('Fraction of Population', fontsize=30)
+    if 'x_tick_names' in kwargs:
+        ax1.set_xticks(x_tick_numbers)
+        ax1.set_xticklabels(x_tick_names)
+    
+    legend = ax1.legend(fontsize=20, loc='center right')
+    legend.get_frame().set_alpha(0.5)
+    for spine in ('top', 'right', 'bottom', 'left'):
+        ax1.spines[spine].set_visible(True)
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(20) 
+    for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(20) 
+    
+    # plt.grid(b=True, which='major', c='w', lw=2, ls='-')
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+
+    if store_plots:
+        plt.savefig(filename + ".png", bbox_inches='tight')
+        # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
+
+
+
+def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, filename, *prob_params):
+    fig, (ax1,ax2, ax3) = plt.subplots(1,3, constrained_layout=True)
+
+    ###########################################################
+    ################## Plot for Beta Samples ##################
+    ###########################################################
+    count, bins, ignored = ax1.hist(beta_samples, 30, density=True, alpha=0.55, edgecolor='k')
+
+    if prob_params[0] == 'uniform':
+        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)        
+
+    if prob_params[0] == 'gaussian':
+        mu    = prob_params[1]
+        sigma = prob_params[2] + 0.00001
+        ax1.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
+                       np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
+        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)    
+
+    if prob_params[0] == 'gamma':
+        g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
+        # Plot gamma samples and pdf
+        x = np.arange(0,1,0.001)
+        ax1.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[1], prob_params[2]))
+
+    if prob_params[0] == 'log-normal':
+        mu    = prob_params[1]
+        sigma = prob_params[2] + 0.00001 
+        # x = np.linspace(min(bins), max(bins), 10000)
+        x = np.arange(0,1,0.001)
+        pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
+        ax1.plot(x, pdf, linewidth=2, color='r')
+
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(15) 
+    for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+    plt.xlim(0, 1.0)            
+    ax1.grid(True, alpha=0.3)
+    ax1.set_title(r"$\beta$ samples", fontsize=20)
+    
+    ###############################################################
+    ################## Plot for Gamma^-1 Samples ##################
+    ###############################################################
+    count, bins, ignored = ax2.hist(gamma_inv_samples, 30, density=True, alpha=0.55, edgecolor='k')
+    if prob_params[0] == 'gaussian':
+        mu    = prob_params[3]
+        sigma = prob_params[4] + 0.00001
+        ax2.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
+                       np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
+
+        ax2.set_xlabel(r"$\gamma^{-1} \sim \mathcal{N}$", fontsize=15)
+    
+    if prob_params[0] == 'uniform':
+        ax2.set_xlabel(r"$\gamma^{-1} \sim \mathcal{U}$", fontsize=15)          
+
+    if prob_params[0] == 'gamma':
+        g_dist    = gamma_dist(prob_params[5], prob_params[4], prob_params[6])
+        # Plot gamma samples and pdf
+        x = np.arange(1,15,0.1)
+        ax2.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[4], prob_params[5]))
+
+    if prob_params[0] == 'log-normal':
+        mu    = prob_params[3]
+        sigma = prob_params[4] + 0.00001
+        x = np.arange(1,15,0.1)
+        pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
+        ax2.plot(x, pdf, linewidth=2, color='r')
+
+
+    for tick in ax2.xaxis.get_major_ticks():
+        tick.label.set_fontsize(15) 
+    for tick in ax2.yaxis.get_major_ticks():
+            tick.label.set_fontsize(15)  
+    plt.xlim(1, 17) 
+    ax2.grid(True, alpha=0.3)    
+    ax2.set_title(r"$\gamma^{-1}$ samples", fontsize=20)    
+    
+    ###############################################################
+    ################## Plot for Sigma^-1 Samples ##################
+    ###############################################################
+    count, bins, ignored = ax3.hist(sigma_inv_samples, 30, density=True, alpha=0.55, edgecolor='k')
+    if prob_params[0] == 'gaussian':
+        mu    = prob_params[5]
+        sigma = prob_params[6] + 0.00001
+        ax3.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
+                       np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
+
+        ax3.set_xlabel(r"$\sigma^{-1} \sim \mathcal{N}$", fontsize=15)
+    
+    if prob_params[0] == 'uniform':
+        ax3.set_xlabel(r"$\sigma^{-1} \sim \mathcal{U}$", fontsize=15)          
+
+    if prob_params[0] == 'gamma':
+        g_dist    = gamma_dist(prob_params[8], prob_params[7], prob_params[9])
+        # Plot gamma samples and pdf
+        x = np.arange(1,15,0.1)
+        ax3.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[7], prob_params[8]))
+
+    if prob_params[0] == 'log-normal':
+        mu    = prob_params[5]
+        sigma = prob_params[6] + 0.00001
+        x = np.arange(1,15,0.1)
+        pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
+        ax3.plot(x, pdf, linewidth=2, color='r')
+
+
+    for tick in ax3.xaxis.get_major_ticks():
+        tick.label.set_fontsize(15) 
+    for tick in ax3.yaxis.get_major_ticks():
+            tick.label.set_fontsize(15)  
+    plt.xlim(1, 17) 
+    ax3.grid(True, alpha=0.3)    
+    ax3.set_title(r"$\sigma^{-1}$ samples", fontsize=20)    
+
+
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(20/2, 8/2, forward=True)    
+    
+    # Store plot
+    plt.savefig(filename + ".png", bbox_inches='tight')
+
 
 
 
