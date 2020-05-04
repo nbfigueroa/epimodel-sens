@@ -47,8 +47,8 @@ def plot_simulation(S, I, R, T, t, **kwargs):
     x_axis_offset           = 0.375*kwargs['days']
     y_axis_offset           = 0.003
     plot_all = 1; show_S = 1; show_R = 0; plot_peaks = 1; show_T = 1; scale_offset = 0.025; show_analytic_limit = 0
-
-    SIRvariables   = S, I, R, T, np.arange(0,kwargs['days'])
+    
+    SIRvariables   = S, I, R, T, t
     Plotoptions    = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset  
     plotSIR_evolution(SIRvariables, Plotoptions, **kwargs)
 
@@ -86,7 +86,7 @@ def main():
     #####################################################
     ######## Simulate Vanilla SIR Model Dynamics ########
     #####################################################
-    S,I,R,T,t = run_SIR_sim(**sim_kwargs)
+    S,I,R,T = run_SIR_sim(**sim_kwargs)
 
     print('*********   Results    *********')    
     tc, _, _, _, _ = getCriticalPointsAfterPeak(I)
@@ -100,6 +100,7 @@ def main():
     ############################################
     ######## Plots of Single Simulation ########
     ############################################
+    t = np.arange(0,sim_kwargs['days'])
     plot_simulation(S, I, R, T, t, **sim_kwargs)
 
 if __name__ == '__main__':

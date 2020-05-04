@@ -233,6 +233,7 @@ def gatherMCstats(S_samples, I_samples, R_samples, E_samples = None, bound_type=
         E_mean, E_med, E_std, E_upper, E_lower = computeStats(E_samples, bound_type, bound_param)
 
     # Pack values for plotting and analysis
+
     S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower))    
     I_stats          = np.vstack((I_mean, I_med, I_upper, I_lower))    
     R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower))    
@@ -244,6 +245,7 @@ def gatherMCstats(S_samples, I_samples, R_samples, E_samples = None, bound_type=
         return S_stats, E_stats, I_stats, R_stats, T_stats
     else:
         return S_stats, I_stats, R_stats, T_stats
+
 
 
 def printMeanResults(I_stats, R_stats):    
