@@ -63,7 +63,7 @@ class StochasticSEIR():
                 gamma_inv_dist = stats.gamma(a = gamma_inv_shape, loc = gamma_inv_loc, scale = gamma_inv_scale)
             
             if sigma_inv_scale == 0:
-                sigma_inv_dist = stats.norm(loc = sigma_inv_loc, scale = gamma_inv_scale)
+                sigma_inv_dist = stats.norm(loc = sigma_inv_loc, scale = sigma_inv_scale)
             else:
                 sigma_inv_dist = stats.gamma(a = sigma_inv_shape, loc = sigma_inv_loc, scale = sigma_inv_scale)
             
@@ -174,7 +174,7 @@ class StochasticSEIR():
             samples['gamma'] = 1/self.gamma_inv_dist
         
         if isinstance(self.sigma_inv_dist, stats._distn_infrastructure.rv_frozen):
-            samples['sigma'] = 1/self.sigma_inv_dist.rvs()
+            samples['sigma'] = 1/self.sigma_inv_dist.rvs(1)[0]
         else:
             samples['sigma'] = 1/self.sigma_inv_dist
 
@@ -221,5 +221,12 @@ class StochasticSEIR():
 
 if __name__ == '__main__':
     
-    model = StochasticSEIR()
-    traces, samples = model.project(200, progbar = False)
+    sim_kwargs = loadSimulationParams(5, 0, plot_data = 0, header = 'SEIR')
+    prob_params, plot_vars = getSEIRTestingParams(1, 'gamma',**sim_kwargs)
+    init_cond = {}
+    init_cond['I0'] = sim_kwargs['I0']
+    init_cond['R0'] = sim_kwargs['R0']
+    init_cond['E0'] = sim_kwargs['E0']
+    model = StochasticSEIR(sim_kwargs['N'], *prob_params, **init_cond)
+    
+    

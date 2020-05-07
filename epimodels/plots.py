@@ -224,6 +224,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     worksheet.write_row(row_num, 5,  gamma_inv_stats)
     worksheet.write_row(row_num, 10, R0_stats)    
     worksheet.write_row(row_num, 15, tc_stats)
+    print(Ipeak_stats)
     worksheet.write_row(row_num, 20, Ipeak_stats)
     worksheet.write_row(row_num, 25, Tend_stats)
     
