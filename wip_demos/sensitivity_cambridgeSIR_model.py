@@ -237,7 +237,7 @@ for ii in range(3):
     ############ start simulation ############
     Nf=Tf; filename='this.mat'
     model.simulate(S_0, Ia_0, Is_0, contactMatrix, Tf, Nf, filename)
-'''
+
     ############ Unpacking the simulated variables ############
     data=loadmat(filename)
     IC  = np.zeros((Nf))
