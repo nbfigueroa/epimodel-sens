@@ -49,8 +49,10 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
         plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
 
         # Plot curves with std error bars [Optional.. for analysis purposes]
-        sim_kwargs["do_std"] = 1
-        plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
+        do_bad_stats = 0
+        if do_bad_stats:
+            sim_kwargs["do_std"] = 1
+            plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
 
 
     if sim_kwargs['viz_plots']:
@@ -111,8 +113,8 @@ def run(prob_type = 'gamma'):
     rollouts  = pow(10,5)
     viz_plots = 0
 
-    # for test_num in [1, 2, 3]:
-    for test_num in [3]:        
+    for test_num in [1, 2, 3]:
+    # for test_num in [3]:        
         prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables
@@ -135,6 +137,6 @@ if __name__ == '__main__':
     """
 
     run(prob_type = 'gamma')
-    # run(prob_type = 'log-normal')    
+    run(prob_type = 'log-normal')    
     # run(prob_type = 'gaussian')
-    # run(prob_type = 'uniform')
+    # run(prob_type = 'uniform')=
