@@ -295,8 +295,6 @@ class StochasticCambridge():
         return np.real(np.max(np.linalg.eigvals(L)))
 
         
-                                              
-    
     
     if __name__ == '__main__':
         

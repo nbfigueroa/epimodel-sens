@@ -149,18 +149,24 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     ############################################################################################################
 
     ##### Stats on inputs to model #####
-    beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     beta_skew = stats.skew(beta_samples)    
     print('Mean beta=',beta_bar, ' Med beta=', beta_med, 'Skew beta=', beta_skew)
 
-    gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     gamma_inv_skew = stats.skew(gamma_inv_samples)    
     print('Mean gamma_inv=',gamma_inv_bar, ' Med gamma_inv=', gamma_inv_med, 'Skew gamma_inv=', gamma_inv_skew)
 
-    R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
-    _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    # _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     R0_skew = stats.skew(R0_samples)    
     print('Mean tc=',R0_bar, ' Med tc=', R0_med, 'Skew tc=', R0_skew)
 

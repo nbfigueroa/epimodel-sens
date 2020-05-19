@@ -98,9 +98,9 @@ def createResultsfile(basefilename = './results/test', append_name= 'results', t
     worksheet = workbook.add_worksheet()
 
     if test_type == 'sampling':    
-        header = ['beta-mean','beta-Q97.5','beta-Q2.5', 'beta-Q83.5', 'beta-Q15.5',
-                  'gamma-inv-mean','gamma-inv-Q97.5','gamma-inv-Q2.5', 'gamma-inv-Q83.5', 'gamma-inv-Q15.5',
-                  'R_0-mean','R_0-Q97.5','R_0-Q2.5', 'R_0-Q83.5', 'R_0-Q15.5',
+        header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
+                  'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
+                  'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
                   't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
                   'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
                   'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
@@ -234,12 +234,12 @@ def gatherMCstats(S_samples, I_samples, R_samples, E_samples = None, bound_type=
 
     # Pack values for plotting and analysis
 
-    S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower))    
-    I_stats          = np.vstack((I_mean, I_med, I_upper, I_lower))    
-    R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower))    
-    T_stats          = np.vstack((T_mean, T_med, T_upper, T_lower))
+    S_stats          = np.vstack((S_mean, S_med, S_upper, S_lower, S_std))    
+    I_stats          = np.vstack((I_mean, I_med, I_upper, I_lower, I_std))    
+    R_stats          = np.vstack((R_mean, R_med, R_upper, R_lower, R_std))    
+    T_stats          = np.vstack((T_mean, T_med, T_upper, T_lower, T_std))
     if not E_samples is None:
-        E_stats      = np.vstack((E_mean, E_med, E_upper, E_lower))
+        E_stats      = np.vstack((E_mean, E_med, E_upper, E_lower, E_std))
     
     if not E_samples is None:
         return S_stats, E_stats, I_stats, R_stats, T_stats
