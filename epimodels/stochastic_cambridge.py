@@ -34,8 +34,11 @@ class StochasticCambridge():
             M = self.M
             Warning('Dimension mismatch. Number of components set as per demographic components')
         
-        print(self.M)
+        #print(self.M)
         #The default value is equal distribution across all the compartments
+        #if init_cond['I0'] is not None:
+         #   self.Is0 = init_cond['I0']/M * np.ones((M))
+        #else:
         self.Is0 = 1e-6/M * np.ones((M))
         self.Ia0 = np.zeros(M) # Number of asymptomatic patients
         self.R0 = np.zeros(M) #Recovered population
@@ -76,6 +79,8 @@ class StochasticCambridge():
         #Currently only supports the 'gamma' distribution, support for other 
         #distributions to be added later. For other distribution directly 
         #provide the scipy.stats random variable object
+        
+        #print(prob_params)
         
         beta0_loc        = prob_params[1]
         beta0_shape      = prob_params[2]
@@ -139,6 +144,42 @@ class StochasticCambridge():
         def CM(t):
             return self.CH + self.CO + self.CW + self.CS        
         return CM
+    
+    def ContactMatrixLockdown(self):
+        
+        #Draw the compliance values here
+        u_CO = np.random.uniform(low = 0, high = 0.3)
+        u_CW = np.random.uniform(low = 0, high = 0.2)
+        u_CS = np.random.uniform(low = 0, high = 0.05)
+        def CM(t):
+            
+            if t < 21:
+                return self.CH + self.CO + self.CW + self.CS
+            elif t < 51:
+                return self.CH + u_CO*self.CO + u_CW*self.CW + u_CS*self.CS
+            else:
+                return self.CH + self.CO + self.CW + self.CS
+        
+        return CM
+    
+    def ContactMatricSoftLockdown(self):
+        #Draw the compliance values here
+        u_CO = np.random.uniform(low = 0.2, high = 0.5)
+        u_CW = np.random.uniform(low = 0.1, high = 0.5)
+        u_CS = np.random.uniform(low = 0, high = 0.05)
+        def CM(t):
+            
+            if t < 21:
+                return self.CH + self.CO + self.CW + self.CS
+            elif t < 51:
+                return self.CH + u_CO*self.CO + u_CW*self.CW + u_CS*self.CS
+            else:
+                return self.CH + self.CO + self.CW + self.CS
+        
+        return CM
+    
+            
+            
         
         
     def rollout(self, days, dt = 1, CM_function = None):
@@ -174,9 +215,11 @@ class StochasticCambridge():
         t = output['t']
         X = output['X']
         M = self.M
+        
         S = np.sum(X[:,0:M], axis=1)
-        I = np.sum(X[:, M:3*M])
-        R = np.sum(X[:,3*M::])
+        I = np.sum(X[:, M:3*M], axis = 1)
+        R = np.sum(self.Ni) - S - I
+        #R = np.sum(X[:,3*M::], axis = 1)
         
         return (S,I,R), output, samples
         #S = np.sum()
@@ -237,9 +280,9 @@ class StochasticCambridge():
         L0 = np.zeros((M, M))
         L  = np.zeros((2*M, 2*M))
         
-        print(self.M)
-        print(C.shape)
-        print(list(range(M)))
+        #print(self.M)
+        #print(C.shape)
+        #print(list(range(M)))
         for i in range(M):
             for j in range(M):
                 

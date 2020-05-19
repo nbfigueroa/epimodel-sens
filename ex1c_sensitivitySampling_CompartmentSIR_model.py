@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 # Custom classes and helper/plotting functions
-from epimodels.stochastic_sir    import *
+from epimodels.stochastic_cambridge    import *
 from epimodels.utils  import *
 from epimodels.plots  import *
 from epimodels.sims   import *
-
 
 def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
     '''
@@ -17,6 +17,7 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
 
     # Plot Histogram of Sampled Parameters beta and gamma    
     filename          = sim_kwargs['file_extension'] + "_paramSamples"
+    print(filename)
     plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename,  *prob_params)
     print('Beta interval: [', np.mean(beta_samples), beta_samples[np.argmin(beta_samples)], ',', beta_samples[np.argmax(beta_samples)],']')
     print('Gamma^-1 interval: [', np.mean(gamma_inv_samples), gamma_inv_samples[np.argmin(gamma_inv_samples)], ',', gamma_inv_samples[np.argmax(gamma_inv_samples)],']')
@@ -49,8 +50,8 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
         plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
 
         # Plot curves with std error bars [Optional.. for analysis purposes]
-        sim_kwargs["do_std"] = 1
-        plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
+        #sim_kwargs["do_std"] = 0
+        #plotSIR_evolutionStochastic(S_stats, I_stats, R_stats, T_stats, plot_options, **sim_kwargs)    
 
 
     if sim_kwargs['viz_plots']:
@@ -68,17 +69,16 @@ def run_MC_stochastic_est_SIR(rollouts, *prob_params, **sim_kwargs):
 
     # Run MC rollouts
     init_cond = {}
-    init_cond['I0'] = sim_kwargs['I0']
-    init_cond['R0'] = sim_kwargs['R0']
-    model = StochasticSIR(sim_kwargs['N'], *prob_params, **init_cond)
-    SIR_traces, SIR_params = model.project(days = sim_kwargs['days'], samples = rollouts, progbar = True)
+    init_cond['Is0'] = sim_kwargs['I0']/sim_kwargs['M']*np.ones((sim_kwargs['M']))
+    init_cond['R0'] = sim_kwargs['R0']*np.ones(sim_kwargs['M'])
+    model = StochasticCambridge(sim_kwargs['N'], sim_kwargs['M'], *prob_params, **init_cond)
+    SIR_traces, SIR_params, outputs = model.project(days = sim_kwargs['days'], samples = rollouts, progbar = True)
 
 
     ##############################################################
     ######## Plots and Results Statistics and Realizations #######
     ##############################################################
     computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs)
-
 
 def run(prob_type = 'gamma'):
 
@@ -92,9 +92,12 @@ def run(prob_type = 'gamma'):
         sim_num = 5  --> Primer case study
     '''
     sim_num             = 5
-    sim_kwargs          = loadSimulationParams(sim_num, 0, plot_data = 0)
+    sim_kwargs          = loadSimulationParams(sim_num, 0, plot_data = 0, header = 'Compartment-SIR-Lockdown')
     basefilename        = sim_kwargs['file_extension']
     workbook, worksheet = createResultsfile(basefilename, prob_type, test_type='sampling')
+    
+    #Add model specific information
+    sim_kwargs['M'] = 16
 
     # Testing Variants (includes test type and probability distribution type)
     '''Testing options defined in sims.py
