@@ -7,7 +7,6 @@ from   scipy             import stats
 from   scipy.stats       import gamma as gamma_dist
 from   scipy.stats       import kde
 from scipy.interpolate   import UnivariateSpline
-from epimodels.stochastic_cambridge import *
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -137,12 +136,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     beta_samples      = SIR_params[:,0]
     gamma_inv_samples = SIR_params[:,1]
     tc_samples, Ipeak_samples, Tend_samples = CO_samples
-    if 'Compartment' in kwargs['figure_title']:
-        
-        model = StochasticCambridge(1)
-        R0_samples = [model.compute_r0(sample) for sample in SIR_params]
-    else:
-        R0_samples = beta_samples * gamma_inv_samples
+    R0_samples = beta_samples * gamma_inv_samples
 
     ############################################################################################################
     #######  Compute Descriptive Stats for each critical point distributions (t_c, I_peak, T_end and R0) #######
@@ -267,6 +261,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     print('R0 Coeff:', regr.coef_, 'R0 Intercept:', regr.intercept_)
     print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
 
+
     # Learn linear regressor between params and tc
     regr_tc = linear_model.LinearRegression()
     Y = tc_samples
@@ -299,17 +294,15 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     print('Tend Coeff:', regr_Tend.coef_, 'Tend Intercept:', regr_Tend.intercept_)
 
     # Compute similarities (Could make this a matrix)
-    dist_types = ['sim', 'angle']
-    for dist_type in dist_types:
-        d_R0tc      = hyperplane_similarity(regr.coef_,regr.intercept_,regr_tc.coef_[0],regr_tc.intercept_[0], dist_type)
-        d_R0IPeak   = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0], dist_type)
-        d_R0Tend    = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
-        d_tcIpeak   = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0], dist_type)
-        d_tcTend    = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
-        d_IpeakTend = hyperplane_similarity(regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
+    d_R0tc      = hyperplane_similarity(regr.coef_,regr.intercept_,regr_tc.coef_[0],regr_tc.intercept_[0])
+    d_R0IPeak   = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0])
+    d_R0Tend    = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Tend.coef_[0],regr_Tend.intercept_[0])
+    d_tcIpeak   = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0])
+    d_tcTend    = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0])
+    d_IpeakTend = hyperplane_similarity(regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0])
 
-        print(dist_type, ' d_R0tc = ',d_R0tc, ' d_R0IPeak=', d_R0IPeak, ' d_R0Tend=', d_R0Tend)
-        print(dist_type, 'd_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
+    print('d_R0tc = ',d_R0tc, ' d_R0IPeak=', d_R0IPeak, ' d_R0Tend=', d_R0Tend)
+    print('d_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
 
     if do_mask:
         # Options for masking data
@@ -351,20 +344,20 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
 
             print('R0 Error band:' , (R0_max - R0_min)/R0_nom)
 
-            maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
-            print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
-            tc_error = (maskedtc_upper95 - maskedtc_lower95)/maskedtc_bar
-            print('Error band:' , tc_error)
+        maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
+        print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
+        tc_error = (maskedtc_upper95 - maskedtc_lower95)/maskedtc_bar
+        print('Error band:' , tc_error)
 
-            maskedIpeak_bar, maskedIpeak_med, Ipeak_std, maskedIpeak_upper95, maskedIpeak_lower95 = computeStats(masked_Ipeak, bound_type='Quantiles', bound_param = [0.025, 0.975])
-            print('MASKED:: Mean Ipeak=',maskedIpeak_bar, ' Med Ipeak=', maskedIpeak_med, 'Up.Q Ipeak=', maskedIpeak_upper95, 'Low.Q Ipeak=', maskedIpeak_lower95)
-            Ipeak_error = (maskedIpeak_upper95 - maskedIpeak_lower95)/maskedIpeak_bar
-            print('Error band:' , Ipeak_error)
+        maskedIpeak_bar, maskedIpeak_med, Ipeak_std, maskedIpeak_upper95, maskedIpeak_lower95 = computeStats(masked_Ipeak, bound_type='Quantiles', bound_param = [0.025, 0.975])
+        print('MASKED:: Mean Ipeak=',maskedIpeak_bar, ' Med Ipeak=', maskedIpeak_med, 'Up.Q Ipeak=', maskedIpeak_upper95, 'Low.Q Ipeak=', maskedIpeak_lower95)
+        Ipeak_error = (maskedIpeak_upper95 - maskedIpeak_lower95)/maskedIpeak_bar
+        print('Error band:' , Ipeak_error)
 
-            maskedTend_bar, maskedTend_med, Tend_std, maskedTend_upper95, maskedTend_lower95 = computeStats(masked_Tend, bound_type='Quantiles', bound_param = [0.025, 0.975])
-            print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
-            Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
-            print('Error band:' , Tend_error)
+        maskedTend_bar, maskedTend_med, Tend_std, maskedTend_upper95, maskedTend_lower95 = computeStats(masked_Tend, bound_type='Quantiles', bound_param = [0.025, 0.975])
+        print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
+        Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
+        print('Error band:' , Tend_error)
 
     ####################################################################
     #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
@@ -641,8 +634,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
                 cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='tab20c', alpha = 0.85, s= 10)
                 print("MASKED T_inf: min beta=", np.argmin(x[idx_Tend]), "max beta=", np.argmax(x[idx_Tend]))
                 print("MASKED T_inf: min gamma=", np.argmin(y[idx_Tend]), "max gamma=", np.argmax(y[idx_Tend]))
-            
-            
+                   
             ax03.grid(True, alpha=0.3)        
             ax03.set_xlabel(r"$\beta$", fontsize=20)
             ax03.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
@@ -1558,28 +1550,7 @@ def plotSIR_sampledParams(beta_samples, gamma_inv_samples, filename, *prob_param
         ax1.set_xlim(0, 1.0)    
 
     if prob_params[0] == 'gamma':
-        
-        if 'Compartment' in filename:
-            beta0_loc        = prob_params[1]
-            beta0_shape      = prob_params[2]
-            beta0_scale      = prob_params[3]
-            gamma_inv_loc   = prob_params[4]
-            gamma_inv_shape = prob_params[5]
-            gamma_inv_scale = prob_params[6]
-            
-            e_gamma_inv = gamma_inv_loc + gamma_inv_shape*gamma_inv_scale
-            model = StochasticCambridge(1) #Note that this enforces default values
-            multiplier = model.compute_r0({'beta':1, 'gs_inv':7, 'ga_inv':7})
-            r0_loc = e_gamma_inv * beta0_loc
-            r0_scale = beta0_scale
-            r0_shape = e_gamma_inv * beta0_shape
-            
-            beta_loc = r0_loc/multiplier
-            beta_shape = r0_shape/multiplier
-            beta_scale = beta0_scale
-            g_dist    = gamma_dist(beta_shape, beta_loc, beta_scale)
-        else:
-            g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
+        g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
         # Plot gamma samples and pdf
         x = np.arange(0,1,0.001)
         ax1.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[1], prob_params[2]))
