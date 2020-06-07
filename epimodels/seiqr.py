@@ -4,7 +4,7 @@ from   scipy.integrate import solve_ivp
 from   scipy.optimize import fsolve
 from   scipy import stats
 
-# The SEIR model differential equations with mortality rates and quarentine
+# The SEIR model differential equations with mortality rates and quarantine
 def seiqr_mumbai_ivp(t, X, N, beta, gamma, sigma, m, q, tau_q):
     S, E, I, Q, R, D = X
 

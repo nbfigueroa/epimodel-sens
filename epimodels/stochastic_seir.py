@@ -14,7 +14,6 @@ class StochasticSEIR():
         #Set the default arguments
         
         #Load gamma distribution params from sims
-        #text_error, prob_params, _ext = getSIRTestingParams(3, prob_type,**sim_kwargs)
         self.N = N #The default value only computes proportional prevalence
         self.I0 = 1e-6*self.N # 1 in million infections
         self.E0 = 10*self.I0
