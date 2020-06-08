@@ -121,6 +121,32 @@ def createResultsfile(basefilename = './results/test', append_name= 'results', t
 ########################################################################################################
 #############                   Functions FOR ALL MODEL TESTS                               ############
 ########################################################################################################
+def compute_Rt(S, **kwargs):
+    N              = kwargs['N']
+    
+    # If r0 exists in the dictionary
+    if 'r0' in kwargs:
+        r0   = kwargs['r0']
+
+    # If beta and gamma are given then recompute or overwrite r0 value
+    if ('beta' in kwargs) and ('gamma' in kwargs):
+        beta   = kwargs['beta']
+        gamma  = kwargs['gamma']
+        r0     = beta/gamma
+
+    # Compute effective reproductive number curve
+    effective_Rt   = r0 * (S/N)
+
+    # Estimations of critical point of epidemic
+    tcs_Rt  = np.nonzero(effective_Rt  < 1.0001)
+    a = np.array(tcs_Rt)
+    if a.size > 0:
+        tc_Rt =  tcs_Rt[0][0]
+    else: 
+        tc_Reff = Nan
+
+    return effective_Rt, tc_Rt
+
 def getCriticalPointsAfterPeak(I):
     """
         Computes t_c, t(I=1000 after t_c), t(I=500 after t_c), t(I=100 after t_c), t(I=10 after t_c)

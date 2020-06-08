@@ -10,7 +10,7 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1, header = 'SIR'):
         sim_num = 2  --> Mexico case study
         sim_num = 3  --> US case study
         sim_num = 4  --> Yucatan case study
-        sim_num = 5  --> Primer case study
+        sim_num = 5  --> Baseline case study
     '''
     # India Simulation starting on March 4th
     if sim_num == 1:
@@ -70,7 +70,7 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1, header = 'SIR'):
         figure_title    = r"COVID-19 {header} Model Dynamics [Scenario {scenario:d}] -- {country} -- ($R_0$={R0:1.3f}, $\beta$={beta:1.4f}, 1/$\gamma$={gamma:1.1f})"
         figure_title    = figure_title.format(header = header, scenario=scenario, country=country, R0=float(r0), beta= beta, gamma = gamma_inv)
     else:    
-        # Test Population for primer paper
+        # Test Population for Baseline paper
         # Using absolute numbers of population
         # N               = pow(10,5)
         # I0, R0          = 1, 0  
@@ -84,7 +84,7 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1, header = 'SIR'):
         gamma_inv       = 7.0  
         r0              = 2.31          
         beta            = r0 / gamma_inv
-        sigma_inv       = 5.1
+        sigma_inv       = 5
         country         = 'Primer'
         x_tick_names    = []
         x_tick_step     = []

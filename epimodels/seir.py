@@ -11,15 +11,14 @@ class SEIR():
         self.args = {}
         
         self.args['I0']         = 1            #Initial infected population
-        self.args['E0']         = 0.0001   #Initial exposed population
+        self.args['E0']         = 0.0001       #Initial exposed population
         self.args['R0']         = 0            #Initial immune/recovered population
 
 
         # One way of defining the model parameters
-        self.args['r0'] = 2            #reproductive rate
-        self.args['inf_period'] = 4.5  #Infection period
-        self.args['lat_period'] = 5    #Infection period
-
+        # self.args['r0'] = 2            #reproductive rate
+        # self.args['inf_period'] = 4.5  #Infection period
+        # self.args['lat_period'] = 5    #Infection period
 
         # Another way
         self.args['beta']       = 0.33
@@ -34,15 +33,18 @@ class SEIR():
 
     @property
     def beta(self):
-        return self.args['r0']/self.args['inf_period']
+        # return self.args['r0']/self.args['inf_period']
+        return self.args['beta']
 
     @property
     def gamma(self):
-        return 1/self.args['inf_period']
+        # return 1/self.args['inf_period']
+        return self.args['gamma']
 
     @property
     def sigma(self):
-        return 1/self.args['lat_period']
+        # return 1/self.args['lat_period']
+        return self.args['sigma']
 
     @property
     def r0(self):

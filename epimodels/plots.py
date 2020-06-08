@@ -7,7 +7,6 @@ from   scipy             import stats
 from   scipy.stats       import gamma as gamma_dist
 from   scipy.stats       import kde
 from scipy.interpolate   import UnivariateSpline
-from epimodels.stochastic_cambridge import *
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -22,6 +21,7 @@ from statsmodels.formula.api import ols
 import pandas as pd
 from   epimodels.utils import *
 
+# from epimodels.stochastic_cambridge import *
 
 ############################################################################################################
 #############                                PLOTS FOR ALL MODEL                               #############
@@ -52,7 +52,7 @@ def plotIT_realizations(I_samples, R_samples, **kwargs):
         ax0.plot(I_samples[idx_r[ii],:]/kwargs['N'])
     ax0.set_title(r"Realizations of $I(t=0)\rightarrow I(t=end)$", fontsize=20)
     ax0.grid(True, alpha=0.3)
-    ax0.set_ylabel('Fraction of the Population', fontsize=20)
+    ax0.set_ylabel('Fraction of the Population', fontsize=25)
     ax0.set_xlabel('[Time/days]', fontsize=20)
     for tick in ax0.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
@@ -63,7 +63,7 @@ def plotIT_realizations(I_samples, R_samples, **kwargs):
         ax01.plot(T_samples[idx_r[ii],:]/kwargs['N'])
     ax01.set_title(r"Realizations of $T(t=0)\rightarrow T(t=end)$", fontsize=20)
     ax01.grid(True, alpha=0.3)
-    ax01.set_ylabel('Fraction of the Population', fontsize=20)
+    ax01.set_ylabel('Fraction of the Population', fontsize=25)
     ax01.set_xlabel('[Time/days]', fontsize=20)
     for tick in ax01.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
@@ -789,7 +789,7 @@ def plotInfected_evolution(Ivariables, Plotoptions, **kwargs):
     
     plt.yscale("log")
 
-    ax2.set_xlabel('Time /days', fontsize=20)
+    ax2.set_xlabel('Time [days]', fontsize=20)
     ax2.set_ylabel('Fraction of Population', fontsize=20)
     if 'x_tick_names' in kwargs:
         plt.xticks(x_tick_numbers, x_tick_names)
@@ -883,29 +883,32 @@ def plotSIR_evolution(SIRvariables, Plotoptions, **kwargs):
     if show_T:
         ax1.plot(t, T/N, 'm', lw=2,   label='Total Cases')
         ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
-        txt1 = "{per:2.3f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1] - x_axis_offset, (total_cases/N) + y_axis_offset, txt1.format(per=total_cases/scale,number_scaling=number_scaling), fontsize=20, color='r')    
+
+        txt1 = r"{tend}: {per:2.3f} {number_scaling} total cases"
+        T_end = r"$T_{\rm end}$"
+        ax1.text(t[-1] - x_axis_offset, (total_cases/N) + y_axis_offset, txt1.format(tend=T_end, per=total_cases/scale,number_scaling=number_scaling), fontsize=20, color='r')    
 
     if show_S:
         ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
     
     if show_R:
-        ax1.plot(t, R/N, 'g--',  lw=1,  label='Recovered')
+        ax1.plot(t, R/N, 'c--',  lw=1,  label='Recovered')
 
     if plot_peaks:
         # Plot peak points
         ax1.plot(tc, I_tc/N,'ro', markersize=8)        
-        txt_title = r"Peak infected: {I_tc:2.4f} {number_scaling} by day {peak_days:10.0f} " 
+        txt_title = r"{Ipeak}: {I_tc:2.4f} {number_scaling} by day {peak_days:10.0f} "         
+        I_peak = r"$I_{\rm peak}$"
+        ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
+        
         txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
-        ax1.text(1.1*tc, I_tc/N, txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-
         if show_T:
             ax1.plot(tc, T_tc/N,'ro', markersize=8)
             ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
 
     # Making things beautiful
-    ax1.set_xlabel('Time /days', fontsize=20)
-    ax1.set_ylabel('Fraction of Population', fontsize=20)
+    ax1.set_xlabel('Time [days]', fontsize=20)
+    ax1.set_ylabel('Fraction of Population', fontsize=25)
     if 'x_tick_names' in kwargs:
         plt.xticks(x_tick_numbers, x_tick_names)
     legend = ax1.legend(fontsize=20)
@@ -941,7 +944,7 @@ def plotSIR_growth(Svariables, **kwargs):
 
     # Create Plot
     fig, (ax1, ax2) = plt.subplots(1,2)
-    fig.suptitle(figure_title,fontsize=20)    
+    # fig.suptitle(figure_title,fontsize=20)    
     
     ########################################################
     #######       Plots for Reproductive Rates     #########
@@ -950,10 +953,10 @@ def plotSIR_growth(Svariables, **kwargs):
     
     # Plot of Reproductive rate (number)
     ax1.plot(t, effective_Rt, 'k', lw=2)
-    ax1.text(t[0] + 0.02, effective_Rt[0] - 0.15,r'${\cal R}_t(t)$', fontsize=20)
+    ax1.text(t[0] + 0.02, effective_Rt[0] - 0.25,r'${\cal R}_t(t)$', fontsize=30)
     ax1.plot(t, 1*np.ones(len(t)), 'r-')
-    txt1 = "Critical (Rt={per:2.2f})"
-    ax1.text(t[-1]-50, 1 + 0.01, txt1.format(per=1), fontsize=12, color='r')
+    txt1 = "Critical ($Rt<1$)"
+    ax1.text(t[-1]-60, 1 + 0.05, txt1, fontsize=20, color='r')
     ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)        
 
 
@@ -965,18 +968,18 @@ def plotSIR_growth(Svariables, **kwargs):
         print('R_t <= 1 @ day=', tc_Reff, 'R_t=',effective_Rt[tc_Reff])
         print('Previous=',effective_Rt[tc_Reff-1])
         ax1.plot(tc_Reff, 1,'ro', markersize=12)
-        ax1.text(tc_Reff*1.1,0.9,str(tc_Reff), fontsize=20, color="r")
+        ax1.text(tc_Reff*1.1, 0.85,str(tc_Reff), fontsize=20, color="r")
     else: 
         tc_Reff = Nan
 
     # Making things beautiful
-    ax1.set_xlabel('Time /days', fontsize=20)
+    ax1.set_xlabel('Time [days]', fontsize=20)
     ax1.set_ylabel('$\mathcal{R}_t$ (Effective Reproductive Rate)', fontsize=20)
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
         ax1.set_xticklabels(x_tick_names)
     for tick in ax1.xaxis.get_major_ticks():
-        tick.label.set_fontsize(15) 
+        tick.label.set_fontsize(20) 
     for tick in ax1.yaxis.get_major_ticks():
             tick.label.set_fontsize(20)         
 
@@ -985,11 +988,11 @@ def plotSIR_growth(Svariables, **kwargs):
     ##################################################
     growth_rates = gamma * (effective_Rt - 1)
     ax2.plot(t, growth_rates, 'k', lw=2)
-    ax2.text(t[0] + 0.02, growth_rates[0] - 0.02,r'${r}_I(t)$', fontsize=20)
+    ax2.text(t[0] + 0.01, growth_rates[0] - 0.035,r'${r}_I(t)$', fontsize=30)
 
     ax2.plot(t, 0*np.ones(len(t)), 'r-')
-    txt1 = r"Critical ($r_I$={per:2.2f})"
-    ax2.text(t[-1]-50, 0 + 0.01, txt1.format(per=0), fontsize=12, color='r')
+    txt1 = r"Critical ($r_I=0$)"
+    ax2.text(t[-1]-60, 0 + 0.01, txt1.format(per=0), fontsize=20, color='r')
 
     tcs_growth  = np.nonzero(growth_rates  < 0)
     a = np.array(tcs_growth)
@@ -1005,19 +1008,20 @@ def plotSIR_growth(Svariables, **kwargs):
 
     # Making things beautiful
     ax2.set_ylabel('$r_I$(temporal growth rate)', fontsize=20)
-    ax2.set_xlabel('Time[days]',fontsize=20)
+    ax2.set_xlabel('Time [days]',fontsize=20)
     if 'x_tick_names' in kwargs:
         ax2.set_xticks(x_tick_numbers)
         ax2.set_xticklabels(x_tick_names)
     for tick in ax2.xaxis.get_major_ticks():
-        tick.label.set_fontsize(15) 
+        tick.label.set_fontsize(20) 
     for tick in ax2.yaxis.get_major_ticks():
             tick.label.set_fontsize(20)     
 
     ax2.grid(True, color='k', alpha=0.2, linewidth = 0.25)        
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(35.5/2, 14.5/2, forward=True)
+    # fig.set_size_inches(35.5/2, 14.5/2, forward=True)
+    fig.set_size_inches(35.5/2, 11.5/2, forward=True)
 
     if store_plots:
         plt.savefig(filename + "_growthRates.png", bbox_inches='tight')
@@ -1165,22 +1169,26 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         total_cases     = T[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
-        txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        
+        txt1 = r"{tend}: {per:2.3f} {number_scaling} total cases"
+        T_end = r"$T_{\rm end}$"
+        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
 
         total_cases     = T_minus[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
-        txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, 0.98*(total_cases/N), txt1.format(per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, 0.98*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
 
         total_cases     = T_plus[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
-        txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(per=total_cases/scale, number_scaling = number_scaling), fontsize=18, color='m')
-        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
+        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling = number_scaling), fontsize=18, color='m')
 
+
+        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
         ax1.text(1, 0.5, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
     else:
         if Tf == 90:
@@ -1227,6 +1235,8 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         do_minus = 0
 
     if plot_peaks:
+        Ipeak = r"I_{\rm peak}"
+
         # Plot peak points
         ax1.plot(tc, I_tc/N,'ro', markersize=8)
         if do_plus:
@@ -1244,24 +1254,24 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
                 ax1.text(I_tc_plus_idx- 30, 0.9*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
                 txt_title = r"Local peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
                 ax1.text(I_tc_minus_idx+ 5,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-            else:
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(tc- 40, I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_plus_idx- 20, I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_minus_idx -30,I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            else:                
+                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(tc- 40, I_tc/N , txt_title.format(Ipeak=Ipeak, I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx- 20, I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx -30,I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         else:
             # Adjust automatically
             txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+2, (1)*I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            ax1.text(tc+2, (1)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_plus:        
                 txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_minus:
                 txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         if plot_all == 1:
             ax1.plot(tc, T_tc/N,'mo', markersize=8)
@@ -1269,7 +1279,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
             ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
 
 
-    ax1.set_xlabel('Time /days', fontsize=30)
+    ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
     # ax1.yaxis.set_tick_params(length=0)
     # ax1.xaxis.set_tick_params(length=0)
@@ -1287,7 +1297,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
     for tick in ax1.yaxis.get_major_ticks():
             tick.label.set_fontsize(20) 
     
-    plt.grid(b=True, which='major', c='w', lw=2, ls='-')
+    # plt.grid(b=True, which='major', c='w', lw=2, ls='-')
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
     fig.set_size_inches(27.5/2, 16.5/2, forward=True)
 
@@ -1456,7 +1466,6 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     I_tc_minus     = I_minus[I_tc_minus_idx]
     print('Peak Instant. Infected + Error= ', I_tc_minus,'by day=', I_tc_minus_idx)
 
-
     do_plus = 0
     do_minus = do_plus
     if abs(tc-I_tc_plus_idx) < 3:
@@ -1492,8 +1501,11 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
         else:
             # Adjust automatically
-            txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+10, (1)*I_tc/N , txt_title.format(I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            # txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
+            txt_title = r"{Ipeak}: {I_tc:2.4f} {number_scaling} by day {peak_days:10.0f} " 
+            I_peak = r"$I_{\rm peak}$"
+
+            ax1.text(tc+10, (1)*I_tc/N , txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_plus:        
                 txt_title = r"Peak infected: {I_tc:2.3f} {number_scaling} by day {peak_days:10.0f} " 
                 ax1.text(I_tc_plus_idx-25, 1.05*I_tc_plus/N, txt_title.format(I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
@@ -1503,11 +1515,11 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
         if plot_all == 1:
             ax1.plot(tc, T_tc/N,'mo', markersize=8)
-            txt_title2 = r"Total Cases: {peak_total:2.3f} {number_scaling} by day {peak_days:10.0f} " 
+            txt_title2 = r"Total Cases: {peak_total:2.3f} {number_scaling} by day {peak_days:10.0f}"             
             ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
 
 
-    ax1.set_xlabel('Time /days', fontsize=30)
+    ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
@@ -1793,8 +1805,8 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
             ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
 
 
-    ax1.set_xlabel('Time /days', fontsize=20)
-    ax1.set_ylabel('Fraction of Population', fontsize=20)
+    ax1.set_xlabel('Time [days]', fontsize=20)
+    ax1.set_ylabel('Fraction of Population', fontsize=25)
     ax1.yaxis.set_tick_params(length=0)
     ax1.xaxis.set_tick_params(length=0)
     
@@ -1836,6 +1848,182 @@ def plotSIR_evolutionErrors(txt_title, SIRparams, S_variables, I_variables, R_va
 ##..
 ##..
 ##..
+def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
+    
+    # Unpacking variables
+    S, E, I, R, T, t = SIRvariables
+    plot_all, show_S, show_E, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset = Plotoptions 
+    
+    figure_title   = kwargs['figure_title']
+    N              = kwargs['N']
+    filename       = kwargs['file_extension']
+    if 'number_scaling' in kwargs:
+        number_scaling = kwargs['number_scaling']
+    else:
+        number_scaling = 'million'
+
+    if 'x_tick_names' in kwargs:
+        x_tick_names   = kwargs['x_tick_names']
+        x_tick_numbers = np.arange(0, len(T), kwargs['x_tick_step'])
+
+    
+    store_plots    = kwargs['store_plots']
+    # Check if x_tick_labels is given
+    # x_tick_numbers, x_tick_names = x_tick_labels
+    
+    if number_scaling == 'million':
+        scale      = 1000000
+    elif number_scaling == '100k':
+        scale      = 100000
+    elif number_scaling == '10k':
+        scale      = 10000
+    elif number_scaling == 'k':
+        scale      = 1000
+    elif number_scaling == 'none':
+        scale     = 1 
+        number_scaling = ""
+    elif number_scaling == 'fraction':
+        scale     = N 
+        number_scaling = "fraction"
+
+    
+    if plot_peaks:
+        tc, t_I100, t_I500, t_I100, t_I10 = getCriticalPointsAfterPeak(I)
+        tc    =  np.argmax(I)
+        I_tc  = I[tc]
+        T_tc  = T[tc]
+    
+    total_cases     = T[-1]
+
+    # Plot the data on three separate curves for S(t), I(t) and R(t)
+    fig, ax1 = plt.subplots()    
+    fig.suptitle(figure_title,fontsize=20)
+
+    # Variable evolution    
+    ax1.plot(t, I/N, 'r',   lw=2,   label='Infected')
+
+    if show_E:
+        ax1.plot(t, E/N, 'g', lw=2, label='Exposed')
+
+    if plot_all:        
+        show_S = 1
+        show_R = 1
+        show_T = 1
+        # Plot Final Epidemic Size
+        if show_analytic_limit:
+            ax1.plot(t, One_SinfN*np.ones(len(t)), 'm--')
+            txt1 = "Analytic Epidemic Size: 1-S(inf)/N={per:2.2f} percentage (analytic)"
+            ax1.text(t[-1]-200, One_SinfN + 0.02, txt1.format(per=One_SinfN[0]), fontsize=20, color='m')
+    
+    if show_T:
+        ax1.plot(t, T/N, 'm', lw=2,   label='Total Cases')
+        ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'r--')
+        txt1 = r"{tend}: {per:2.3f} {number_scaling} total cases"
+        T_end = r"$T_{\rm end}$"
+        ax1.text(t[-1] - x_axis_offset, (total_cases/N) + y_axis_offset, txt1.format(tend=T_end, per=total_cases/scale,number_scaling=number_scaling), fontsize=20, color='r')    
+
+    if show_S:
+        ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
+    
+    if show_R:
+        ax1.plot(t, R/N, 'c--',  lw=1,  label='Recovered')
+
+    if plot_peaks:
+        # Plot peak points
+        ax1.plot(tc, I_tc/N,'ro', markersize=8)                
+        txt_title = r"{Ipeak}: {I_tc:2.4f} {number_scaling} by day {peak_days:10.0f} " 
+        I_peak = r"$I_{\rm peak}$"
+        ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
+
+        txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
+        
+
+        if show_T:
+            ax1.plot(tc, T_tc/N,'ro', markersize=8)
+            ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+
+    # Making things beautiful
+    ax1.set_xlabel('Time [days]', fontsize=20)
+    ax1.set_ylabel('Fraction of Population', fontsize=25)
+    if 'x_tick_names' in kwargs:
+        plt.xticks(x_tick_numbers, x_tick_names)
+    legend = ax1.legend(fontsize=20, loc='center left')
+    legend.get_frame().set_alpha(0.5)
+    for spine in ('top', 'right', 'bottom', 'left'):
+        ax1.spines[spine].set_visible(True)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(20) 
+    for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(20)     
+ 
+    ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)       
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    
+    if store_plots:
+        plt.savefig(filename + ".png", bbox_inches='tight')
+        # plt.savefig(filename + ".pdf", bbox_inches='tight')
+
+
+
+def plotSEIR_growth(St, **kwargs):    
+    
+    S,t = St
+    # Compute quantities
+    effective_Rt, tc_Rt = compute_Rt(S, **kwargs)
+
+    ########################################################
+    #######       Plots for Reproductive Rates     #########
+    ########################################################    
+    # Parse plot options
+    figure_title   = kwargs['figure_title']
+    filename       = kwargs['file_extension']
+    if 'x_tick_names' in kwargs:
+        x_tick_names   = kwargs['x_tick_names']
+        x_tick_numbers = np.arange(0, len(S), kwargs['x_tick_step'])
+    store_plots    = kwargs['store_plots']
+
+    # Create Plot
+    fig, ax1 = plt.subplots()
+    fig.suptitle(figure_title,fontsize=20)    
+        
+    # Plot of Reproductive rate (number)
+    ax1.plot(t, effective_Rt, 'k', lw=2)
+    ax1.text(t[0] + 0.02, effective_Rt[0] - 0.25,r'${\cal R}_t(t)$', fontsize=40)
+    ax1.plot(t, 1*np.ones(len(t)), 'r-')
+    txt1 = "Critical ($R_t$={per:2.2f})"
+    ax1.text(1, 1 + 0.01, txt1.format(per=1), fontsize=30, color='r')
+    ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)        
+
+    # Plot tc point
+    if not math.isnan(tc_Rt):
+        print('R_t <= 1 @ day=', tc_Rt, 'R_t=',effective_Rt[tc_Rt])
+        print('Previous=',effective_Rt[tc_Rt-1])
+        ax1.plot(tc_Rt, 1,'ro', markersize=12)
+        ax1.text(tc_Rt*1.1,0.85,str(tc_Rt), fontsize=30, color="r")
+
+    # Making things beautiful
+    ax1.set_xlabel('Time [days]', fontsize=20)
+    ax1.set_ylabel('$\mathcal{R}_t$ (Effective Reproductive Rate)', fontsize=25)
+    if 'x_tick_names' in kwargs:
+        ax1.set_xticks(x_tick_numbers)
+        ax1.set_xticklabels(x_tick_names)
+    for tick in ax1.xaxis.get_major_ticks():
+        tick.label.set_fontsize(20) 
+    for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(20)         
+
+    fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+    fig.set_size_inches(27.5/2, 14.5/2, forward=True)
+
+    if store_plots:
+        plt.savefig(filename + "_growthRates.png", bbox_inches='tight')
+        # plt.savefig(filename + ".pdf", bbox_inches='tight')
+    
+    return tc_Rt, effective_Rt[tc_Rt]
+
+
+
 def plotSEIR_evolutionStochastic(S_variables, E_variables, I_variables, R_variables, T_variables, Plotoptions, **kwargs):    
 
     S       = S_variables[0,:]
@@ -2042,7 +2230,7 @@ def plotSEIR_evolutionStochastic(S_variables, E_variables, I_variables, R_variab
             ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
 
 
-    ax1.set_xlabel('Time /days', fontsize=30)
+    ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
@@ -2254,8 +2442,8 @@ def plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, sto
         if show_S:
             ax1.plot(t, S/N, 'k',   lw=2, label='Susceptible')
         if show_R:
-            ax1.plot(t, Re/N, 'g--',  lw=1,  label='Recovered')
-            ax1.plot(t, R/N, 'g',  lw=2,  label='Recovered+Dead+Quarantined')
+            ax1.plot(t, Re/N, 'c--',  lw=1,  label='Recovered')
+            ax1.plot(t, R/N, 'c',  lw=2,  label='Recovered+Dead+Quarantined')
 
         # Plot Final Epidemic Size
         if show_analytic_limit:        
@@ -2294,7 +2482,7 @@ def plotSEIQR_evolution(txt_title, SEIQRparams, SEIQRvariables, Plotoptions, sto
         ax1.text(peak_All_I_idx+10, peak_All_I/N, txt_title3.format(peak_E=peak_All_I/scale, peake_days= peak_All_I_idx), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
 
     # Making things beautiful
-    ax1.set_xlabel('Time /days', fontsize=40)
+    ax1.set_xlabel('Time [days]', fontsize=40)
     ax1.set_ylabel('Fraction of Population', fontsize=40)
     ax1.yaxis.set_tick_params(length=0)
     ax1.xaxis.set_tick_params(length=0)
@@ -2472,7 +2660,7 @@ def plotSEIQR_evolutionErrors(txt_title, SEIQRparams, S_variables, E_variables, 
         ax1.text(t[0], covid_SinfS0 - 0.05, txt1.format(per=covid_SinfS0[0]), fontsize=20, color='m')
 
 
-    ax1.set_xlabel('Time /days', fontsize=20)
+    ax1.set_xlabel('Time [days]', fontsize=20)
     ax1.set_ylabel('Fraction of Population', fontsize=20)
     ax1.yaxis.set_tick_params(length=0)
     ax1.xaxis.set_tick_params(length=0)
