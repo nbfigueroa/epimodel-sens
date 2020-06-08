@@ -45,8 +45,7 @@ Code used to evaluate standard compartmental epidemic models (SIR/SEIR) as well 
 Nadia Figueroa and Ankit Shah
 
 ## References
-* Primer paper (Analysis of Standard Models) by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
-* Second paper (Analysis of Extended Models) by Nadia Figueroa, David Kaiser, Ankit Shah and Julie Shah.
+* "Sensitivity of Predictions from Epidemic Models to Parameter Uncertainty" by Nadia B. Figueroa, David I. Kaiser, Ankit J. Shah and Julie A. Shah.
 
 
 
