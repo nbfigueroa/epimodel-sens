@@ -1179,7 +1179,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
         # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, 0.98*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
 
         total_cases     = T_plus[-1]
         print('Total Cases when growth linear = ', total_cases)
@@ -1235,7 +1235,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         do_minus = 0
 
     if plot_peaks:
-        Ipeak = r"I_{\rm peak}"
+        Ipeak = r"$I_{\rm peak}$"
 
         # Plot peak points
         ax1.plot(tc, I_tc/N,'ro', markersize=8)
@@ -1264,14 +1264,14 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
 
         else:
             # Adjust automatically
-            txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
             ax1.text(tc+2, (1)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_plus:        
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_minus:
-                txt_title = r"Peak infected: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=12, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         if plot_all == 1:
             ax1.plot(tc, T_tc/N,'mo', markersize=8)
@@ -1297,7 +1297,8 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
     for tick in ax1.yaxis.get_major_ticks():
             tick.label.set_fontsize(20) 
     
-    # plt.grid(b=True, which='major', c='w', lw=2, ls='-')
+
+    ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)  
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
     fig.set_size_inches(27.5/2, 16.5/2, forward=True)
 
