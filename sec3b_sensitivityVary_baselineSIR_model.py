@@ -126,7 +126,7 @@ def main():
 
     ## For variation on these parameters
     beta       = sim_kwargs['beta']
-    gamma_inv  = sim_kwargs['gamma_inv']
+    gamma_inv  = sim_kwargs['gamma_inv']    
 
     # Variables for +/- errors on beta
     error_perc        = 10

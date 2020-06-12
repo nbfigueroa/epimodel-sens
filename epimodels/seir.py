@@ -33,17 +33,14 @@ class SEIR():
 
     @property
     def beta(self):
-        # return self.args['r0']/self.args['inf_period']
         return self.args['beta']
 
     @property
     def gamma(self):
-        # return 1/self.args['inf_period']
         return self.args['gamma']
 
     @property
     def sigma(self):
-        # return 1/self.args['lat_period']
         return self.args['sigma']
 
     @property
