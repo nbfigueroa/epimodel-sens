@@ -116,11 +116,11 @@ def run_SEIR_wErrors(beta_samples, gamma_inv_samples, sigma_inv_samples, E0_samp
     ##############################################################
     ######## Plots Simulation Variables with Error Bounds ########
     ##############################################################
-    x_axis_offset       = round(kwargs['days']*0.4)
+    x_axis_offset       = round(kwargs['days']*0.3)
     y_axis_offset       = 0.0000000003 
-    plot_all            = 1; plot_peaks = 1; show_S = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.01 
-    Plotoptions         = plot_all, show_S, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset, scenario
-    plotSIR_evolutionErrors_new(S_samples, I_samples, R_samples, Plotoptions, text_error, **kwargs)    
+    plot_all            = 1; plot_peaks = 1; show_S = 0; show_E = 0; show_T = 1; show_R = 0; show_analytic_limit = 0; scale_offset = 0.015 
+    Plotoptions         = plot_all, show_S, show_E, show_T, show_R, show_analytic_limit, plot_peaks, x_axis_offset, y_axis_offset, scale_offset, scenario
+    plotSEIR_evolutionErrors(S_samples, E_samples, I_samples, R_samples, Plotoptions, text_error, **kwargs)    
 
 
 def main():    
@@ -140,7 +140,7 @@ def main():
     # Need to get rid of this variable here/..
     sim_kwargs['scenario']     = scenario
     basefilename               = sim_kwargs['file_extension']
-    workbook, worksheet        = createResultsfile(basefilename, 'errorVary', test_type='varying')
+    workbook, worksheet        = createResultsfile(basefilename, 'errorVary', test_type='varying', header = 'SEIR')
 
     ## For variation on these parameters
     beta       = sim_kwargs['beta']
@@ -177,6 +177,9 @@ def main():
     plt.show()
 
     ########### Test 3: vary sigma, fix beta and gamma ############
+    # Variables for +/- errors on beta
+    error_perc        = 20
+    err               = error_perc/100
     text_error                    =  r"$\sigma^{-1} \pm %1.2f \sigma^{-1}$"%err
     sim_kwargs['file_extension']  = basefilename + "_errorsVarySigma"
     sim_kwargs['worksheet']       = worksheet
@@ -188,15 +191,21 @@ def main():
     run_SEIR_wErrors(beta_samples, gamma_inv_samples, sigma_inv_samples, E0_samples, text_error, **sim_kwargs)
     plt.show()
     
-    ########### Test 3: vary sigma, fix beta and gamma ############
+    ########### Test 4: vary sigma, fix beta and gamma ############
+    # Variables for +/- errors on beta
+    error_perc        = 50
+    err               = error_perc/100
+
     text_error                    =  r"$E(0) \pm %1.2f E(0)$"%err
-    sim_kwargs['file_extension']  = basefilename + "_errorsVarySigma"
+    sim_kwargs['file_extension']  = basefilename + "_errorsVaryE0"
     sim_kwargs['worksheet']       = worksheet
-    sim_kwargs['row_num']         = 3
+    sim_kwargs['row_num']         = 4
     beta_samples      = [beta, beta, beta]
     gamma_inv_samples = [gamma_inv, gamma_inv, gamma_inv]
     sigma_inv_samples = [sigma_inv, sigma_inv, sigma_inv]
-    E0_samples        = [E0, E0*(1+err), E0*(1-err)]
+    I0                = sim_kwargs['I0']
+    E_scale           = 10
+    E0_samples        = [E_scale*I0, E_scale*(1+err)*I0, E_scale*(1-err)*I0]
     run_SEIR_wErrors(beta_samples, gamma_inv_samples, sigma_inv_samples, E0_samples, text_error, **sim_kwargs)
     plt.show()
 

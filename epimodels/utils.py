@@ -92,26 +92,46 @@ def loadCSSEData(country, plot_data):
     return data
 
 
-def createResultsfile(basefilename = './results/test', append_name= 'results', test_type='sampling'):
+def createResultsfile(basefilename = './results/test', append_name= 'results', test_type='sampling', header="SIR"):
     results_filename = basefilename + '_' + append_name + '.xlsx'
     workbook = xlsxwriter.Workbook(results_filename)
     worksheet = workbook.add_worksheet()
 
-    if test_type == 'sampling':    
-        header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
-                  'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
-                  'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
-                  't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
-                  'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
-                  'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+    if header == "SIR":
+        if test_type == 'sampling':    
+            header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
+                      'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
+                      'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
+                      't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
+                      'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
+                      'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
 
-    if test_type == 'varying':    
-                header = ['beta','beta-max', 'beta-max',
-                          'gamma_inv', 'gamma_inv-max','gamma_inv-min',
-                          'R_0', 'R_0-max', 'R_0-min',
-                          't_c', 't_c-max','t_c-min',
-                          'I_peak', 'I_peak-max', 'I_peak-min',
-                          'T_end', 'T_end-max', 'T_end-min']
+        if test_type == 'varying':    
+                    header = ['beta','beta-max', 'beta-max',
+                              'gamma_inv', 'gamma_inv-max','gamma_inv-min',
+                              'R_0', 'R_0-max', 'R_0-min',
+                              't_c', 't_c-max','t_c-min',
+                              'I_peak', 'I_peak-max', 'I_peak-min',
+                              'T_end', 'T_end-max', 'T_end-min']
+    elif header == "SEIR":
+        # This is for sampling method.. should be modified
+        if test_type == 'sampling':    
+            header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
+                      'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
+                      'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
+                      't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
+                      'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
+                      'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+
+        if test_type == 'varying':    
+                    header = ['beta','beta-max', 'beta-max',
+                              'gamma_inv', 'gamma_inv-max','gamma_inv-min',
+                              'sigma_inv', 'sigma_inv-max','sigma_inv-min',
+                              'E_0', 'E_0-max','E_0-min',
+                              'R_0', 'R_0-max', 'R_0-min',
+                              't_c', 't_c-max','t_c-min',
+                              'I_peak', 'I_peak-max', 'I_peak-min',
+                              'T_end', 'T_end-max', 'T_end-min']
 
     for i in range(len(header)):
         worksheet.write(0,i, header[i])
