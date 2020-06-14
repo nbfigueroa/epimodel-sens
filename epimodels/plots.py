@@ -911,7 +911,7 @@ def plotSIR_evolution(SIRvariables, Plotoptions, **kwargs):
     ax1.set_ylabel('Fraction of Population', fontsize=25)
     if 'x_tick_names' in kwargs:
         plt.xticks(x_tick_numbers, x_tick_names)
-    legend = ax1.legend(fontsize=20)
+    legend = ax1.legend(fontsize=20, loc='center left')
     legend.get_frame().set_alpha(0.5)
     for spine in ('top', 'right', 'bottom', 'left'):
         ax1.spines[spine].set_visible(True)
@@ -922,7 +922,8 @@ def plotSIR_evolution(SIRvariables, Plotoptions, **kwargs):
  
     ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)       
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
     
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')
@@ -1021,7 +1022,8 @@ def plotSIR_growth(Svariables, **kwargs):
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
     # fig.set_size_inches(35.5/2, 14.5/2, forward=True)
-    fig.set_size_inches(35.5/2, 11.5/2, forward=True)
+    # fig.set_size_inches(35.5/2, 11.5/2, forward=True)
+    fig.set_size_inches(35.5/2.2, 14.5/2.5, forward=True)
 
     if store_plots:
         plt.savefig(filename + "_growthRates.png", bbox_inches='tight')
@@ -1058,7 +1060,7 @@ def plotSIR_finalEpidemicR0(**kwargs):
     # Plots
     fig0, ax0 = plt.subplots()
     ax0.plot(r0_vals, Sinf_S0, 'r', lw=2, label='Susceptible')
-    ax0.set_ylabel('1 - $S_{\infty}/S_{0}$ (Fraction of Population Infected)', fontsize=20)
+    ax0.set_ylabel('1 - $S_{\infty}/S_{0}$', fontsize=20)
     ax0.set_xlabel('$\mathcal{R}_0$', fontsize=20)
 
     for tick in ax0.xaxis.get_major_ticks():
@@ -1081,7 +1083,8 @@ def plotSIR_finalEpidemicR0(**kwargs):
     ax0.text(4, 0.75, r"${\cal R}_0 \equiv \frac{ \beta } {\gamma}$", fontsize=20, bbox=dict(facecolor='red', alpha=0.15))
     ax0.grid(True, color='k', alpha=0.2, linewidth = 0.25)        
     fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig0.set_size_inches(25.5/2, 12.5/2, forward=True)
+    # fig0.set_size_inches(25.5/2, 12.5/2, forward=True)
+    fig0.set_size_inches(0.75*(27.5/2.5), 0.75*(14.5/2.4), forward=True)
 
     if store_plots:
         plt.savefig(filename + "_finalEpidemic.png", bbox_inches='tight')
@@ -1867,7 +1870,7 @@ def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
         x_tick_names   = kwargs['x_tick_names']
         x_tick_numbers = np.arange(0, len(T), kwargs['x_tick_step'])
 
-    
+    days           = kwargs['days']
     store_plots    = kwargs['store_plots']
     # Check if x_tick_labels is given
     # x_tick_numbers, x_tick_names = x_tick_labels
@@ -1934,14 +1937,20 @@ def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
         ax1.plot(tc, I_tc/N,'ro', markersize=8)                
         txt_title = r"{Ipeak}: {I_tc:2.4f} {number_scaling} by day {peak_days:10.0f} " 
         I_peak = r"$I_{\rm peak}$"
-        ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
 
-        txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
-        
+
+        if tc > 0.5*days:
+            ax1.text(tc - 0.25*days, (I_tc/N) + 0.05*N, txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
+        else:
+            ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = I_peak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))        
 
         if show_T:
+            txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
             ax1.plot(tc, T_tc/N,'ro', markersize=8)
-            ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+            if tc > 0.5*days:
+                ax1.text(tc - 0.25*days, (T_tc/N) + 0.05*N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+            else:
+                ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
 
     # Making things beautiful
     ax1.set_xlabel('Time [days]', fontsize=20)
@@ -1959,7 +1968,9 @@ def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
  
     ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)       
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 14.5/2.2, forward=True)
+    fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
     
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')
@@ -2015,7 +2026,8 @@ def plotSEIR_growth(St, **kwargs):
             tick.label.set_fontsize(20)         
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(27.5/2, 14.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 14.5/2, forward=True)
+    fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
 
     if store_plots:
         plt.savefig(filename + "_growthRates.png", bbox_inches='tight')

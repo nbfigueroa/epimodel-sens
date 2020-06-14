@@ -78,7 +78,9 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1, header = 'SIR'):
         # Using fraction of population
         N               = 1
         I0, R0          = pow(10,-5), 0    
-        E0              = 10*I0
+        E0              = 10*I0   # Baseline
+        # E0              = I0      # Extreme negative error
+        # E0              = 0.001*N # Extreme positive error
         number_scaling  = 'fraction'
         days            = 200
         gamma_inv       = 7.0  
