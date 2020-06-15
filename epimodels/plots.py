@@ -1152,7 +1152,7 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
 
     # Plot the data of three separate curves for S(t), I(t) and R(t)
     fig, ax1 = plt.subplots()
-    fig.suptitle(figure_title,fontsize=25)    
+    # fig.suptitle(figure_title,fontsize=25)    
 
     # Variable evolution
     if show_S:
@@ -1176,19 +1176,19 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         
         txt1 = r"{tend}: {per:2.3f} {number_scaling} total cases"
         T_end = r"$T_{\rm end}$"
-        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=15, color='m')
 
         total_cases     = T_minus[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
         # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=15, color='m')
 
         total_cases     = T_plus[-1]
         print('Total Cases when growth linear = ', total_cases)
         # ax1.plot(t, (total_cases/N)*np.ones(len(t)), 'k--')
         # txt1 = "{per:2.4f} {number_scaling} total cases as $t(end)$"
-        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling = number_scaling), fontsize=18, color='m')
+        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling = number_scaling), fontsize=15, color='m')
 
 
         fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
@@ -1268,29 +1268,29 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
         else:
             # Adjust automatically
             txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+2, (1)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            ax1.text(tc+2, (1)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=18, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_plus:        
                 txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(I_tc_plus_idx-25, (1 + 10*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=13, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             if do_minus:
                 txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(I_tc_minus_idx+2, (1 - 10*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=13, color="r",  bbox=dict(facecolor='white', alpha=0.75))
 
         if plot_all == 1:
             ax1.plot(tc, T_tc/N,'mo', markersize=8)
             txt_title2 = r"Total Cases: {peak_total:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
+            ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=18, color="m", bbox=dict(facecolor='white', alpha=0.75))
 
 
     ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
+    ax1.set_ylim(top=1)
     # ax1.yaxis.set_tick_params(length=0)
     # ax1.xaxis.set_tick_params(length=0)
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
-        ax1.set_xticklabels(x_tick_names)
-    
-    legend = ax1.legend(fontsize=20, loc='center right')
+        ax1.set_xticklabels(x_tick_names)    
+    legend = ax1.legend(fontsize=20, loc='upper left')
     legend.get_frame().set_alpha(0.5)
     for spine in ('top', 'right', 'bottom', 'left'):
         ax1.spines[spine].set_visible(True)
@@ -1303,7 +1303,8 @@ def plotSIR_evolutionErrors_new(S_variables, I_variables, R_variables, Plotoptio
 
     ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)  
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
 
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')
@@ -1955,9 +1956,10 @@ def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
     # Making things beautiful
     ax1.set_xlabel('Time [days]', fontsize=20)
     ax1.set_ylabel('Fraction of Population', fontsize=25)
+    ax1.set_ylim(top=1)
     if 'x_tick_names' in kwargs:
         plt.xticks(x_tick_numbers, x_tick_names)
-    legend = ax1.legend(fontsize=20, loc='center left')
+    legend = ax1.legend(fontsize=20, loc='upper left')
     legend.get_frame().set_alpha(0.5)
     for spine in ('top', 'right', 'bottom', 'left'):
         ax1.spines[spine].set_visible(True)
@@ -1971,7 +1973,7 @@ def plotSEIR_evolution(SIRvariables, Plotoptions, **kwargs):
     # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
     # fig.set_size_inches(27.5/2, 14.5/2.2, forward=True)
     fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
-    
+
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')
         # plt.savefig(filename + ".pdf", bbox_inches='tight')
@@ -2070,6 +2072,7 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
     figure_title   = kwargs['figure_title']
     N              = kwargs['N']
     r0             = kwargs['r0']
+    days           = kwargs['days']
     gamma          = 1/kwargs['gamma_inv']
     filename       = kwargs['file_extension']
     if 'x_tick_names' in kwargs:
@@ -2102,7 +2105,7 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
 
     # Plot the data of three separate curves for S(t), I(t) and R(t)
     fig, ax1 = plt.subplots()
-    fig.suptitle(figure_title,fontsize=25)    
+    # fig.suptitle(figure_title,fontsize=25)    
 
     # Variable evolution
     if show_S:
@@ -2126,15 +2129,19 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
         
         txt1 = r"{tend}: {per:2.3f} {number_scaling} total cases"
         T_end = r"$T_{\rm end}$"
-        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')        
-        total_cases     = T_minus[-1]
-        print('Total Cases when growth linear = ', total_cases)
-        ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')
+        
+        if abs(T[-1]-T_minus[-1]) > 0.1:
+            ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=15, color='m')        
 
-        total_cases     = T_plus[-1]
-        print('Total Cases when growth linear = ', total_cases)
-        ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling = number_scaling), fontsize=18, color='m')
-
+            total_cases     = T_minus[-1]
+            print('Total Cases when growth linear = ', total_cases)
+            ax1.text(t[-1]-x_axis_offset, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=15, color='m')
+            
+            total_cases     = T_plus[-1]
+            print('Total Cases when growth linear = ', total_cases)
+            ax1.text(t[-1]-x_axis_offset, (1 + scale_offset)*(total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling = number_scaling), fontsize=15, color='m')
+        else:       
+            ax1.text(0.60*days, (total_cases/N), txt1.format(tend=T_end, per=total_cases/scale, number_scaling= number_scaling), fontsize=18, color='m')                    
 
         fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
         ax1.text(1, 0.5, text_error, fontsize=20, bbox=dict(facecolor='red', alpha=0.1))
@@ -2212,34 +2219,56 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
 
         else:
             # Adjust automatically
-            txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+1, (1.25)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-            do_plus = 1
-            do_minus = 1
+            txt_title = r"{Ipeak}: {I_tc:5.4f} {number_scaling} by day {peak_days:10.0f} " 
+            # ax1.text(tc+1, (1.25)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            
+            if tc > 0.5*days:
+                ax1.text(tc - 0.25*days, (I_tc/N) + 0.075*N, txt_title.format(Ipeak = Ipeak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
+            else:
+                ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = Ipeak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))        
+
             if do_plus:        
-                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                # ax1.text(I_tc_plus_idx-55, (1 - 30*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-                ax1.text(I_tc_plus_idx-25, (1 + 25*scale_offset)*I_tc_plus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.4f} {number_scaling} by day {peak_days:10.0f} " 
+
+                if I_tc_plus_idx > tc:
+                    ax1.text(I_tc_plus_idx + 5, I_tc_plus/N - 0.01*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                else:
+                    ax1.text(I_tc_plus_idx - 0.375*days, I_tc_plus/N - 0.05*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_plus/scale, number_scaling=number_scaling, peak_days= I_tc_plus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+            
             if do_minus:
-                txt_title = r"{Ipeak}: {I_tc:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-                # ax1.text(I_tc_minus_idx+0, (1 - 30*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
-                ax1.text(I_tc_minus_idx+2, (1 - 25*scale_offset)*I_tc_minus/N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                txt_title = r"{Ipeak}: {I_tc:5.4f} {number_scaling} by day {peak_days:10.0f} " 
+                if I_tc_minus_idx > tc:
+                    ax1.text(I_tc_minus_idx + 5, I_tc_minus/N - 0.01*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                else:
+                    if abs(I_tc_minus_idx-tc) < 10:
+                        ax1.text(I_tc_minus_idx - 0.375*days, I_tc_minus/N - 0.01*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                    else:
+                        # ax1.text(I_tc_minus_idx - 0.25*days, I_tc_minus/N - 0.01*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                        ax1.text(I_tc_minus_idx - 0.375*days, I_tc_minus/N - 0.01*N, txt_title.format(Ipeak=Ipeak,I_tc=I_tc_minus/scale, number_scaling=number_scaling, peak_days= I_tc_minus_idx), fontsize=15, color="r",  bbox=dict(facecolor='white', alpha=0.75))
+                
 
         if plot_all == 1:
-            ax1.plot(tc, T_tc/N,'mo', markersize=8)
-            txt_title2 = r"Total Cases: {peak_total:5.5f} {number_scaling} by day {peak_days:10.0f} " 
-            ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
+            # ax1.plot(tc, T_tc/N,'mo', markersize=8)
+            # txt_title2 = r"Total Cases: {peak_total:5.5f} {number_scaling} by day {peak_days:10.0f} " 
+            # ax1.text(tc+10, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="m", bbox=dict(facecolor='white', alpha=0.75))
+
+            txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
+            ax1.plot(tc, T_tc/N,'ro', markersize=8)
+            if tc > 0.5*days:
+                ax1.text(tc - 0.25*days, (T_tc/N) + 0.075*N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+            else:
+                ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+
+
 
 
     ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
-    # ax1.yaxis.set_tick_params(length=0)
-    # ax1.xaxis.set_tick_params(length=0)
+    ax1.set_ylim(top=1)
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
         ax1.set_xticklabels(x_tick_names)
-    
-    legend = ax1.legend(fontsize=20, loc='center right')
+    legend = ax1.legend(fontsize=20, loc='upper left')
     legend.get_frame().set_alpha(0.5)
     for spine in ('top', 'right', 'bottom', 'left'):
         ax1.spines[spine].set_visible(True)
@@ -2252,7 +2281,8 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
 
     ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25)  
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
+    fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
 
     if store_plots:
         plt.savefig(filename + ".png", bbox_inches='tight')

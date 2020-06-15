@@ -196,7 +196,8 @@ def main():
     error_perc        = 50
     err               = error_perc/100
 
-    text_error                    =  r"$E(0) \pm %1.2f E(0)$"%err
+    # text_error                    =  r"$E(0) \pm %1.2f E(0)$"%err
+    text_error                    =  r"$E(0)=I(0)\\ \quad E(0)=0.1\%N$"
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryE0"
     sim_kwargs['worksheet']       = worksheet
     sim_kwargs['row_num']         = 4
@@ -206,6 +207,7 @@ def main():
     I0                = sim_kwargs['I0']
     E_scale           = 10
     E0_samples        = [E_scale*I0, E_scale*(1+err)*I0, E_scale*(1-err)*I0]
+    E0_samples        = [E_scale*I0, I0, 0.001]
     run_SEIR_wErrors(beta_samples, gamma_inv_samples, sigma_inv_samples, E0_samples, text_error, **sim_kwargs)
     plt.show()
 
