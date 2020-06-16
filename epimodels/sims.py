@@ -228,6 +228,7 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
         # beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
         # gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
+        # From equations: \mu=loc, s=shape, \kappa=scale
         beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
         sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 2.2, 3.35, 0.865

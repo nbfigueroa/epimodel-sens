@@ -178,7 +178,7 @@ def main():
 
     ########### Test 3: vary sigma, fix beta and gamma ############
     # Variables for +/- errors on beta
-    error_perc        = 20
+    error_perc        = 10
     err               = error_perc/100
     text_error                    =  r"$\sigma^{-1} \pm %1.2f \sigma^{-1}$"%err
     sim_kwargs['file_extension']  = basefilename + "_errorsVarySigma"
@@ -193,11 +193,9 @@ def main():
     
     ########### Test 4: vary sigma, fix beta and gamma ############
     # Variables for +/- errors on beta
-    error_perc        = 50
-    err               = error_perc/100
+    E_scale = 10
+    E_max   = 0
 
-    # text_error                    =  r"$E(0) \pm %1.2f E(0)$"%err
-    text_error                    =  r"$E(0)=I(0)\\ \quad E(0)=0.1\%N$"
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryE0"
     sim_kwargs['worksheet']       = worksheet
     sim_kwargs['row_num']         = 4
@@ -205,9 +203,15 @@ def main():
     gamma_inv_samples = [gamma_inv, gamma_inv, gamma_inv]
     sigma_inv_samples = [sigma_inv, sigma_inv, sigma_inv]
     I0                = sim_kwargs['I0']
-    E_scale           = 10
-    E0_samples        = [E_scale*I0, E_scale*(1+err)*I0, E_scale*(1-err)*I0]
-    E0_samples        = [E_scale*I0, I0, 0.001]
+    if E_max:
+        text_error        =  r"$E(0)=I(0)\\ \quad E(0)=0.1\%N$"
+        E0_samples        = [E_scale*I0, I0, 0.001]            
+    else:
+        error_perc        = 50
+        err               = error_perc/100
+        text_error        =  r"$E(0) \pm %1.2f E(0)$"%err
+        E0_samples        = [E_scale*I0, E_scale*(1+err)*I0, E_scale*(1-err)*I0]        
+
     run_SEIR_wErrors(beta_samples, gamma_inv_samples, sigma_inv_samples, E0_samples, text_error, **sim_kwargs)
     plt.show()
 
