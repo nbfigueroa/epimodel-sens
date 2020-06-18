@@ -225,14 +225,19 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
     ########### Method 3: Drawing from Gamma Distributions ############
     ###################################################################
     if prob_type  == 'gamma':           
+        # From equations: \mu=loc, s=shape, \kappa=scale        
+
+        # Old parameters:
         # beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
         # gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
-        # From equations: \mu=loc, s=shape, \kappa=scale
+        # New parameters:
         beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
-        sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 2.2, 3.35, 0.865
+        # sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 2.2, 3.35, 0.865
+        sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 0, 80, 0.05
         
+
         ########### Test 1: Sample beta, fix gamma and sigma ############
         if test_num == 1:
             gamma_inv_scale = 0
@@ -250,6 +255,7 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
             sigma_inv_loc  = sim_kwargs['sigma_inv']
             _ext           = "_errorsSampleGamma_Gamma"
             text_error     =  r"$\gamma^{-1} \sim Gamma(.)$"
+
         ############ Test 3: sample sigma, fix beta and gamma ############
         if test_num == 3:
             gamma_inv_scale = 0
@@ -259,8 +265,8 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
             _ext           = "_errorsSampleSigma_Gamma"
             text_error     = r"$\sigma^{-1} \sim Gamma(.)$"
             
-            #_ext          =  "_errorsSampleBetaGamma_Gamma"            
-            #text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$" + "\n" + r"$\sigma^{-1} \sim Gamma(.)$"
+            _ext          =  "_errorsSampleBetaGamma_Gamma"            
+            text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$" + "\n" + r"$\sigma^{-1} \sim Gamma(.)$"
         
         ############ Test 4: Sample beta, gamma, sigma ############
         if test_num == 4:
@@ -417,12 +423,18 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
     ########### Method 3: Drawing from Gamma Distributions ############
     ###################################################################
     if prob_type  == 'gamma':           
+
+        # From equations: \mu=loc, s=shape, \kappa=scale        
+
+        # Old parameters (May draft):
         beta_loc, beta_shape, beta_scale                = 0.22, 10, 0.009
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
+        # New parameters (June draft):
         beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
         
+
         ########### Test 1: Sample beta, fix gamma ############
         if test_num == 1:
             gamma_inv_scale = 0
