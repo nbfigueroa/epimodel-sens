@@ -1,8 +1,8 @@
 # Custom classes and helper/plotting functions
 from epimodels.stochastic_sir    import *
 from epimodels.utils  import *
-# from epimodels.plots  import *
-from epimodels.plots_local  import *
+from epimodels.plots  import *
+# from epimodels.plots_local  import *
 from epimodels.sims   import *
 
 
@@ -114,8 +114,8 @@ def run(prob_type = 'gamma'):
     rollouts  = pow(10,5)
     viz_plots = 0
 
-    # for test_num in [1, 2, 3]:
-    for test_num in [3]:        
+    for test_num in [1, 2, 3]:
+    # for test_num in [3]:        
         prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables
