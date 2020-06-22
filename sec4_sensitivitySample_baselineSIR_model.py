@@ -115,7 +115,6 @@ def run(prob_type = 'gamma'):
     viz_plots = 0
 
     for test_num in [1, 2, 3]:
-    # for test_num in [3]:        
         prob_params, plot_vars        = getSIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables

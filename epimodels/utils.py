@@ -11,6 +11,11 @@ from   matplotlib import rc
 rc('font',**{'family':'serif','serif':['Times']})
 rc('text', usetex=True)
 
+import statsmodels.api       as sm
+from statsmodels.formula.api import ols
+from   scipy.stats       import kde
+from scipy.interpolate   import UnivariateSpline
+
 import pandas as pd 
 import xlsxwriter
 
@@ -99,12 +104,12 @@ def createResultsfile(basefilename = './results/test', append_name= 'results', t
 
     if header == "SIR":
         if test_type == 'sampling':    
-            header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
-                      'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
-                      'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
-                      't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
-                      'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
-                      'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+            header = ['beta-mean','beta-Q15.5', 'beta-Q83.5', 'beta-Q2.5','beta-Q97.5',
+                      'gamma-inv-mean', 'gamma-inv-Q15.5', 'gamma-inv-Q83.5','gamma-inv-Q2.5','gamma-inv-Q97.5',
+                      'R_0-mean',  'R_0-Q15.5','R_0-Q83.5', 'R_0-Q2.5', 'R_0-Q97.5',
+                      't_c-mean', 't_c-Q15.5', 't_c-Q83.5', 't_c-Q2.5', 't_c-Q97.5',
+                      'I_peak-mean', 'I_peak-Q15.5', 'I_peak-Q83.5', 'I_peak-Q2.5', 'I_peak-Q97.5',
+                      'T_end-mean',  'T_end-Q15.5', 'T_end-Q83.5', 'T_end-Q2.5', 'T_end-Q97.5']    
 
         if test_type == 'varying':    
                     header = ['beta','beta-max', 'beta-max',
@@ -116,12 +121,13 @@ def createResultsfile(basefilename = './results/test', append_name= 'results', t
     elif header == "SEIR":
         # This is for sampling method.. should be modified
         if test_type == 'sampling':    
-            header = ['beta-mean','beta-Q99.85', 'beta-Q0.15', 'beta-Q97.5','beta-Q2.5',
-                      'gamma-inv-mean', 'gamma-inv-Q99.85', 'gamma-inv-Q0.15','gamma-inv-Q97.5','gamma-inv-Q2.5',
-                      'R_0-mean','R_0-Q99.85', 'R_0-Q0.15', 'R_0-Q97.5','R_0-Q2.5',
-                      't_c-mean','t_c-Q97.5','t_c-Q2.5', 't_c-Q83.5', 't_c-Q15.5', 
-                      'I_peak-mean','I_peak-Q97.5','I_peak-Q2.5', 'I_peak-Q83.5', 'I_peak-Q15.5', 
-                      'T_end-mean','T_end-Q97.5','T_end-Q2.5', 'T_end-Q83.5', 'T_end-Q15.5']    
+            header = ['beta-mean','beta-Q15.5', 'beta-Q83.5', 'beta-Q2.5','beta-Q97.5',
+                      'gamma-inv-mean', 'gamma-inv-Q15.5', 'gamma-inv-Q83.5','gamma-inv-Q2.5','gamma-inv-Q97.5',
+                      'sigma-inv-mean', 'sigma-inv-Q15.5', 'sigma-inv-Q83.5','sigma-inv-Q2.5','sigma-inv-Q97.5',
+                      'R_0-mean',  'R_0-Q15.5','R_0-Q83.5', 'R_0-Q2.5', 'R_0-Q97.5',
+                      't_c-mean', 't_c-Q15.5', 't_c-Q83.5', 't_c-Q2.5', 't_c-Q97.5',
+                      'I_peak-mean', 'I_peak-Q15.5', 'I_peak-Q83.5', 'I_peak-Q2.5', 'I_peak-Q97.5',
+                      'T_end-mean',  'T_end-Q15.5', 'T_end-Q83.5', 'T_end-Q2.5', 'T_end-Q97.5']
 
         if test_type == 'varying':    
                     header = ['beta','beta-max', 'beta-max',
@@ -379,3 +385,598 @@ def sample_SIRparam_distributions(*prob_params):
             gamma_inv = np.random.lognormal(gamma_inv_mean, gamma_inv_std)
 
     return beta, gamma_inv
+
+
+
+# TODO: Move these to utils.py
+def fit1D_KDE(x):
+    # Use scipy.stats class to fit the bandwith
+    tc_kde = stats.gaussian_kde(x.T)    
+    stdev = np.sqrt(tc_kde.covariance)[0, 0]
+
+    # using statsmodels kde to compute quantiles
+    tc_kde_sm = sm.nonparametric.KDEUnivariate(x)    
+    tc_kde_sm.fit()
+    bw = tc_kde_sm.bw
+    tc_kde_sm.fit(bw=np.max(np.array([stdev,bw])))
+    icdf_spl = UnivariateSpline(np.linspace(0, 1, num = tc_kde_sm.icdf.size), tc_kde_sm.icdf)    
+
+    # fig00, ax00 = plt.subplots()    
+    # ax00.plot(np.linspace(0, 1, num = tc_kde_sm.icdf.size),tc_kde_sm.icdf,'k', lw=1, label=r"icdf-kde")
+    # ax00.plot(np.linspace(0, 1, num = tc_kde_sm.icdf.size),icdf_spl(np.linspace(0, 1, num = tc_kde_sm.icdf.size)),'b', lw=1, label=r"icdf-spl")
+  
+    fun_kde      = lambda x: tc_kde_sm.evaluate(x)
+    fun_kde_icdf = lambda x: icdf_spl(x)
+
+    return  fun_kde, fun_kde_icdf    
+
+
+def hyperplane_similarity(w_1,b_1,w_2,b_2, sim_type = 'sim'):
+    """
+        Equation for Hyper-plane similarity measure 
+        https://math.stackexchange.com/questions/2124611/on-a-measure-of-similarity-between-two-hyperplanes
+
+        Equation for Dihedral angle
+        https://en.wikipedia.org/wiki/Dihedral_angle
+
+    """
+    if sim_type == 'sim':
+        # Original version    
+        d = (np.linalg.norm(w_1)*np.linalg.norm(w_2)) - abs(np.dot(w_1, w_2)) + abs(b_1 - b_2)
+        
+        # Normalized version
+        d = 1 - abs(np.dot(w_1, w_2))/(np.linalg.norm(w_1)*np.linalg.norm(w_2)) + abs(b_1 - b_2)
+    else:    
+        # Dihedral angle (angle between two intersecting hyper-planes.. are they?)
+        n_1  = np.random.randn(2)
+        n_1 -= n_1.dot(w_1)  * (w_1 / np.linalg.norm(w_1)**2)
+        n_1 /= np.linalg.norm(n_1)
+        
+        n_2  = np.random.randn(2)
+        n_2 -= n_2.dot(w_2)  * (w_2 / np.linalg.norm(w_2)**2)
+        n_2 /= np.linalg.norm(n_2)
+
+        d = math.acos(abs(np.dot(n_1,n_2))/abs(np.linalg.norm(n_1) * np.linalg.norm(n_2)))
+        # d_ = math.acos(abs(np.dot(w_1,w_2))/abs(np.linalg.norm(w_1) * np.linalg.norm(w_2)))
+
+    return d
+
+
+def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
+
+    plot_data_quant, plot_regress_lines, do_histograms, do_contours, do_mask = plot_options
+
+    beta_samples      = SIR_params[:,0]
+    gamma_inv_samples = SIR_params[:,1]
+    tc_samples, Ipeak_samples, Tend_samples = CO_samples
+    if 'Compartment' in kwargs['figure_title']:        
+        model = StochasticCambridge(1)
+        R0_samples = [model.compute_r0(sample) for sample in SIR_params]
+    else:
+        R0_samples = beta_samples * gamma_inv_samples
+
+    ############################################################################################################
+    #######  Compute Descriptive Stats for each critical point distributions (t_c, I_peak, T_end and R0) #######
+    ############################################################################################################
+
+    ##### Stats on inputs to model #####
+    # beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    # _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    beta_skew = stats.skew(beta_samples)    
+    print('Mean beta=',beta_bar, ' Med beta=', beta_med, 'Skew beta=', beta_skew)
+
+    # gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    # _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    gamma_inv_skew = stats.skew(gamma_inv_samples)    
+    print('Mean gamma_inv=',gamma_inv_bar, ' Med gamma_inv=', gamma_inv_med, 'Skew gamma_inv=', gamma_inv_skew)
+
+    # R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
+    # _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    R0_skew = stats.skew(R0_samples)    
+    print('Mean tc=',R0_bar, ' Med tc=', R0_med, 'Skew tc=', R0_skew)
+
+    ##### Stats on outputs of model #####
+    tc_bar, tc_med, tc_std, tc_upper95, tc_lower95 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, tc_upper68, tc_lower68 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    tc_skew = stats.skew(tc_samples)    
+    print('Mean tc=',tc_bar, ' Med tc=', tc_med, 'Skew tc=', tc_skew)
+
+    Ipeak_bar, Ipeak_med, Ipeak_std, Ipeak_upper95, Ipeak_lower95 = computeStats(Ipeak_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, Ipeak_upper68, Ipeak_lower68 = computeStats(Ipeak_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    Ipeak_skew = stats.skew(Ipeak_samples)
+    print('Mean Ipeak=',Ipeak_bar, ' Med Ipeak=', Ipeak_med, 'Skew Ipeak=', Ipeak_skew)
+
+    Tend_bar, Tend_med, Tend_std, Tend_upper95, Tend_lower95 = computeStats(Tend_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    _, _, _, Tend_upper68, Tend_lower68 = computeStats(Tend_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+    Tend_skew = stats.skew(Tend_samples)
+    print('Mean Tend=',Tend_bar, ' Med Tend=', Tend_med, 'Skew Tend=', Tend_skew)
+
+    #################################################################################
+    ####### Fit kde to each critical point and compute stats of distributions #######
+    #################################################################################
+
+    # Fit kde to Tend_samples
+    tc_kde, tc_kde_icdf = fit1D_KDE(tc_samples)
+    x_vals_tc      = np.linspace(np.min(tc_samples),np.max(tc_samples), 100)
+    tc_kde_pdf     = tc_kde(x_vals_tc)
+    tc_kde_median  = tc_kde_icdf(0.50)
+    tc_kde_lower95 = tc_kde_icdf(0.025) 
+    tc_kde_upper95 = tc_kde_icdf(0.975) 
+    tc_kde_lower68 = tc_kde_icdf(0.155) 
+    tc_kde_upper68 = tc_kde_icdf(0.835) 
+    print('t_c:', tc_kde_median, tc_kde_lower95, tc_kde_upper95, tc_kde_lower68, tc_kde_upper68)
+
+    # Fit kde to Tend_samples
+    Ipeak_kde, Ipeak_kde_icdf = fit1D_KDE(Ipeak_samples)
+    x_vals_Ipeak      = np.linspace(np.min(Ipeak_samples),np.max(Ipeak_samples), 100)
+    Ipeak_kde_pdf     = Ipeak_kde(x_vals_Ipeak)
+    Ipeak_kde_median  = Ipeak_kde_icdf(0.50)
+    Ipeak_kde_lower95 = Ipeak_kde_icdf(0.025) 
+    Ipeak_kde_upper95 = Ipeak_kde_icdf(0.975) 
+    Ipeak_kde_lower68 = Ipeak_kde_icdf(0.155) 
+    Ipeak_kde_upper68 = Ipeak_kde_icdf(0.835) 
+    print('Ipeak:', Ipeak_kde_median, Ipeak_kde_lower95, Ipeak_kde_upper95, Ipeak_kde_lower68, Ipeak_kde_upper68)
+
+    # Fit kde to Tend_samples
+    Tend_kde, Tend_kde_icdf = fit1D_KDE(Tend_samples)
+    x_vals_Tend = np.linspace(np.min(Tend_samples),np.max(Tend_samples), 100)
+    Tend_kde_pdf = Tend_kde(x_vals_Tend)
+    Tend_kde_median  = Tend_kde_icdf(0.50)
+    Tend_kde_lower95 = Tend_kde_icdf(0.025) 
+    Tend_kde_upper95 = Tend_kde_icdf(0.975) 
+    Tend_kde_lower68 = Tend_kde_icdf(0.155) 
+    Tend_kde_upper68 = Tend_kde_icdf(0.835) 
+    print('Tend:', Tend_kde_median, Tend_kde_lower95, Tend_kde_upper95, Tend_kde_lower68, Tend_kde_upper68)
+
+    # Store stats
+    worksheet        = kwargs['worksheet']
+    row_num          = kwargs['row_num']
+    beta_stats       = [beta_bar, beta_lower68, beta_upper68, beta_lower95, beta_upper95]
+    gamma_inv_stats  = [gamma_inv_bar, gamma_inv_lower68,  gamma_inv_upper68, gamma_inv_lower95, gamma_inv_upper95]
+    R0_stats         = [R0_bar, R0_lower68, R0_upper68, R0_lower95, R0_upper95]
+    tc_stats         = [tc_bar, tc_kde_lower95, tc_kde_upper95, tc_kde_lower68, tc_kde_upper68]
+    Ipeak_stats      = [Ipeak_bar, Ipeak_kde_lower68, Ipeak_kde_upper68, Ipeak_kde_lower95, Ipeak_kde_upper95]
+    Tend_stats       = [Tend_bar, Tend_kde_lower68, Tend_kde_upper68, Tend_kde_lower95, Tend_kde_upper95]
+
+    worksheet.write_row(row_num, 0,  beta_stats)
+    worksheet.write_row(row_num, 5,  gamma_inv_stats)
+    worksheet.write_row(row_num, 10, R0_stats)    
+    worksheet.write_row(row_num, 15, tc_stats)
+    worksheet.write_row(row_num, 20, Ipeak_stats)
+    worksheet.write_row(row_num, 25, Tend_stats)
+    
+
+    #############################################################################
+    ####### Fit regressive models of model parameters vs. R0 and outcomes #######
+    #############################################################################
+    # Variables for Critical Point samples
+    t_tc = tc_samples[:,0]
+    t_Ipeak = Ipeak_samples[:,0]
+    t_Tend = Tend_samples[:,0]
+
+    # Learn linear regressor between params and R0
+    from sklearn import linear_model
+    from sklearn.metrics import mean_squared_error, r2_score
+
+    regr = linear_model.LinearRegression()
+    X = SIR_params; 
+    Y = R0_samples
+    regr.fit(X, Y)
+    Y_pred = np.empty([1,len(Y)])
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr.predict([X[ii,:]])
+    print('R0 MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('R0 R2: ',  r2_score(Y_pred.T, Y))
+    print('R0 Coeff:', regr.coef_, 'R0 Intercept:', regr.intercept_)
+    print('R0 min/max=',np.min(R0_samples), np.max(R0_samples))
+
+    # Learn linear regressor between params and tc
+    regr_tc = linear_model.LinearRegression()
+    Y = tc_samples
+    regr_tc.fit(X, Y)
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr_tc.predict([X[ii,:]])
+
+    print('t_c MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('t_c R2: ',  r2_score(Y_pred.T, Y))
+    print('t_c Coeff:', regr_tc.coef_, 't_c Intercept:', regr_tc.intercept_)
+
+    regr_Ipeak = linear_model.LinearRegression()
+    Y = Ipeak_samples
+    regr_Ipeak.fit(X, Y)    
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr_Ipeak.predict([X[ii,:]])
+
+    print('Ipeak MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('Ipeak R2: ',  r2_score(Y_pred.T, Y))     
+    print('Ipeak Coeff:', regr_Ipeak.coef_, 't_c Intercept:', regr_Ipeak.intercept_)
+
+    regr_Tend = linear_model.LinearRegression()
+    Y = Tend_samples    
+    regr_Tend.fit(X, Y)
+    for ii in range(len(Y)):
+        Y_pred[0,ii] =  regr_Tend.predict([X[ii,:]])
+    
+    print('Tend MSE: ', mean_squared_error(Y_pred.T, Y))
+    print('Tend R2: ',  r2_score(Y_pred.T, Y))        
+    print('Tend Coeff:', regr_Tend.coef_, 'Tend Intercept:', regr_Tend.intercept_)
+
+    # Compute similarities (Could make this a matrix)
+    dist_types = ['sim', 'angle']
+    for dist_type in dist_types:
+        d_R0tc      = hyperplane_similarity(regr.coef_,regr.intercept_,regr_tc.coef_[0],regr_tc.intercept_[0], dist_type)
+        d_R0IPeak   = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0], dist_type)
+        d_R0Tend    = hyperplane_similarity(regr.coef_,regr.intercept_,regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
+        d_tcIpeak   = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0], dist_type)
+        d_tcTend    = hyperplane_similarity(regr_tc.coef_[0],regr_tc.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
+        d_IpeakTend = hyperplane_similarity(regr_Ipeak.coef_[0],regr_Ipeak.intercept_[0],regr_Tend.coef_[0],regr_Tend.intercept_[0], dist_type)
+
+        print(dist_type, ' d_R0tc = ',d_R0tc, ' d_R0IPeak=', d_R0IPeak, ' d_R0Tend=', d_R0Tend)
+        print(dist_type, 'd_tcIpeak = ',d_tcIpeak, ' d_tcTend=', d_tcTend, ' d_IpeakTend=', d_IpeakTend)
+
+    if do_mask:
+        # Options for masking data
+        mask_type = '95'
+
+        # Masked point samples for 95% of outcomes            
+        if mask_type == '95':
+            do_95 = 1
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower95, t_tc < tc_kde_upper95))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower95, t_Ipeak < Ipeak_kde_upper95))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower95, t_Tend < Tend_kde_upper95))
+            masked_Tend  = t_Tend[idx_Tend]
+
+        # Masked point samples for 68% of outcomes
+        if mask_type == '68':
+            do_95 = 0            
+            idx_tc       = np.nonzero(np.logical_and(t_tc > tc_kde_lower68, t_tc < tc_kde_upper68))
+            masked_tc    = t_tc[idx_tc]
+            idx_Ipeak    = np.nonzero(np.logical_and(t_Ipeak > Ipeak_kde_lower68, t_Ipeak < Ipeak_kde_upper68))
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            idx_Tend     = np.nonzero(np.logical_and(t_Tend > Tend_kde_lower68, t_Tend < Tend_kde_upper68))
+            masked_Tend  = t_Tend[idx_Tend]        
+
+        # Masked point samples for r0 slice
+        if mask_type == 'R0':
+            do_95        = -1           
+
+            R0_nom = 2.3; R0_err = 0.20
+            R0_min = R0_nom - R0_nom*R0_err
+            R0_max = R0_nom + R0_nom*R0_err
+
+            idx_R0       = np.nonzero(np.logical_and(R0_samples > R0_min, R0_samples < R0_max))
+            idx_tc = idx_R0; idx_Ipeak = idx_R0; idx_Tend = idx_R0
+            masked_tc    = t_tc[idx_tc]
+            masked_Ipeak = t_Ipeak[idx_Ipeak]
+            masked_Tend  = t_Tend[idx_Tend]        
+
+            print('R0 Error band:' , (R0_max - R0_min)/R0_nom)
+
+            maskedtc_bar, maskedtc_med, tc_std, maskedtc_upper95, maskedtc_lower95 = computeStats(masked_tc, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean tc=',maskedtc_bar, ' Med tc=', maskedtc_med, 'Up.Q tc=', maskedtc_upper95, 'Low.Q tc=', maskedtc_lower95)
+            tc_error = (maskedtc_upper95 - maskedtc_lower95)/maskedtc_bar
+            print('Error band:' , tc_error)
+
+            maskedIpeak_bar, maskedIpeak_med, Ipeak_std, maskedIpeak_upper95, maskedIpeak_lower95 = computeStats(masked_Ipeak, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean Ipeak=',maskedIpeak_bar, ' Med Ipeak=', maskedIpeak_med, 'Up.Q Ipeak=', maskedIpeak_upper95, 'Low.Q Ipeak=', maskedIpeak_lower95)
+            Ipeak_error = (maskedIpeak_upper95 - maskedIpeak_lower95)/maskedIpeak_bar
+            print('Error band:' , Ipeak_error)
+
+            maskedTend_bar, maskedTend_med, Tend_std, maskedTend_upper95, maskedTend_lower95 = computeStats(masked_Tend, bound_type='Quantiles', bound_param = [0.025, 0.975])
+            print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
+            Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
+            print('Error band:' , Tend_error)
+
+    ####################################################################
+    #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
+    ####################################################################
+    if do_histograms:
+        #### Plot for t_c ####
+        fig, (ax0,ax1,ax2)   = plt.subplots(1,3, constrained_layout=True)
+        bin_size = 30    
+
+        # Histogram
+        count, bins, ignored = ax0.hist(tc_samples, bin_size, density=True, color='r', alpha = 0.35, edgecolor='k' )
+        
+        # Plot kde curve and quantile stats    
+        ax0.plot(x_vals_tc,tc_kde_pdf,'k', lw=1, label=r"kde")
+        # ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
+        ax0.plot([tc_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
+        ax0.plot([tc_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
+        ax0.plot([tc_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
+        ax0.plot([tc_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
+
+        # Plot raw mean and quantile stats
+        ax0.plot([tc_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r', lw=2,label=r"mean")
+        if plot_data_quant:
+            ax0.plot([tc_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5, label=r"Q[95\%]")
+            ax0.plot([tc_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5)
+            ax0.plot([tc_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5, label=r"Q[68\%]")
+            ax0.plot([tc_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5)
+
+        # ax0.set_title(r"Critical point $t_c$", fontsize=20)
+        ax0.grid(True, alpha=0.3)
+        ax0.set_xlabel(r"Critical point $t_c$", fontsize=20)
+        legend = ax0.legend(fontsize=15, loc='upper right')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax0.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax0.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        #########################        
+        #### Plot for I_peak ####
+        #########################
+
+        ### Histogram and stats for I_peak
+        count, bins, ignored = ax1.hist(Ipeak_samples, bin_size, density=True, color='g', alpha = 0.35, edgecolor='k')
+        
+        # Plot kde curve and quantile stats    
+        ax1.plot(x_vals_Ipeak,Ipeak_kde_pdf,'k', lw=1, label=r"kde")
+        # ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
+        ax1.plot([Ipeak_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
+        ax1.plot([Ipeak_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
+        ax1.plot([Ipeak_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
+        ax1.plot([Ipeak_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
+
+        # Plot raw median and quantile stats
+        ax1.plot([Ipeak_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g', lw=2,label=r"mean")    
+        if plot_data_quant:
+            ax1.plot([Ipeak_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5, label=r"Q[95\%]")
+            ax1.plot([Ipeak_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5)
+            ax1.plot([Ipeak_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5, label=r"Q[68\%]")
+            ax1.plot([Ipeak_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5)
+
+        # ax1.set_title(r"Peak Infected $I_{peak}$", fontsize=20)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel(r"Peak Infected $I_{peak}$", fontsize=20)
+        legend = ax1.legend(fontsize=15, loc='upper right')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax1.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax1.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        ###########################        
+        #### Plot for T(t=end) ####
+        ###########################
+
+        ### Histogram and stats for T(t=end)
+        count, bins, ignored = ax2.hist(Tend_samples, bin_size, density=True, color='b', alpha = 0.35, edgecolor='k')   
+
+        # Plot kde curve and quantile stats    
+        ax2.plot(x_vals_Tend,Tend_kde_pdf,'k', lw=1, label=r"kde")    
+        # ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
+        ax2.plot([Tend_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
+        ax2.plot([Tend_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
+        ax2.plot([Tend_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
+        ax2.plot([Tend_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
+
+        # Plot raw median and quantile stats 
+        ax2.plot([Tend_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b', lw=2,label=r"mean")    
+        if plot_data_quant:
+            ax2.plot([Tend_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5, label=r"Q[95\%]")
+            ax2.plot([Tend_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5)
+            ax2.plot([Tend_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5, label=r"Q[68\%]")
+            ax2.plot([Tend_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5)
+
+        # ax2.set_title(, fontsize=20)
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlabel(r"Total cases $T_{\rm end}$", fontsize=20)
+        legend = ax2.legend(fontsize=15, loc='upper left')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax2.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax2.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        fig.set_size_inches(27/2, 9/2, forward=True)
+        if kwargs['store_plots']:
+            plt.savefig(kwargs['file_extension'] + "_CriticalPointsHistograms.png", bbox_inches='tight')
+
+
+    #################################################################################
+    ####     Plot scatter of paramaters vs critical points when both are sampled  ###
+    #################################################################################
+    beta_std      = np.std(beta_samples, axis=0)
+    gamma_inv_std = np.std(gamma_inv_samples, axis=0)
+    if do_contours:
+        if beta_std != 0 and gamma_inv_std != 0:
+            ###############################################################################################
+            #### Contour plot of 2D gaussian kde Param distribution with regression hyper-plane for R0 ####
+            ###############################################################################################
+            x = beta_samples
+            y = gamma_inv_samples
+            xmin = np.min(beta_samples); xmax = np.max(beta_samples); 
+            ymin = np.min(gamma_inv_samples); ymax = np.max(gamma_inv_samples);        
+            xx, yy = np.mgrid[xmin:xmax:100j, ymin:ymax:100j]
+            positions = np.vstack([xx.ravel(), yy.ravel()])
+            values = np.vstack([beta_samples, gamma_inv_samples])
+            kde_2d = stats.gaussian_kde(values)
+            f = np.reshape(kde_2d(positions).T, xx.shape)
+
+            fig00, ax00 = plt.subplots()     
+            
+            if plot_regress_lines:
+                cset = ax00.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)    
+                dim, N = positions.shape
+                Y = np.empty([1,N])
+                for ii in range(N):
+                    y_regr =  regr.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]])
+                    Y[0,ii]  = y_regr[0]
+                f_R0 = np.reshape(Y.T, xx.shape)
+                cset = ax00.contour(xx, yy, f_R0, colors='k', levels = 10, alpha = 0.75)
+                ax00.clabel(cset, inline=1, fontsize=10)                
+            else:
+                cset = ax00.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
+                ax00.clabel(cset, inline=1, fontsize=10)        
+
+            cax = ax00.scatter(beta_samples, gamma_inv_samples, c=R0_samples,  cmap='tab20c', alpha = 0.85, s= 10)
+            ax00.set_xlabel(r"$\beta$", fontsize=20)
+            ax00.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
+            for tick in ax00.xaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+            for tick in ax00.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15)     
+            ax00.grid(True, alpha=0.3)
+            ax00.set_title(r"Distribution of $\beta,\gamma^{-1}$ vs. $R_{0}$", fontsize=20)
+            cbar = fig00.colorbar(cax, ax=ax00, orientation='vertical')
+            cbarlabels = np.around(np.linspace(np.min(R0_samples), np.max(R0_samples), num = 20, endpoint=True),decimals=2)
+            cbar.set_ticks(cbarlabels)
+            cbar.set_ticklabels(cbarlabels)
+            fig00.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+            # fig00.tight_layout()
+            fig00.set_size_inches(29/2 * 0.35, 9/2, forward=True)
+
+            if kwargs['store_plots']:
+                if plot_regress_lines:
+                    plt.savefig(kwargs['file_extension'] + "_ParamSamplesContours_regress.png", bbox_inches='tight')
+                else: 
+                    plt.savefig(kwargs['file_extension'] + "_ParamSamplesContours.png", bbox_inches='tight')
+
+            ##########################################################################################
+            #### Contour plots of 2D gaussian kde Param distribution with regression hyper-plane  ####
+            ##########################################################################################       
+            fig0, (ax01,ax02,ax03) = plt.subplots(1,3)        
+            
+            if plot_regress_lines:
+                cset = ax01.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+                dim, N = positions.shape
+                Y = np.empty([1,N])
+                for ii in range(N):
+                    y_regr =  regr_tc.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_tc.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_tc.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
+                    Y[0,ii]  = y_regr[0]
+                f_tc = np.reshape(Y.T, xx.shape)
+                cset = ax01.contour(xx, yy, f_tc, colors='k', levels = 10, alpha = 0.75)
+                ax01.clabel(cset, inline=1, fontsize=10)          
+                # cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='RdBu', alpha = 0.35, s= 10)
+                cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='tab20c', alpha = 0.55, s= 10)
+            else:
+                cax = ax01.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
+                cset = ax01.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
+                ax01.clabel(cset, inline=1, fontsize=10)                
+                # cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='RdBu', alpha = 0.35, s= 10)
+                cax = ax01.scatter(x[idx_tc], y[idx_tc], c=masked_tc,  cmap='tab20c', alpha = 0.85, s= 10)
+
+                print("MASKED t_c: min beta=", np.argmin(x[idx_tc]), "max beta=", np.argmax(x[idx_tc]))
+                print("MASKED t_c: min gamma=", np.argmin(y[idx_tc]), "max gamma=", np.argmax(y[idx_tc]))
+
+
+            ax01.set_xlabel(r"$\beta$", fontsize=20)
+            ax01.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
+            for tick in ax01.xaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+            for tick in ax01.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+            ax01.grid(True, alpha=0.3)
+            if do_95 == 1:
+                ax01.set_title(r'$95\% t_{c}$ Values')
+            elif do_95 == 0:
+                ax01.set_title(r'$ 68\% t_{c}$ Values')
+            elif do_95 == -1:
+                ax01.set_title(r'$\mathcal{R}_0$ Slice $t_{c}$ Values')
+            fig0.colorbar(cax, ax=ax01, shrink=0.9)
+
+            if plot_regress_lines:
+                cset = ax02.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+                # ax02.clabel(cset, inline=1, fontsize=10)        
+                Y = np.empty([1,N])
+                for ii in range(N):
+                    y_regr =  regr_Ipeak.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_Ipeak.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_Ipeak.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
+                    Y[0,ii]  = y_regr[0]
+                f_Ipeak = np.reshape(Y.T, xx.shape)
+                cset = ax02.contour(xx, yy, f_Ipeak, colors='k', levels = 15, alpha = 0.75)
+                ax02.clabel(cset, inline=1, fontsize=10)          
+                # cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='PiYG', alpha = 0.35, s= 10)
+                cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='tab20c', alpha = 0.55, s= 10)
+            else:
+                cax = ax02.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
+                cset = ax02.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
+                ax02.clabel(cset, inline=1, fontsize=10)        
+                # cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='PiYG', alpha = 0.35, s= 10)
+                cax = ax02.scatter(x[idx_Ipeak], y[idx_Ipeak], c=masked_Ipeak,  cmap='tab20c', alpha = 0.85, s= 10)
+                print("MASKED I_peak: min beta=", np.argmin(x[idx_Ipeak]), "max beta=", np.argmax(x[idx_Ipeak]))
+                print("MASKED I_peak: min gamma=", np.argmin(y[idx_Ipeak]), "max gamma=", np.argmax(y[idx_Ipeak]))
+            
+            ax02.set_xlabel(r"$\beta$", fontsize=20)
+            ax02.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
+            for tick in ax02.xaxis.get_major_ticks(): 
+                tick.label.set_fontsize(15) 
+            for tick in ax02.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+            ax02.grid(True, alpha=0.3)
+            if do_95 == 1:
+                ax02.set_title(r'$95\% I_{peak}$ Values')
+            elif do_95 == 0:
+                ax02.set_title(r'$68\% I_{peak}$ Values')
+            elif do_95 == -1:
+                ax02.set_title(r'$\mathcal{R}_0$ Slice $I_{peak}$ Values')
+            fig0.colorbar(cax, ax=ax02, shrink=0.9)
+
+            ############ Param samples vs. Tend #############            
+            if plot_regress_lines:
+                cset = ax03.contour(xx, yy, f, colors='darkblue', levels = 10, alpha = 0.25)
+                # ax02.clabel(cset, inline=1, fontsize=10)                        
+                Y = np.empty([1,N])
+                for ii in range(N):
+                    y_regr =  regr_Tend.predict([[positions[0,ii],positions[1,ii]]])
+                    # y_regr =  regr_Tend.predict([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii]]])
+                    # y_regr =  regr_Tend.predict(([[positions[0,ii],positions[1,ii], positions[0,ii]*positions[1,ii], positions[0,ii]**2, positions[1,ii]**2]]))
+                    Y[0,ii]  = y_regr[0]
+                f_Tend = np.reshape(Y.T, xx.shape)
+                cset = ax03.contour(xx, yy, f_Tend, colors='k', levels = 10, alpha = 0.75)
+                ax02.clabel(cset, inline=1, fontsize=10)
+                # cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='bwr', alpha = 0.35, s= 10)
+                cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='tab20c', alpha = 0.55, s= 10)
+            else:
+                cax = ax03.scatter(x, y, c='w', edgecolor='k', alpha = 0.35, s= 10)
+                cset = ax03.contour(xx, yy, f, colors='k', levels = 15, alpha = 0.85)
+                ax02.clabel(cset, inline=1, fontsize=10)        
+                # cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='bwr', alpha = 0.35, s= 10)
+                cax = ax03.scatter(x[idx_Tend], y[idx_Tend], c=masked_Tend,  cmap='tab20c', alpha = 0.85, s= 10)
+                print("MASKED T_inf: min beta=", np.argmin(x[idx_Tend]), "max beta=", np.argmax(x[idx_Tend]))
+                print("MASKED T_inf: min gamma=", np.argmin(y[idx_Tend]), "max gamma=", np.argmax(y[idx_Tend]))
+            
+            
+            ax03.grid(True, alpha=0.3)        
+            ax03.set_xlabel(r"$\beta$", fontsize=20)
+            ax03.set_ylabel(r"$\gamma^{-1}$", fontsize=20)
+            for tick in ax03.xaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+            for tick in ax03.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15)     
+            if do_95 == 1:
+                ax03.set_title(r'$95\% T_{end}$ Values')
+            elif do_95 == 0:
+                ax03.set_title(r'$68\% T_{end}$ Values')
+            elif do_95 == -1:            
+                ax03.set_title(r'$\mathcal{R}_0$ Slice $T_{end}$ Values')
+            fig0.colorbar(cax, ax=ax03, shrink=0.9)
+
+            # Global figure adjustments            
+            fig0.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+            fig0.set_size_inches(29/2, 8/2, forward=True)
+
+            if kwargs['store_plots']:
+                if plot_regress_lines:
+                    plt.savefig(kwargs['file_extension'] + "_CriticalPointsContours_regress.png", bbox_inches='tight')
+                else: 
+                    plt.savefig(kwargs['file_extension'] + "_CriticalPointsContours.png", bbox_inches='tight')

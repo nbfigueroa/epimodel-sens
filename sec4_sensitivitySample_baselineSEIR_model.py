@@ -107,7 +107,7 @@ def run(prob_type = 'gamma', days = 200):
     rollouts  = pow(10,5)
     viz_plots = 0
 
-    for test_num in [1, 2, 3, 4]:
+    for test_num in [1, 2, 3, 4, 5]:
         prob_params, plot_vars        = getSEIRTestingParams(test_num=test_num, prob_type=prob_type,**sim_kwargs)
         
         # unpack plotting and file variables

@@ -232,9 +232,8 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
         # gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
         # New parameters:
-        beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
-        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
-        # sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 2.2, 3.35, 0.865
+        beta_loc, beta_shape, beta_scale                = 0.21, 12, 0.010
+        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4.5,  10, 0.25
         sigma_inv_loc, sigma_inv_shape, sigma_inv_scale = 0, 80, 0.05
         
 
@@ -256,21 +255,25 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
             _ext           = "_errorsSampleGamma_Gamma"
             text_error     =  r"$\gamma^{-1} \sim Gamma(.)$"
 
-        ############ Test 3: sample sigma, fix beta and gamma ############
+        ############ Test 3: sample beta, sample gamma ############
         if test_num == 3:
+            sigma_inv_scale = 0
+            sigma_inv_loc  = sim_kwargs['sigma_inv']
+            _ext          =  "_errorsSampleBetaGamma_Gamma"            
+            text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$"
+
+        ############ Test 4: sample sigma, fix beta and gamma ############
+        if test_num == 4:
             gamma_inv_scale = 0
             gamma_inv_loc   = sim_kwargs['gamma_inv']
             beta_scale     = 0
             beta_loc       = sim_kwargs['beta']
             _ext           = "_errorsSampleSigma_Gamma"
             text_error     = r"$\sigma^{-1} \sim Gamma(.)$"
-            
-            _ext          =  "_errorsSampleBetaGamma_Gamma"            
-            text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$" + "\n" + r"$\sigma^{-1} \sim Gamma(.)$"
         
-        ############ Test 4: Sample beta, gamma, sigma ############
-        if test_num == 4:
-            _ext          =  "_errorsSampleBetaGamma_Gamma"            
+        ############ Test 5: Sample beta, gamma, sigma ############
+        if test_num == 5:
+            _ext          =  "_errorsSampleBetaGammaSigma_Gamma"            
             text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$" + "\n" + r"$\sigma^{-1} \sim Gamma(.)$"
             
             
@@ -431,8 +434,8 @@ def getSIRTestingParams(test_num, prob_type, **sim_kwargs):
         gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 3.8,  10, 0.301
 
         # New parameters (June draft):
-        beta_loc, beta_shape, beta_scale                = 0.24, 10, 0.009
-        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4,  10, 0.301
+        beta_loc, beta_shape, beta_scale                = 0.21, 12, 0.010
+        gamma_inv_loc, gamma_inv_shape, gamma_inv_scale = 4.5,  10, 0.25
         
 
         ########### Test 1: Sample beta, fix gamma ############
