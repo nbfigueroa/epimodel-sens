@@ -447,39 +447,48 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     beta_samples      = SIR_params[:,0]
     gamma_inv_samples = SIR_params[:,1]
     tc_samples, Ipeak_samples, Tend_samples = CO_samples
+
     if 'Compartment' in kwargs['figure_title']:        
         model = StochasticCambridge(1)
         R0_samples = [model.compute_r0(sample) for sample in SIR_params]
     else:
         R0_samples = beta_samples * gamma_inv_samples
 
+    if 'SEIR' in kwargs['figure_title']:
+        sigma_inv_samples = SIR_params[:,2]
+
     ############################################################################################################
     #######  Compute Descriptive Stats for each critical point distributions (t_c, I_peak, T_end and R0) #######
     ############################################################################################################
 
+    ####################################
     ##### Stats on inputs to model #####
-    # beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
-    # _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    ####################################
     beta_bar, beta_med, beta_std, beta_upper95, beta_lower95 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     _, _, _, beta_upper68, beta_lower68 = computeStats(beta_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     beta_skew = stats.skew(beta_samples)    
     print('Mean beta=',beta_bar, ' Med beta=', beta_med, 'Skew beta=', beta_skew)
 
-    # gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
-    # _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     gamma_inv_bar, gamma_inv_med, gamma_inv_std, gamma_inv_upper95, gamma_inv_lower95 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     _, _, _, gamma_inv_upper68, gamma_inv_lower68 = computeStats(gamma_inv_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     gamma_inv_skew = stats.skew(gamma_inv_samples)    
     print('Mean gamma_inv=',gamma_inv_bar, ' Med gamma_inv=', gamma_inv_med, 'Skew gamma_inv=', gamma_inv_skew)
 
-    # R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.0015, 0.9985])
-    # _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+    if 'SEIR' in kwargs['figure_title']:
+        sigma_inv_bar, sigma_inv_med, sigma_inv_std, sigma_inv_upper95, sigma_inv_lower95 = computeStats(sigma_inv_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
+        _, _, _, sigma_inv_upper68, sigma_inv_lower68 = computeStats(sigma_inv_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
+        sigma_inv_skew = stats.skew(sigma_inv_samples)    
+        print('Mean sigma_inv=',sigma_inv_bar, ' Med sigma_inv=', sigma_inv_med, 'Skew sigma_inv=', sigma_inv_skew)
+
+
     R0_bar, R0_med, R0_std, R0_upper95, R0_lower95 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     _, _, _, R0_upper68, R0_lower68 = computeStats(R0_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     R0_skew = stats.skew(R0_samples)    
     print('Mean tc=',R0_bar, ' Med tc=', R0_med, 'Skew tc=', R0_skew)
 
+    #####################################
     ##### Stats on outputs of model #####
+    #####################################
     tc_bar, tc_med, tc_std, tc_upper95, tc_lower95 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.025, 0.975])
     _, _, _, tc_upper68, tc_lower68 = computeStats(tc_samples, bound_type='Quantiles', bound_param = [0.155, 0.835])
     tc_skew = stats.skew(tc_samples)    
@@ -532,11 +541,13 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     Tend_kde_upper68 = Tend_kde_icdf(0.835) 
     print('Tend:', Tend_kde_median, Tend_kde_lower95, Tend_kde_upper95, Tend_kde_lower68, Tend_kde_upper68)
 
-    # Store stats
+    # Store stats in worksheet
     worksheet        = kwargs['worksheet']
     row_num          = kwargs['row_num']
     beta_stats       = [beta_bar, beta_lower68, beta_upper68, beta_lower95, beta_upper95]
     gamma_inv_stats  = [gamma_inv_bar, gamma_inv_lower68,  gamma_inv_upper68, gamma_inv_lower95, gamma_inv_upper95]
+    if 'SEIR' in kwargs['figure_title']:
+        sigma_inv_stats  = [sigma_inv_bar, sigma_inv_lower68,  sigma_inv_upper68, sigma_inv_lower95, sigma_inv_upper95]
     R0_stats         = [R0_bar, R0_lower68, R0_upper68, R0_lower95, R0_upper95]
     tc_stats         = [tc_bar, tc_kde_lower68, tc_kde_upper68, tc_kde_lower95, tc_kde_upper95]
     Ipeak_stats      = [Ipeak_bar, Ipeak_kde_lower68, Ipeak_kde_upper68, Ipeak_kde_lower95, Ipeak_kde_upper95]
@@ -544,10 +555,17 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
 
     worksheet.write_row(row_num, 0,  beta_stats)
     worksheet.write_row(row_num, 5,  gamma_inv_stats)
-    worksheet.write_row(row_num, 10, R0_stats)    
-    worksheet.write_row(row_num, 15, tc_stats)
-    worksheet.write_row(row_num, 20, Ipeak_stats)
-    worksheet.write_row(row_num, 25, Tend_stats)
+    if 'SEIR' in kwargs['figure_title']:
+        worksheet.write_row(row_num, 10,  sigma_inv_stats)
+        worksheet.write_row(row_num, 15, R0_stats)    
+        worksheet.write_row(row_num, 20, tc_stats)
+        worksheet.write_row(row_num, 25, Ipeak_stats)
+        worksheet.write_row(row_num, 30, Tend_stats)
+    else:
+        worksheet.write_row(row_num, 10, R0_stats)    
+        worksheet.write_row(row_num, 15, tc_stats)
+        worksheet.write_row(row_num, 20, Ipeak_stats)
+        worksheet.write_row(row_num, 25, Tend_stats)
 
     ####################################################################
     #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####

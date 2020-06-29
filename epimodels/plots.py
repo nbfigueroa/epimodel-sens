@@ -1936,7 +1936,6 @@ def plotSEIR_evolutionStochastic(S_variables, E_variables, I_variables, R_variab
         # plt.savefig(file_extensions[0] + "_all.pdf", bbox_inches='tight')
 
 
-
 def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, filename, *prob_params):
     fig, (ax1,ax2, ax3) = plt.subplots(1,3, constrained_layout=True)
 
@@ -1946,20 +1945,21 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
     count, bins, ignored = ax1.hist(beta_samples, 30, density=True, alpha=0.55, edgecolor='k')
 
     if prob_params[0] == 'uniform':
-        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)        
+        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=20)        
 
     if prob_params[0] == 'gaussian':
         mu    = prob_params[1]
         sigma = prob_params[2] + 0.00001
         ax1.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
                        np.exp( - (bins - mu)**2 / (2 * sigma**2) ), linewidth=2, color='r')
-        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=15)    
+        ax1.set_xlabel(r"$\beta \sim \mathcal{N}$", fontsize=20)    
 
     if prob_params[0] == 'gamma':
         g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
         # Plot gamma samples and pdf
         x = np.arange(0,1,0.001)
         ax1.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[1], prob_params[2]))
+        ax1.set_xlabel(r"$\beta \sim Gamma$", fontsize=20)    
 
     if prob_params[0] == 'log-normal':
         mu    = prob_params[1]
@@ -1968,6 +1968,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         x = np.arange(0,1,0.001)
         pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
         ax1.plot(x, pdf, linewidth=2, color='r')
+        ax1.set_xlabel(r"$\beta \sim LogNormal$", fontsize=20)
 
     for tick in ax1.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
@@ -1975,7 +1976,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
             tick.label.set_fontsize(15) 
     plt.xlim(0, 1.0)            
     ax1.grid(True, alpha=0.3)
-    ax1.set_title(r"$\beta$ samples", fontsize=20)
+    ax1.set_title(r"Distribution of $\beta$ samples", fontsize=20)
     
     ###############################################################
     ################## Plot for Gamma^-1 Samples ##################
@@ -1997,6 +1998,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         # Plot gamma samples and pdf
         x = np.arange(1,15,0.1)
         ax2.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[4], prob_params[5]))
+        ax2.set_xlabel(r"$\gamma^{-1} \sim Gamma$", fontsize=20)      
 
     if prob_params[0] == 'log-normal':
         mu    = prob_params[3]
@@ -2004,7 +2006,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         x = np.arange(1,15,0.1)
         pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
         ax2.plot(x, pdf, linewidth=2, color='r')
-
+        ax2.set_xlabel(r"$\gamma^{-1} \sim LogNormal$", fontsize=20)
 
     for tick in ax2.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
@@ -2012,7 +2014,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
             tick.label.set_fontsize(15)  
     plt.xlim(1, 17) 
     ax2.grid(True, alpha=0.3)    
-    ax2.set_title(r"$\gamma^{-1}$ samples", fontsize=20)    
+    plt.title(r"Distribution of $\gamma^{-1}$ samples", fontsize=20)    
     
     ###############################################################
     ################## Plot for Sigma^-1 Samples ##################
@@ -2034,6 +2036,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         # Plot gamma samples and pdf
         x = np.arange(1,15,0.1)
         ax3.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[7], prob_params[8]))
+        ax3.set_xlabel(r"$\sigma^{-1} \sim Gamma$", fontsize=20)      
 
     if prob_params[0] == 'log-normal':
         mu    = prob_params[5]
@@ -2041,16 +2044,15 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         x = np.arange(1,15,0.1)
         pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
         ax3.plot(x, pdf, linewidth=2, color='r')
-
+        ax3.set_xlabel(r"$\sigma^{-1} \sim LogNormal$", fontsize=20)
 
     for tick in ax3.xaxis.get_major_ticks():
         tick.label.set_fontsize(15) 
     for tick in ax3.yaxis.get_major_ticks():
             tick.label.set_fontsize(15)  
-    plt.xlim(1, 17) 
+    plt.xlim(1, 10) 
     ax3.grid(True, alpha=0.3)    
-    ax3.set_title(r"$\sigma^{-1}$ samples", fontsize=20)    
-
+    plt.title(r"Distribution of $\sigma^{-1}$ samples", fontsize=20)    
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
     fig.set_size_inches(20/2, 8/2, forward=True)    

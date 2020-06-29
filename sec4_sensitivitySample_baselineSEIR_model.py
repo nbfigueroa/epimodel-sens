@@ -90,7 +90,7 @@ def run(prob_type = 'gamma', days = 200):
     sim_kwargs          = loadSimulationParams(sim_num, 0, plot_data = 0, header = 'SEIR')
     sim_kwargs['days']  = days
     basefilename        = sim_kwargs['file_extension']
-    workbook, worksheet = createResultsfile(basefilename, prob_type, test_type='sampling')
+    workbook, worksheet = createResultsfile(basefilename, prob_type, test_type='sampling', header = 'SEIR')
 
     # Testing Variants (includes test type and probability distribution type)
     '''Testing options defined in sims.py
