@@ -565,7 +565,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     from sklearn.metrics import mean_squared_error, r2_score
 
     regr = linear_model.LinearRegression()
-    X = SIR_params; 
+    X = SIR_params[:, 0:2]; 
     Y = R0_samples
     regr.fit(X, Y)
     Y_pred = np.empty([1,len(Y)])
