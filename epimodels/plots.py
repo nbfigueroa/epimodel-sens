@@ -951,9 +951,8 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
     for tick in ax1.yaxis.get_major_ticks():
             tick.label.set_fontsize(20) 
     
-    # plt.grid(b=True, which='major', c='w', lw=2, ls='-')
+    ax1.grid(True, color='k', alpha=0.2, linewidth = 0.25) 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    # fig.set_size_inches(27.5/2, 16.5/2, forward=True)
     fig.set_size_inches(27.5/2.5, 14.5/2.4, forward=True)
 
     if store_plots:

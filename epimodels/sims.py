@@ -275,8 +275,7 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
         if test_num == 5:
             _ext          =  "_errorsSampleBetaGammaSigma_Gamma"            
             text_error    =  r"$\beta \sim Gamma(.)$" + "\n" + r"$\gamma^{-1} \sim Gamma(.)$" + "\n" + r"$\sigma^{-1} \sim Gamma(.)$"
-            
-            
+                        
         prob_params = (prob_type, beta_loc, beta_shape, beta_scale, gamma_inv_loc, gamma_inv_shape, gamma_inv_scale, sigma_inv_loc, sigma_inv_shape, sigma_inv_scale) 
     
 

@@ -391,19 +391,17 @@ def sample_SIRparam_distributions(*prob_params):
 # TODO: Move these to utils.py
 def fit1D_KDE(x):
     # Use scipy.stats class to fit the bandwith
-    tc_kde = stats.gaussian_kde(x.T)    
+    tc_kde = stats.gaussian_kde(x.T, bw_method = 'silverman')    
     stdev = np.sqrt(tc_kde.covariance)[0, 0]
 
     # using statsmodels kde to compute quantiles
     tc_kde_sm = sm.nonparametric.KDEUnivariate(x)    
     tc_kde_sm.fit()
     bw = tc_kde_sm.bw
+    print('KDE std-dev:', stdev, ' bw:', bw)
     tc_kde_sm.fit(bw=np.max(np.array([stdev,bw])))
     icdf_spl = UnivariateSpline(np.linspace(0, 1, num = tc_kde_sm.icdf.size), tc_kde_sm.icdf)    
 
-    # fig00, ax00 = plt.subplots()    
-    # ax00.plot(np.linspace(0, 1, num = tc_kde_sm.icdf.size),tc_kde_sm.icdf,'k', lw=1, label=r"icdf-kde")
-    # ax00.plot(np.linspace(0, 1, num = tc_kde_sm.icdf.size),icdf_spl(np.linspace(0, 1, num = tc_kde_sm.icdf.size)),'b', lw=1, label=r"icdf-spl")
   
     fun_kde      = lambda x: tc_kde_sm.evaluate(x)
     fun_kde_icdf = lambda x: icdf_spl(x)
@@ -540,7 +538,7 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     beta_stats       = [beta_bar, beta_lower68, beta_upper68, beta_lower95, beta_upper95]
     gamma_inv_stats  = [gamma_inv_bar, gamma_inv_lower68,  gamma_inv_upper68, gamma_inv_lower95, gamma_inv_upper95]
     R0_stats         = [R0_bar, R0_lower68, R0_upper68, R0_lower95, R0_upper95]
-    tc_stats         = [tc_bar, tc_kde_lower95, tc_kde_upper95, tc_kde_lower68, tc_kde_upper68]
+    tc_stats         = [tc_bar, tc_kde_lower68, tc_kde_upper68, tc_kde_lower95, tc_kde_upper95]
     Ipeak_stats      = [Ipeak_bar, Ipeak_kde_lower68, Ipeak_kde_upper68, Ipeak_kde_lower95, Ipeak_kde_upper95]
     Tend_stats       = [Tend_bar, Tend_kde_lower68, Tend_kde_upper68, Tend_kde_lower95, Tend_kde_upper95]
 
@@ -550,7 +548,123 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
     worksheet.write_row(row_num, 15, tc_stats)
     worksheet.write_row(row_num, 20, Ipeak_stats)
     worksheet.write_row(row_num, 25, Tend_stats)
-    
+
+    ####################################################################
+    #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
+    ####################################################################
+    if do_histograms:
+        #### Plot for t_c ####
+        fig, (ax0,ax1,ax2)   = plt.subplots(1,3, constrained_layout=True)
+        bin_size = 30    
+
+        # Histogram
+        count, bins, ignored = ax0.hist(tc_samples, bin_size, density=True, color='r', alpha = 0.35, edgecolor='k' )
+        
+        # Plot kde curve and quantile stats    
+        # ax0.plot(x_vals_tc,tc_kde_pdf,'k', lw=1, label=r"kde")
+        ax0.plot(x_vals_tc,tc_kde_pdf,'k', lw=2)
+        ax0.plot([tc_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r', lw=2,label=r"mean")        
+        ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax0.plot([tc_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3, label=r"Q[95\%]")
+        ax0.plot([tc_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3)
+        ax0.plot([tc_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3, label=r"Q[68\%]")
+        ax0.plot([tc_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3)
+
+        # Plot raw mean and quantile stats        
+        if plot_data_quant:
+            ax0.plot([tc_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5, label=r"Q[95\%]")
+            ax0.plot([tc_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5)
+            ax0.plot([tc_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5, label=r"Q[68\%]")
+            ax0.plot([tc_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5)
+
+        # ax0.set_title(r"Critical point $t_c$", fontsize=20)
+        ax0.grid(True, alpha=0.3)
+        ax0.set_xlabel(r"Critical point $t_c$", fontsize=20)
+        legend = ax0.legend(fontsize=17, loc='upper right')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax0.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax0.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        #########################        
+        #### Plot for I_peak ####
+        #########################
+
+        ### Histogram and stats for I_peak
+        count, bins, ignored = ax1.hist(Ipeak_samples, bin_size, density=True, color='g', alpha = 0.35, edgecolor='k')
+        
+        # Plot kde curve and quantile stats 
+        
+        # ax1.plot(x_vals_Ipeak,Ipeak_kde_pdf,'k', lw=1, label=r"kde")
+        ax1.plot(x_vals_Ipeak,Ipeak_kde_pdf,'k', lw=2)
+        ax1.plot([Ipeak_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g', lw=2, label=r"mean")      
+        ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax1.plot([Ipeak_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3, label=r"Q[95\%]")
+        ax1.plot([Ipeak_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3)
+        ax1.plot([Ipeak_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3, label=r"Q[68\%]")
+        ax1.plot([Ipeak_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3)
+
+        # Plot raw median and quantile stats        
+        if plot_data_quant:
+            ax1.plot([Ipeak_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5, label=r"Q[95\%]")
+            ax1.plot([Ipeak_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5)
+            ax1.plot([Ipeak_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5, label=r"Q[68\%]")
+            ax1.plot([Ipeak_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5)
+
+        # ax1.set_title(r"Peak Infected $I_{peak}$", fontsize=20)
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlabel(r"Peak Infected $I_{peak}$", fontsize=20)
+        legend = ax1.legend(fontsize=17, loc='upper right')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax1.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax1.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        ###########################        
+        #### Plot for T(t=end) ####
+        ###########################
+
+        ### Histogram and stats for T(t=end)
+        count, bins, ignored = ax2.hist(Tend_samples, bin_size, density=True, color='b', alpha = 0.35, edgecolor='k')   
+
+        # Plot kde curve and quantile stats    
+        
+        # ax2.plot(x_vals_Tend,Tend_kde_pdf,'k', lw=1, label=r"kde")    
+        ax2.plot(x_vals_Tend,Tend_kde_pdf,'k', lw=2)  
+        ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
+        ax2.plot([Tend_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b', lw=2,label=r"mean")    
+        ax2.plot([Tend_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3, label=r"Q[95\%]")
+        ax2.plot([Tend_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=3)
+        ax2.plot([Tend_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3, label=r"Q[68\%]")
+        ax2.plot([Tend_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=3)
+
+        # Plot raw median and quantile stats 
+        
+        if plot_data_quant:
+            ax2.plot([Tend_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5, label=r"Q[95\%]")
+            ax2.plot([Tend_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5)
+            ax2.plot([Tend_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5, label=r"Q[68\%]")
+            ax2.plot([Tend_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5)
+
+        # ax2.set_title(, fontsize=20)
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlabel(r"Total cases $T_{\rm end}$", fontsize=20)
+        legend = ax2.legend(fontsize=17, loc='upper left')
+        legend.get_frame().set_alpha(0.5)
+        for tick in ax2.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15) 
+        for tick in ax2.yaxis.get_major_ticks():
+                tick.label.set_fontsize(15) 
+
+        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
+        fig.set_size_inches(27/2, 9/2, forward=True)
+        if kwargs['store_plots']:
+            plt.savefig(kwargs['file_extension'] + "_CriticalPointsHistograms.png", bbox_inches='tight')
+
+
+
 
     #############################################################################
     ####### Fit regressive models of model parameters vs. R0 and outcomes #######
@@ -674,117 +788,6 @@ def computeCriticalPointsStats(SIR_params, CO_samples, plot_options, **kwargs):
             print('MASKED:: Mean Tend=', maskedTend_bar, ' Med Tend=', maskedTend_med, 'Up.Q Tend=', maskedTend_upper95, 'Low.Q Tend=', maskedTend_lower95)
             Tend_error = (maskedTend_upper95 - maskedTend_lower95)/maskedTend_bar
             print('Error band:' , Tend_error)
-
-    ####################################################################
-    #### Plot histograms of t_c, I_peak and T_end vs. param-vector #####
-    ####################################################################
-    if do_histograms:
-        #### Plot for t_c ####
-        fig, (ax0,ax1,ax2)   = plt.subplots(1,3, constrained_layout=True)
-        bin_size = 30    
-
-        # Histogram
-        count, bins, ignored = ax0.hist(tc_samples, bin_size, density=True, color='r', alpha = 0.35, edgecolor='k' )
-        
-        # Plot kde curve and quantile stats    
-        ax0.plot(x_vals_tc,tc_kde_pdf,'k', lw=1, label=r"kde")
-        # ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax0.plot([tc_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
-        ax0.plot([tc_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
-        ax0.plot([tc_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax0.plot([tc_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
-        ax0.plot([tc_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
-
-        # Plot raw mean and quantile stats
-        ax0.plot([tc_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r', lw=2,label=r"mean")
-        if plot_data_quant:
-            ax0.plot([tc_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5, label=r"Q[95\%]")
-            ax0.plot([tc_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r:', lw=1.5)
-            ax0.plot([tc_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5, label=r"Q[68\%]")
-            ax0.plot([tc_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'r-.', lw=1.5)
-
-        # ax0.set_title(r"Critical point $t_c$", fontsize=20)
-        ax0.grid(True, alpha=0.3)
-        ax0.set_xlabel(r"Critical point $t_c$", fontsize=20)
-        legend = ax0.legend(fontsize=15, loc='upper right')
-        legend.get_frame().set_alpha(0.5)
-        for tick in ax0.xaxis.get_major_ticks():
-            tick.label.set_fontsize(15) 
-        for tick in ax0.yaxis.get_major_ticks():
-                tick.label.set_fontsize(15) 
-
-        #########################        
-        #### Plot for I_peak ####
-        #########################
-
-        ### Histogram and stats for I_peak
-        count, bins, ignored = ax1.hist(Ipeak_samples, bin_size, density=True, color='g', alpha = 0.35, edgecolor='k')
-        
-        # Plot kde curve and quantile stats    
-        ax1.plot(x_vals_Ipeak,Ipeak_kde_pdf,'k', lw=1, label=r"kde")
-        # ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax1.plot([Ipeak_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
-        ax1.plot([Ipeak_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
-        ax1.plot([Ipeak_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax1.plot([Ipeak_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
-        ax1.plot([Ipeak_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
-
-        # Plot raw median and quantile stats
-        ax1.plot([Ipeak_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g', lw=2,label=r"mean")    
-        if plot_data_quant:
-            ax1.plot([Ipeak_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5, label=r"Q[95\%]")
-            ax1.plot([Ipeak_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g:', lw=1.5)
-            ax1.plot([Ipeak_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5, label=r"Q[68\%]")
-            ax1.plot([Ipeak_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'g-.', lw=1.5)
-
-        # ax1.set_title(r"Peak Infected $I_{peak}$", fontsize=20)
-        ax1.grid(True, alpha=0.3)
-        ax1.set_xlabel(r"Peak Infected $I_{peak}$", fontsize=20)
-        legend = ax1.legend(fontsize=15, loc='upper right')
-        legend.get_frame().set_alpha(0.5)
-        for tick in ax1.xaxis.get_major_ticks():
-            tick.label.set_fontsize(15) 
-        for tick in ax1.yaxis.get_major_ticks():
-                tick.label.set_fontsize(15) 
-
-        ###########################        
-        #### Plot for T(t=end) ####
-        ###########################
-
-        ### Histogram and stats for T(t=end)
-        count, bins, ignored = ax2.hist(Tend_samples, bin_size, density=True, color='b', alpha = 0.35, edgecolor='k')   
-
-        # Plot kde curve and quantile stats    
-        ax2.plot(x_vals_Tend,Tend_kde_pdf,'k', lw=1, label=r"kde")    
-        # ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2,label=r"med")
-        ax2.plot([Tend_kde_median]*10,np.linspace(0,count[np.argmax(count)], 10),'k--', lw=2)
-        ax2.plot([Tend_kde_lower95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5, label=r"Q[95\%]")
-        ax2.plot([Tend_kde_upper95]*10,np.linspace(0,count[np.argmax(count)], 10),'k:', lw=1.5)
-        ax2.plot([Tend_kde_lower68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5, label=r"Q[68\%]")
-        ax2.plot([Tend_kde_upper68]*10,np.linspace(0,count[np.argmax(count)], 10),'k-.', lw=1.5)
-
-        # Plot raw median and quantile stats 
-        ax2.plot([Tend_bar[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b', lw=2,label=r"mean")    
-        if plot_data_quant:
-            ax2.plot([Tend_lower95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5, label=r"Q[95\%]")
-            ax2.plot([Tend_upper95[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b:', lw=1.5)
-            ax2.plot([Tend_lower68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5, label=r"Q[68\%]")
-            ax2.plot([Tend_upper68[0]]*10,np.linspace(0,count[np.argmax(count)], 10),'b-.', lw=1.5)
-
-        # ax2.set_title(, fontsize=20)
-        ax2.grid(True, alpha=0.3)
-        ax2.set_xlabel(r"Total cases $T_{\rm end}$", fontsize=20)
-        legend = ax2.legend(fontsize=15, loc='upper left')
-        legend.get_frame().set_alpha(0.5)
-        for tick in ax2.xaxis.get_major_ticks():
-            tick.label.set_fontsize(15) 
-        for tick in ax2.yaxis.get_major_ticks():
-                tick.label.set_fontsize(15) 
-
-        fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-        fig.set_size_inches(27/2, 9/2, forward=True)
-        if kwargs['store_plots']:
-            plt.savefig(kwargs['file_extension'] + "_CriticalPointsHistograms.png", bbox_inches='tight')
 
 
     #################################################################################
