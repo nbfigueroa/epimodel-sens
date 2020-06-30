@@ -30,7 +30,7 @@ def computeSEIR_MCresults(SEIR_traces, SEIR_params, *prob_params, **sim_kwargs):
     # Variables: tc_samples, Ipeak_samples, Tend_samples = CO_samples
     plot_data_quant  = 0; plot_regress_lines = 0; do_histograms = 1; do_contours = 1; do_mask = 1
     plot_options = plot_data_quant, plot_regress_lines, do_histograms, do_contours, do_mask
-    # computeCriticalPointsStats(SEIR_params, CO_samples, plot_options, **sim_kwargs)
+    computeCriticalPointsStats(SEIR_params, CO_samples, plot_options, **sim_kwargs)
 
     plot_traces = 1
     if plot_traces:
@@ -136,7 +136,7 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gamma', days = 275)
+    run(prob_type = 'gamma', days = 250)
     # run(prob_type = 'log-normal', days = 200)    
     # run(prob_type = 'gaussian', days = 200)
     # run(prob_type = 'uniform', days = 200)
