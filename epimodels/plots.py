@@ -794,7 +794,7 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
     # Plot the data of three separate curves for S(t), I(t) and R(t)
     fig, ax1 = plt.subplots()
-    fig.suptitle(figure_title,fontsize=25)    
+    # fig.suptitle(figure_title,fontsize=25)    
 
     # Variable evolution
     if show_S:
@@ -853,7 +853,9 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
             ax1.text(0, 0.5, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
         else:
             # ax1.text(0, 0.8, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
-            ax1.text(0, 0.65, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
+            # Works for SIR
+            # ax1.text(0, 0.65, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
+            ax1.text(0, 0.55, text_error, fontsize=18, bbox=dict(facecolor='red', alpha=0.1))
     else:
         if Tf == 90:
             if scenario == 1:

@@ -162,8 +162,6 @@ class StochasticSEIR():
         else:
             samples['sigma'] = 1/self.sigma_inv_dist
 
-        print(samples)   
-
         return samples
 
     
@@ -174,9 +172,6 @@ class StochasticSEIR():
         #With the samples and the initial conditions for the models, rollout the IVP
         deriv_fun = self.deriv(samples['beta'], samples['gamma'], samples['sigma'])
         y0 = (self.N - self.I0 - self.E0 - self.R0, self.E0, self.I0, self.R0)
-
-        print(y0)
-
         t = np.arange(0, days)
         
         ode_sol  = odeint(deriv_fun, y0, t)

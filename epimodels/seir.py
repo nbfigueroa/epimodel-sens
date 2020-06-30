@@ -76,8 +76,6 @@ class SEIR():
         #Set initial conditions
         y0 = (self.N - self.args['I0'] - self.args['E0']  - self.args['R0'], self.args['E0'], self.args['I0'], self.args['R0'])
 
-        print(y0)
-
         #Integrate the ODE
         if solver_type == 'ode_int':
             ode_sol  = odeint(self.deriv(), y0, t)
