@@ -74,7 +74,9 @@ class SEIR():
         t = np.arange(0, days, dt)
 
         #Set initial conditions
-        y0 = (self.N - self.args['I0'] - self.args['R0'], self.args['E0'], self.args['I0'], self.args['R0'])
+        y0 = (self.N - self.args['I0'] - self.args['E0']  - self.args['R0'], self.args['E0'], self.args['I0'], self.args['R0'])
+
+        print(y0)
 
         #Integrate the ODE
         if solver_type == 'ode_int':
@@ -82,7 +84,7 @@ class SEIR():
             S,E,I,R  = ode_sol.T
 
         elif solver_type == 'solve_ivp':
-            ode_sol  = solve_ivp(lambda t, y: SIR.deriv_static(t, y, self.N, self.beta, self.gamma, self.sigma), y0=y0, t_span=[0, days], t_eval=t)
+            ode_sol  = solve_ivp(lambda t, y: SEIR.deriv_static(t, y, self.N, self.beta, self.gamma, self.sigma), y0=y0, t_span=[0, days], t_eval=t)
             S  = ode_sol['y'][0]
             E  = ode_sol['y'][1]
             I  = ode_sol['y'][2]

@@ -33,8 +33,6 @@ def computeSIR_MCresults(SIR_traces, SIR_params, *prob_params, **sim_kwargs):
 
     plot_traces = 1
     if plot_traces:
-        ### TODO: Add the growth rate plots with errors    
-        # plotSIR_growth_realizations(SIR_traces, SIR_params)
         
         # Plot Realizations of Infected and Total Cases
         plotIT_realizations(I_samples, R_samples, **sim_kwargs)

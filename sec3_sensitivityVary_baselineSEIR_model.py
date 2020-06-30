@@ -194,7 +194,7 @@ def main():
     ########### Test 4: vary sigma, fix beta and gamma ############
     # Variables for +/- errors on beta
     E_scale = 10
-    E_max   = 0
+    E_max   = 1
 
     sim_kwargs['file_extension']  = basefilename + "_errorsVaryE0"
     sim_kwargs['worksheet']       = worksheet

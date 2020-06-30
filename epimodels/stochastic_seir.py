@@ -22,15 +22,10 @@ class StochasticSEIR():
         
         if not prob_params:
             sim_init_cond       = loadSimulationParams(5, scenario = 0, plot_data = 0)
-            prob_params, _      = getSIRTestingParams(3, 'gamma',**sim_init_cond)
+            prob_params, _      = getSEIRTestingParams(3, 'gamma',**sim_init_cond)
         
         
         self.beta_dist, self.gamma_inv_dist, self.sigma_inv_dist = self.set_distribution_params(*prob_params)
-        # self.I0 = 1e-6*self.N #1 in million infections
-        # self.E0 = 10*self.I0
-        # self.R0 = 0 #No initial immunity
-        # self.text_error = text_error
-        # self._ext = _ext
         
         #If inputs provided, override the default values
         for key in init_cond:
@@ -134,8 +129,7 @@ class StochasticSEIR():
     # def E0(self):
     #     return 10*self.I0
     
-    def deriv(self, beta, sigma, gamma):
-        
+    def deriv(self, beta, sigma, gamma):        
         def ddt(y,t):
             S, E, I, R = y
             N = self.N
@@ -147,7 +141,7 @@ class StochasticSEIR():
         
             return dSdt, dEdt, dIdt, dRdt
         return ddt
-    
+
     
     def sample_params(self):
         
@@ -155,20 +149,12 @@ class StochasticSEIR():
         
         # These hacks are necessary for the gaussian distribution, which is wrong to use anyway
         if isinstance(self.beta_dist, stats._distn_infrastructure.rv_frozen):
-            beta = self.beta_dist.rvs(1)[0]
-            while beta < 0.15:
-                beta = self.beta_dist.rvs(1)[0]
-
-            samples['beta'] = beta
+            samples['beta'] = self.beta_dist.rvs(1)[0]
         else:
             samples['beta'] = self.beta_dist
 
         if isinstance(self.gamma_inv_dist, stats._distn_infrastructure.rv_frozen):
-            gamma_inv = self.gamma_inv_dist.rvs(1)[0]
-            while gamma_inv < 3:
-                gamma_inv = self.gamma_inv_dist.rvs(1)[0]
-
-            samples['gamma'] = 1/gamma_inv
+            samples['gamma'] = 1/self.gamma_inv_dist.rvs(1)[0]
         else:
             samples['gamma'] = 1/self.gamma_inv_dist
         
@@ -176,6 +162,8 @@ class StochasticSEIR():
             samples['sigma'] = 1/self.sigma_inv_dist.rvs(1)[0]
         else:
             samples['sigma'] = 1/self.sigma_inv_dist
+
+        print(samples)   
 
         return samples
 
@@ -186,12 +174,14 @@ class StochasticSEIR():
         
         #With the samples and the initial conditions for the models, rollout the IVP
         deriv_fun = self.deriv(samples['beta'], samples['gamma'], samples['sigma'])
-        S0 = self.N - self.I0 - self.E0 - self.R0
-        y0 = (S0, self.E0, self.I0, self.R0)
+        y0 = (self.N - self.I0 - self.E0 - self.R0, self.E0, self.I0, self.R0)
+
+        print(y0)
+
         t = np.arange(0, days)
         
         ode_sol  = odeint(deriv_fun, y0, t)
-        S,E,I,R    = ode_sol.T
+        S,E,I,R  = ode_sol.T
         
         return (S,E,I,R), samples
         

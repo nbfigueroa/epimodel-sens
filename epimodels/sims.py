@@ -86,7 +86,8 @@ def loadSimulationParams(sim_num, scenario, plot_data = 1, header = 'SIR'):
         gamma_inv       = 7.0  
         r0              = 2.31          
         beta            = r0 / gamma_inv
-        sigma_inv       = 5
+        # sigma_inv       = 5
+        sigma_inv       = 4 # New value for paper
         country         = 'Primer'
         x_tick_names    = []
         x_tick_step     = []
@@ -239,6 +240,8 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
 
         ########### Test 1: Sample beta, fix gamma and sigma ############
         if test_num == 1:
+            beta_scale     = 0
+            beta_loc       = sim_kwargs['beta']
             gamma_inv_scale = 0
             gamma_inv_loc   = sim_kwargs['gamma_inv']
             sigma_inv_scale = 0

@@ -794,7 +794,7 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
     # Plot the data of three separate curves for S(t), I(t) and R(t)
     fig, ax1 = plt.subplots()
-    # fig.suptitle(figure_title,fontsize=25)    
+    fig.suptitle(figure_title,fontsize=25)    
 
     # Variable evolution
     if show_S:
@@ -936,6 +936,8 @@ def plotSIR_evolutionStochastic(S_variables, I_variables, R_variables, T_variabl
 
     ax1.set_xlabel('Time [days]', fontsize=30)
     ax1.set_ylabel('Fraction of Population', fontsize=30)
+    ax1.set_ylim(top=1)
+
     if 'x_tick_names' in kwargs:
         ax1.set_xticks(x_tick_numbers)
         ax1.set_xticklabels(x_tick_names)
@@ -1638,7 +1640,7 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
             txt_title = r"{Ipeak}: {I_tc:5.4f} {number_scaling} by day {peak_days:10.0f} " 
             # ax1.text(tc+1, (1.25)*I_tc/N , txt_title.format(Ipeak=Ipeak,I_tc=I_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.75))
             
-            if tc > 0.5*days:
+            if tc > 0.35*days:
                 ax1.text(tc - 0.25*days, (I_tc/N) + 0.075*N, txt_title.format(Ipeak = Ipeak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))
             else:
                 ax1.text(1.1*tc, I_tc/N, txt_title.format(Ipeak = Ipeak, I_tc=I_tc/scale, number_scaling=number_scaling,  peak_days= tc), fontsize=20, color="r",  bbox=dict(facecolor='white', alpha=0.85))        
@@ -1671,9 +1673,9 @@ def plotSEIR_evolutionErrors(S_variables, E_variables, I_variables, R_variables,
             txt_title2 = r"Total Cases: {peak_total:2.4f} {number_scaling} by day {peak_days:10.0f} " 
             ax1.plot(tc, T_tc/N,'ro', markersize=8)
             if tc > 0.5*days:
-                ax1.text(tc - 0.25*days, (T_tc/N) + 0.075*N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(tc - 0.25*days, (T_tc/N) + 0.075*N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=16, color="r", bbox=dict(facecolor='white', alpha=0.75))
             else:
-                ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=20, color="r", bbox=dict(facecolor='white', alpha=0.75))
+                ax1.text(1.1*tc, T_tc/N, txt_title2.format(peak_total=T_tc/scale, number_scaling=number_scaling, peak_days= tc), fontsize=16, color="r", bbox=dict(facecolor='white', alpha=0.75))
 
 
 
@@ -1957,7 +1959,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
     if prob_params[0] == 'gamma':
         g_dist    = gamma_dist(prob_params[2], prob_params[1], prob_params[3])
         # Plot gamma samples and pdf
-        x = np.arange(0,1,0.001)
+        x = np.arange(0,0.75,0.001)
         ax1.plot(x, g_dist.pdf(x), 'r',label=r'$k = 1, \mu=%.1f,\ \theta=%.1f$' % (prob_params[1], prob_params[2]))
         ax1.set_xlabel(r"$\beta \sim Gamma$", fontsize=20)    
 
@@ -1965,7 +1967,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         mu    = prob_params[1]
         sigma = prob_params[2] + 0.00001 
         # x = np.linspace(min(bins), max(bins), 10000)
-        x = np.arange(0,1,0.001)
+        x = np.arange(0,0.75,0.001)
         pdf = (np.exp(-(np.log(x) - mu)**2 / (2 * sigma**2)) / (x * sigma * np.sqrt(2 * np.pi)))
         ax1.plot(x, pdf, linewidth=2, color='r')
         ax1.set_xlabel(r"$\beta \sim LogNormal$", fontsize=20)
@@ -1974,7 +1976,7 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         tick.label.set_fontsize(15) 
     for tick in ax1.yaxis.get_major_ticks():
             tick.label.set_fontsize(15) 
-    plt.xlim(0, 1.0)            
+    plt.xlim(0, 0.75)            
     ax1.grid(True, alpha=0.3)
     ax1.set_title(r"Distribution of $\beta$ samples", fontsize=20)
     
@@ -2012,9 +2014,9 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         tick.label.set_fontsize(15) 
     for tick in ax2.yaxis.get_major_ticks():
             tick.label.set_fontsize(15)  
-    plt.xlim(1, 17) 
+    plt.xlim(0, 15) 
     ax2.grid(True, alpha=0.3)    
-    plt.title(r"Distribution of $\gamma^{-1}$ samples", fontsize=20)    
+    ax2.set_title(r"Distribution of $\gamma^{-1}$ samples", fontsize=20)    
     
     ###############################################################
     ################## Plot for Sigma^-1 Samples ##################
@@ -2050,13 +2052,13 @@ def plotSEIR_sampledParams(beta_samples, gamma_inv_samples, sigma_inv_samples, f
         tick.label.set_fontsize(15) 
     for tick in ax3.yaxis.get_major_ticks():
             tick.label.set_fontsize(15)  
-    plt.xlim(1, 10) 
+    plt.xlim(0, 9) 
     ax3.grid(True, alpha=0.3)    
-    plt.title(r"Distribution of $\sigma^{-1}$ samples", fontsize=20)    
+    ax3.set_title(r"Distribution of $\sigma^{-1}$ samples", fontsize=20)    
 
     fig.subplots_adjust(left=.12, bottom=.14, right=.93, top=0.93)
-    fig.set_size_inches(20/2, 8/2, forward=True)    
-    
+    fig.set_size_inches(24/2, 7/2, forward=True)    
+
     # Store plot
     plt.savefig(filename + ".png", bbox_inches='tight')
 
