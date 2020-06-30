@@ -136,7 +136,7 @@ if __name__ == '__main__':
         gamma, log-Normal (proper distributions)
         gaussian, uniform (not adequate for beta or gamma_{-1})
     """
-    run(prob_type = 'gamma', days = 500)
-    # run(prob_type = 'log-normal', days = 500)    
-    # run(prob_type = 'gaussian', days = 500)
-    # run(prob_type = 'uniform', days = 500)
+    run(prob_type = 'gamma', days = 200)
+    # run(prob_type = 'log-normal', days = 200)    
+    # run(prob_type = 'gaussian', days = 200)
+    # run(prob_type = 'uniform', days = 200)

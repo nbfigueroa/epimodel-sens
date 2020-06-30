@@ -129,7 +129,7 @@ class StochasticSEIR():
     # def E0(self):
     #     return 10*self.I0
     
-    def deriv(self, beta, sigma, gamma):        
+    def deriv(self, beta, gamma, sigma):        
         def ddt(y,t):
             S, E, I, R = y
             N = self.N
@@ -141,7 +141,6 @@ class StochasticSEIR():
         
             return dSdt, dEdt, dIdt, dRdt
         return ddt
-
     
     def sample_params(self):
         
@@ -204,8 +203,6 @@ class StochasticSEIR():
             param_samples[i,:]= [sample['beta'],1/sample['gamma'], 1/sample['sigma']]
         
         return (S_samples, E_samples, I_samples, R_samples), param_samples
-
-
 
 
 if __name__ == '__main__':

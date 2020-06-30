@@ -240,8 +240,6 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
 
         ########### Test 1: Sample beta, fix gamma and sigma ############
         if test_num == 1:
-            beta_scale     = 0
-            beta_loc       = sim_kwargs['beta']
             gamma_inv_scale = 0
             gamma_inv_loc   = sim_kwargs['gamma_inv']
             sigma_inv_scale = 0
@@ -267,10 +265,10 @@ def getSEIRTestingParams(test_num, prob_type, **sim_kwargs):
 
         ############ Test 4: sample sigma, fix beta and gamma ############
         if test_num == 4:
-            gamma_inv_scale = 0
-            gamma_inv_loc   = sim_kwargs['gamma_inv']
             beta_scale     = 0
             beta_loc       = sim_kwargs['beta']
+            gamma_inv_scale = 0
+            gamma_inv_loc   = sim_kwargs['gamma_inv']            
             _ext           = "_errorsSampleSigma_Gamma"
             text_error     = r"$\sigma^{-1} \sim Gamma(.)$"
         
